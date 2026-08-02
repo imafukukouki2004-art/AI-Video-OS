@@ -67,6 +67,12 @@ class SQLAlchemyRepository[T, CreateSchema, UpdateSchema]:
         await self.session.refresh(instance)
         return instance
 
+    async def get_status(self, id: UUID) -> str | None:
+        instance = await self.get_by_id(id)
+        if not instance:
+            return None
+        return str(getattr(instance, "status", None))
+
 
 class ProjectRepository(SQLAlchemyRepository[Project, ProjectCreate, ProjectUpdate]):
     def __init__(self, session: AsyncSession) -> None:

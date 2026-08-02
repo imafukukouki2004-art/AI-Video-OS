@@ -67,3 +67,23 @@ async def test_run_workflow_not_found(app: FastAPI, client: AsyncClient):
     assert response.json()["error"]["code"] == "WORKFLOW_NOT_FOUND"
 
     app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_get_job_status_api(app: FastAPI, client: AsyncClient):
+    job_id = uuid4()
+    from apps.api.dependencies import get_job_service
+    from apps.api.services.domain import JobService
+
+    mock_service = AsyncMock(spec=JobService)
+    mock_service.get_status.return_value = "running"
+
+    app.dependency_overrides[get_job_service] = lambda: mock_service
+
+    response = await client.get(f"/jobs/{job_id}/status")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "running"
+    mock_service.get_status.assert_awaited_once_with(job_id)
+
+    app.dependency_overrides.clear()

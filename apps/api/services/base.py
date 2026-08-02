@@ -32,3 +32,7 @@ class BaseService[T, CreateSchema, UpdateSchema]:
     async def update(self, id: UUID, schema: UpdateSchema) -> T | None:
         """Orchestrate entity update."""
         return await self.repository.update(id, schema)
+
+    async def get_status(self, id: UUID) -> str | None:
+        """Orchestrate entity status retrieval."""
+        return await self.repository.get_status(id)
