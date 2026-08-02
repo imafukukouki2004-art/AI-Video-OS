@@ -13,6 +13,7 @@ from apps.api.repositories import (
     JobRepository,
     ProjectRepository,
     VideoRepository,
+    WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
@@ -22,6 +23,7 @@ from apps.api.services import (
     JobService,
     ProjectService,
     VideoService,
+    WorkflowExecutionErrorService,
     WorkflowExecutionHistoryService,
     WorkflowExecutionService,
     WorkflowRuntimeService,
@@ -134,6 +136,17 @@ WorkflowExecutionHistoryRepositoryDependency = Annotated[
 ]
 
 
+def get_workflow_execution_error_repository(
+    session: DatabaseSessionDependency,
+) -> WorkflowExecutionErrorRepository:
+    return WorkflowExecutionErrorRepository(session)
+
+
+WorkflowExecutionErrorRepositoryDependency = Annotated[
+    WorkflowExecutionErrorRepository, Depends(get_workflow_execution_error_repository)
+]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -193,6 +206,17 @@ WorkflowExecutionHistoryServiceDependency = Annotated[
 ]
 
 
+def get_workflow_execution_error_service(
+    repo: WorkflowExecutionErrorRepositoryDependency,
+) -> WorkflowExecutionErrorService:
+    return WorkflowExecutionErrorService(repo)
+
+
+WorkflowExecutionErrorServiceDependency = Annotated[
+    WorkflowExecutionErrorService, Depends(get_workflow_execution_error_service)
+]
+
+
 def get_workflow_validation_service(
     workflow_repo: WorkflowRepositoryDependency,
     step_repo: WorkflowStepRepositoryDependency,
@@ -211,8 +235,11 @@ def get_workflow_runtime_service(
     execution_repo: WorkflowExecutionRepositoryDependency,
     step_repo: WorkflowStepRepositoryDependency,
     history_repo: WorkflowExecutionHistoryRepositoryDependency,
+    error_repo: WorkflowExecutionErrorRepositoryDependency,
 ) -> WorkflowRuntimeService:
-    return WorkflowRuntimeService(workflow_repo, job_repo, execution_repo, step_repo, history_repo)
+    return WorkflowRuntimeService(
+        workflow_repo, job_repo, execution_repo, step_repo, history_repo, error_repo
+    )
 
 
 WorkflowRuntimeServiceDependency = Annotated[

@@ -198,6 +198,9 @@ class WorkflowExecution(Base):
     history: Mapped[list["WorkflowExecutionHistory"]] = relationship(
         back_populates="execution", cascade="all, delete-orphan"
     )
+    errors: Mapped[list["WorkflowExecutionError"]] = relationship(
+        back_populates="execution", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowExecutionHistory(Base):
@@ -220,4 +223,27 @@ class WorkflowExecutionHistory(Base):
     )
 
     execution: Mapped["WorkflowExecution"] = relationship(back_populates="history")
+    step: Mapped["WorkflowStep | None"] = relationship()
+
+
+class WorkflowExecutionError(Base):
+    """Integrated error record for workflow execution failures."""
+
+    __tablename__ = "workflow_execution_errors"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_execution_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=False
+    )
+    workflow_step_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_steps.id"), nullable=True
+    )
+    error_code: Mapped[str] = mapped_column(String(100), nullable=False)
+    error_message: Mapped[str] = mapped_column(String(1000), nullable=False)
+    error_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+
+    execution: Mapped["WorkflowExecution"] = relationship(back_populates="errors")
     step: Mapped["WorkflowStep | None"] = relationship()

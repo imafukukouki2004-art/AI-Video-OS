@@ -9,6 +9,7 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowExecutionErrorServiceDependency,
     WorkflowExecutionHistoryServiceDependency,
     WorkflowExecutionServiceDependency,
     WorkflowRuntimeServiceDependency,
@@ -26,6 +27,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     VideoResponse,
     WorkflowCreate,
+    WorkflowExecutionErrorResponse,
     WorkflowExecutionHistoryResponse,
     WorkflowExecutionResponse,
     WorkflowResponse,
@@ -185,6 +187,18 @@ async def list_execution_history(
     """Retrieve the audit trail for a specific execution."""
     history = await service.list_by_execution(execution_id)
     return [WorkflowExecutionHistoryResponse.model_validate(h) for h in history]
+
+
+@router.get(
+    "/workflow-executions/{execution_id}/errors",
+    response_model=list[WorkflowExecutionErrorResponse],
+)
+async def list_execution_errors(
+    execution_id: UUID, service: WorkflowExecutionErrorServiceDependency
+) -> list[WorkflowExecutionErrorResponse]:
+    """Retrieve all errors for a specific execution."""
+    errors = await service.list_by_execution(execution_id)
+    return [WorkflowExecutionErrorResponse.model_validate(e) for e in errors]
 
 
 # --- Jobs ---

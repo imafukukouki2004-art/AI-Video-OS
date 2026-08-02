@@ -14,6 +14,7 @@ from apps.api.domain.models import (
 )
 from apps.api.repositories import (
     JobRepository,
+    WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowStepRepository,
@@ -41,15 +42,25 @@ def history_repository():
     return AsyncMock(spec=WorkflowExecutionHistoryRepository)
 
 
+@pytest.fixture
+def error_repository():
+    return AsyncMock(spec=WorkflowExecutionErrorRepository)
+
+
 @pytest.mark.asyncio
 async def test_workflow_runtime_run_success_with_history(
     job_repository: AsyncMock,
     execution_repository: AsyncMock,
     step_repository: AsyncMock,
     history_repository: AsyncMock,
+    error_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
-        job_repository, execution_repository, step_repository, history_repository
+        job_repository,
+        execution_repository,
+        step_repository,
+        history_repository,
+        error_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -95,9 +106,14 @@ async def test_workflow_runtime_failure_with_history(
     execution_repository: AsyncMock,
     step_repository: AsyncMock,
     history_repository: AsyncMock,
+    error_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
-        job_repository, execution_repository, step_repository, history_repository
+        job_repository,
+        execution_repository,
+        step_repository,
+        history_repository,
+        error_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -131,9 +147,14 @@ async def test_workflow_runtime_guard_prevents_execution(
     execution_repository: AsyncMock,
     step_repository: AsyncMock,
     history_repository: AsyncMock,
+    error_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
-        job_repository, execution_repository, step_repository, history_repository
+        job_repository,
+        execution_repository,
+        step_repository,
+        history_repository,
+        error_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -145,3 +166,47 @@ async def test_workflow_runtime_guard_prevents_execution(
     assert result["status"] == "failed"
     assert "validation_errors" in result
     assert execution_repository.create.called is False
+
+
+@pytest.mark.asyncio
+async def test_workflow_runtime_records_error_on_failure(
+    job_repository: AsyncMock,
+    execution_repository: AsyncMock,
+    step_repository: AsyncMock,
+    history_repository: AsyncMock,
+    error_repository: AsyncMock,
+):
+    runtime = WorkflowRuntime(
+        job_repository,
+        execution_repository,
+        step_repository,
+        history_repository,
+        error_repository,
+    )
+    workflow = Workflow(id=uuid4(), config={})
+    step = WorkflowStep(id=uuid4(), name="fail_step", step_type="test", order=0, config={})
+    step_repository.list_by_workflow.return_value = [step]
+
+    execution = AsyncMock(id=uuid4(), status=WorkflowExecutionStatus.PENDING)
+    execution_repository.create.return_value = execution
+    execution_repository.update.return_value = execution
+
+    # Force failure during job creation
+    job_repository.create.side_effect = Exception("Integrated failure")
+
+    result = await runtime.run(workflow)
+
+    assert result["status"] == "failed"
+    # Verify Error Record
+    assert error_repository.create.called
+    error_call = error_repository.create.call_args[0][0]
+    assert error_call.error_code == "STEP_EXECUTION_FAILED"
+    assert "Integrated failure" in error_call.error_message
+
+    # Verify Status Update
+    assert execution_repository.update.called
+    # Verify History
+    assert history_repository.create.called
+    # Last history should be failure
+    last_history = history_repository.create.call_args_list[-1].args[0]
+    assert last_history.to_status == "failed"
