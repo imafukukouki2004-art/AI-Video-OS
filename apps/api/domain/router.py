@@ -1,14 +1,14 @@
-"""FastAPI routers for core domain entities using repositories."""
+"""FastAPI routers for core domain entities using services."""
 
 from uuid import UUID
 
 from fastapi import APIRouter, status
 
 from apps.api.dependencies import (
-    JobRepositoryDependency,
-    ProjectRepositoryDependency,
-    VideoRepositoryDependency,
-    WorkflowRepositoryDependency,
+    JobServiceDependency,
+    ProjectServiceDependency,
+    VideoServiceDependency,
+    WorkflowServiceDependency,
 )
 from apps.api.domain.schemas import (
     JobCreate,
@@ -31,17 +31,17 @@ router = APIRouter(tags=["domain"])
 
 @router.post("/projects", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
-    project_in: ProjectCreate, repo: ProjectRepositoryDependency
+    project_in: ProjectCreate, service: ProjectServiceDependency
 ) -> ProjectResponse:
     """Create a new video production project."""
-    project = await repo.create(project_in)
+    project = await service.create(project_in)
     return ProjectResponse.model_validate(project)
 
 
 @router.get("/projects/{project_id}", response_model=ProjectResponse)
-async def get_project(project_id: UUID, repo: ProjectRepositoryDependency) -> ProjectResponse:
+async def get_project(project_id: UUID, service: ProjectServiceDependency) -> ProjectResponse:
     """Retrieve a project by ID."""
-    project = await repo.get_by_id(project_id)
+    project = await service.get_by_id(project_id)
     if not project:
         raise ApplicationError(
             code="PROJECT_NOT_FOUND",
@@ -53,10 +53,10 @@ async def get_project(project_id: UUID, repo: ProjectRepositoryDependency) -> Pr
 
 @router.patch("/projects/{project_id}", response_model=ProjectResponse)
 async def update_project(
-    project_id: UUID, project_in: ProjectUpdate, repo: ProjectRepositoryDependency
+    project_id: UUID, project_in: ProjectUpdate, service: ProjectServiceDependency
 ) -> ProjectResponse:
     """Update an existing project."""
-    project = await repo.update(project_id, project_in)
+    project = await service.update(project_id, project_in)
     if not project:
         raise ApplicationError(
             code="PROJECT_NOT_FOUND",
@@ -66,20 +66,27 @@ async def update_project(
     return ProjectResponse.model_validate(project)
 
 
+@router.get("/projects", response_model=list[ProjectResponse])
+async def list_projects(service: ProjectServiceDependency) -> list[ProjectResponse]:
+    """List all projects."""
+    projects = await service.list()
+    return [ProjectResponse.model_validate(p) for p in projects]
+
+
 # --- Videos ---
 
 
 @router.post("/videos", response_model=VideoResponse, status_code=status.HTTP_201_CREATED)
-async def create_video(video_in: VideoCreate, repo: VideoRepositoryDependency) -> VideoResponse:
+async def create_video(video_in: VideoCreate, service: VideoServiceDependency) -> VideoResponse:
     """Create a new video entity linked to a project."""
-    video = await repo.create(video_in)
+    video = await service.create(video_in)
     return VideoResponse.model_validate(video)
 
 
 @router.get("/videos/{video_id}", response_model=VideoResponse)
-async def get_video(video_id: UUID, repo: VideoRepositoryDependency) -> VideoResponse:
+async def get_video(video_id: UUID, service: VideoServiceDependency) -> VideoResponse:
     """Retrieve a video by ID."""
-    video = await repo.get_by_id(video_id)
+    video = await service.get_by_id(video_id)
     if not video:
         raise ApplicationError(
             code="VIDEO_NOT_FOUND",
@@ -94,17 +101,17 @@ async def get_video(video_id: UUID, repo: VideoRepositoryDependency) -> VideoRes
 
 @router.post("/workflows", response_model=WorkflowResponse, status_code=status.HTTP_201_CREATED)
 async def create_workflow(
-    workflow_in: WorkflowCreate, repo: WorkflowRepositoryDependency
+    workflow_in: WorkflowCreate, service: WorkflowServiceDependency
 ) -> WorkflowResponse:
     """Create a new workflow configuration for a project."""
-    workflow = await repo.create(workflow_in)
+    workflow = await service.create(workflow_in)
     return WorkflowResponse.model_validate(workflow)
 
 
 @router.get("/workflows/{workflow_id}", response_model=WorkflowResponse)
-async def get_workflow(workflow_id: UUID, repo: WorkflowRepositoryDependency) -> WorkflowResponse:
+async def get_workflow(workflow_id: UUID, service: WorkflowServiceDependency) -> WorkflowResponse:
     """Retrieve a workflow by ID."""
-    workflow = await repo.get_by_id(workflow_id)
+    workflow = await service.get_by_id(workflow_id)
     if not workflow:
         raise ApplicationError(
             code="WORKFLOW_NOT_FOUND",
@@ -118,16 +125,16 @@ async def get_workflow(workflow_id: UUID, repo: WorkflowRepositoryDependency) ->
 
 
 @router.post("/jobs", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-async def create_job(job_in: JobCreate, repo: JobRepositoryDependency) -> JobResponse:
+async def create_job(job_in: JobCreate, service: JobServiceDependency) -> JobResponse:
     """Create a new AI job execution linked to a workflow."""
-    job = await repo.create(job_in)
+    job = await service.create(job_in)
     return JobResponse.model_validate(job)
 
 
 @router.get("/jobs/{job_id}", response_model=JobResponse)
-async def get_job(job_id: UUID, repo: JobRepositoryDependency) -> JobResponse:
+async def get_job(job_id: UUID, service: JobServiceDependency) -> JobResponse:
     """Retrieve a job by ID."""
-    job = await repo.get_by_id(job_id)
+    job = await service.get_by_id(job_id)
     if not job:
         raise ApplicationError(
             code="JOB_NOT_FOUND",
