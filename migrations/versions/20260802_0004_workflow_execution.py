@@ -19,19 +19,10 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Create workflow_execution_status enum if not exists
-    # In PostgreSQL, we can use a DO block to safely create the type
+    # Ensure enum type exists with correct values
+    op.execute("DROP TYPE IF EXISTS workflowexecutionstatus CASCADE")
     op.execute(
-        """
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'workflowexecutionstatus') THEN
-                CREATE TYPE workflowexecutionstatus AS ENUM (
-                    'PENDING', 'RUNNING', 'COMPLETED', 'FAILED'
-                );
-            END IF;
-        END$$;
-        """
+        "CREATE TYPE workflowexecutionstatus AS ENUM ('pending', 'running', 'completed', 'failed')"
     )
 
     # Create workflow_executions table
