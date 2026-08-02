@@ -9,6 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
+from apps.api.repositories import (
+    JobRepository,
+    ProjectRepository,
+    VideoRepository,
+    WorkflowRepository,
+)
 from apps.api.storage import ObjectStorage
 
 SettingsDependency = Annotated[Settings, Depends(get_settings)]
@@ -53,3 +59,31 @@ def get_storage(request: Request) -> ObjectStorage:
 
 
 StorageDependency = Annotated[ObjectStorage, Depends(get_storage)]
+
+
+def get_project_repository(session: DatabaseSessionDependency) -> ProjectRepository:
+    return ProjectRepository(session)
+
+
+ProjectRepositoryDependency = Annotated[ProjectRepository, Depends(get_project_repository)]
+
+
+def get_video_repository(session: DatabaseSessionDependency) -> VideoRepository:
+    return VideoRepository(session)
+
+
+VideoRepositoryDependency = Annotated[VideoRepository, Depends(get_video_repository)]
+
+
+def get_workflow_repository(session: DatabaseSessionDependency) -> WorkflowRepository:
+    return WorkflowRepository(session)
+
+
+WorkflowRepositoryDependency = Annotated[WorkflowRepository, Depends(get_workflow_repository)]
+
+
+def get_job_repository(session: DatabaseSessionDependency) -> JobRepository:
+    return JobRepository(session)
+
+
+JobRepositoryDependency = Annotated[JobRepository, Depends(get_job_repository)]

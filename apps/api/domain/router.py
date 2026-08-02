@@ -1,12 +1,15 @@
-"""FastAPI routers for core domain entities."""
+"""FastAPI routers for core domain entities using repositories."""
 
 from uuid import UUID
 
 from fastapi import APIRouter, status
-from sqlalchemy import select
 
-from apps.api.dependencies import DatabaseSessionDependency
-from apps.api.domain.models import Job, Project, Video, Workflow
+from apps.api.dependencies import (
+    JobRepositoryDependency,
+    ProjectRepositoryDependency,
+    VideoRepositoryDependency,
+    WorkflowRepositoryDependency,
+)
 from apps.api.domain.schemas import (
     JobCreate,
     JobResponse,
@@ -28,21 +31,17 @@ router = APIRouter(tags=["domain"])
 
 @router.post("/projects", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
-    project_in: ProjectCreate, session: DatabaseSessionDependency
+    project_in: ProjectCreate, repo: ProjectRepositoryDependency
 ) -> ProjectResponse:
     """Create a new video production project."""
-    project = Project(**project_in.model_dump())
-    session.add(project)
-    await session.commit()
-    await session.refresh(project)
+    project = await repo.create(project_in)
     return ProjectResponse.model_validate(project)
 
 
 @router.get("/projects/{project_id}", response_model=ProjectResponse)
-async def get_project(project_id: UUID, session: DatabaseSessionDependency) -> ProjectResponse:
+async def get_project(project_id: UUID, repo: ProjectRepositoryDependency) -> ProjectResponse:
     """Retrieve a project by ID."""
-    result = await session.execute(select(Project).where(Project.id == project_id))
-    project = result.scalar_one_or_none()
+    project = await repo.get_by_id(project_id)
     if not project:
         raise ApplicationError(
             code="PROJECT_NOT_FOUND",
@@ -54,24 +53,16 @@ async def get_project(project_id: UUID, session: DatabaseSessionDependency) -> P
 
 @router.patch("/projects/{project_id}", response_model=ProjectResponse)
 async def update_project(
-    project_id: UUID, project_in: ProjectUpdate, session: DatabaseSessionDependency
+    project_id: UUID, project_in: ProjectUpdate, repo: ProjectRepositoryDependency
 ) -> ProjectResponse:
     """Update an existing project."""
-    result = await session.execute(select(Project).where(Project.id == project_id))
-    project = result.scalar_one_or_none()
+    project = await repo.update(project_id, project_in)
     if not project:
         raise ApplicationError(
             code="PROJECT_NOT_FOUND",
             message="Project not found",
             status_code=status.HTTP_404_NOT_FOUND,
         )
-
-    update_data = project_in.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(project, field, value)
-
-    await session.commit()
-    await session.refresh(project)
     return ProjectResponse.model_validate(project)
 
 
@@ -79,20 +70,16 @@ async def update_project(
 
 
 @router.post("/videos", response_model=VideoResponse, status_code=status.HTTP_201_CREATED)
-async def create_video(video_in: VideoCreate, session: DatabaseSessionDependency) -> VideoResponse:
+async def create_video(video_in: VideoCreate, repo: VideoRepositoryDependency) -> VideoResponse:
     """Create a new video entity linked to a project."""
-    video = Video(**video_in.model_dump())
-    session.add(video)
-    await session.commit()
-    await session.refresh(video)
+    video = await repo.create(video_in)
     return VideoResponse.model_validate(video)
 
 
 @router.get("/videos/{video_id}", response_model=VideoResponse)
-async def get_video(video_id: UUID, session: DatabaseSessionDependency) -> VideoResponse:
+async def get_video(video_id: UUID, repo: VideoRepositoryDependency) -> VideoResponse:
     """Retrieve a video by ID."""
-    result = await session.execute(select(Video).where(Video.id == video_id))
-    video = result.scalar_one_or_none()
+    video = await repo.get_by_id(video_id)
     if not video:
         raise ApplicationError(
             code="VIDEO_NOT_FOUND",
@@ -107,21 +94,17 @@ async def get_video(video_id: UUID, session: DatabaseSessionDependency) -> Video
 
 @router.post("/workflows", response_model=WorkflowResponse, status_code=status.HTTP_201_CREATED)
 async def create_workflow(
-    workflow_in: WorkflowCreate, session: DatabaseSessionDependency
+    workflow_in: WorkflowCreate, repo: WorkflowRepositoryDependency
 ) -> WorkflowResponse:
     """Create a new workflow configuration for a project."""
-    workflow = Workflow(**workflow_in.model_dump())
-    session.add(workflow)
-    await session.commit()
-    await session.refresh(workflow)
+    workflow = await repo.create(workflow_in)
     return WorkflowResponse.model_validate(workflow)
 
 
 @router.get("/workflows/{workflow_id}", response_model=WorkflowResponse)
-async def get_workflow(workflow_id: UUID, session: DatabaseSessionDependency) -> WorkflowResponse:
+async def get_workflow(workflow_id: UUID, repo: WorkflowRepositoryDependency) -> WorkflowResponse:
     """Retrieve a workflow by ID."""
-    result = await session.execute(select(Workflow).where(Workflow.id == workflow_id))
-    workflow = result.scalar_one_or_none()
+    workflow = await repo.get_by_id(workflow_id)
     if not workflow:
         raise ApplicationError(
             code="WORKFLOW_NOT_FOUND",
@@ -135,20 +118,16 @@ async def get_workflow(workflow_id: UUID, session: DatabaseSessionDependency) ->
 
 
 @router.post("/jobs", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
-async def create_job(job_in: JobCreate, session: DatabaseSessionDependency) -> JobResponse:
+async def create_job(job_in: JobCreate, repo: JobRepositoryDependency) -> JobResponse:
     """Create a new AI job execution linked to a workflow."""
-    job = Job(**job_in.model_dump())
-    session.add(job)
-    await session.commit()
-    await session.refresh(job)
+    job = await repo.create(job_in)
     return JobResponse.model_validate(job)
 
 
 @router.get("/jobs/{job_id}", response_model=JobResponse)
-async def get_job(job_id: UUID, session: DatabaseSessionDependency) -> JobResponse:
+async def get_job(job_id: UUID, repo: JobRepositoryDependency) -> JobResponse:
     """Retrieve a job by ID."""
-    result = await session.execute(select(Job).where(Job.id == job_id))
-    job = result.scalar_one_or_none()
+    job = await repo.get_by_id(job_id)
     if not job:
         raise ApplicationError(
             code="JOB_NOT_FOUND",
