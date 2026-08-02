@@ -11,9 +11,11 @@ TICKET-002 through TICKET-006 provide executable backend, frontend, PostgreSQL, 
 | Product version | AI Video OS Version 2.0 |
 | Phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Completed | TICKET-001, TICKET-002, TICKET-003, TICKET-004, TICKET-005 |
-| Current ticket | TICKET-006 — MinIO Object Storage Foundation |
-| Implementation progress | Object storage foundation implemented and validated; review pending |
+| Completed | TICKET-001 through TICKET-006 |
+| Current ticket | TICKET-007 — CI Foundation |
+| Implementation progress | Approximately 65% |
+| Next technology review | TR-01 at M1 completion |
+| Technology review status | Pending |
 
 See [Project State](docs/operations/PROJECT_STATE.md) for the operational record.
 
@@ -67,6 +69,20 @@ See [Project State](docs/operations/PROJECT_STATE.md) for the operational record
 - Validated asset upload and metadata APIs
 - Asset download and expiring presigned URL APIs
 - Safe object keys, bounded uploads, and secret-safe provider error handling
+
+## CI Foundation
+
+GitHub Actions runs independent Python and Frontend quality jobs for pull requests targeting
+`main` and pushes to `main`.
+
+- Python: Ruff lint and format checks, mypy, pytest, and a 90% coverage gate
+- Frontend: ESLint, Vitest, TypeScript, and the Next.js production build
+- Python 3.12 and Node.js 22 with pinned pnpm 11.9.0
+- pip and pnpm dependency caches keyed by their dependency definitions
+- Read-only repository permissions and cancellation of superseded runs on the same ref
+
+The workflow performs continuous integration only. It does not publish images, deploy services,
+or access production environments.
 
 ## Prerequisites
 
@@ -255,11 +271,12 @@ tests/integration/        HTTP API and error-contract tests
 packages/                 Reserved for later ticket-owned shared packages
 infrastructure/           Reserved for later infrastructure tickets
 compose.yaml              PostgreSQL, Redis, Celery worker, and MinIO services
+.github/workflows/ci.yml  Python and Frontend continuous integration quality gates
 ```
 
 ## Current Implementation Boundaries
 
-TICKET-006 does not implement asset versioning, OpenAI integrations, media processing, rendering, authentication, business logic, domain workflows, or the Workflow Engine.
+TICKET-007 does not implement continuous deployment, container publishing, Kubernetes, production deployment, providers, domain logic, or the Workflow Runtime.
 
 ## Security Rules
 
