@@ -6,6 +6,7 @@ from typing import Annotated, cast
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
 
@@ -33,3 +34,12 @@ async def get_database_session(database: DatabaseDependency) -> AsyncIterator[As
 
 
 DatabaseSessionDependency = Annotated[AsyncSession, Depends(get_database_session)]
+
+
+def get_redis(request: Request) -> RedisManager:
+    """Return the application-owned Redis manager."""
+
+    return cast(RedisManager, request.app.state.redis)
+
+
+RedisDependency = Annotated[RedisManager, Depends(get_redis)]

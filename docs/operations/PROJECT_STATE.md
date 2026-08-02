@@ -7,9 +7,9 @@
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Current task | Awaiting TICKET-005 approval |
+| Current task | Awaiting TICKET-006 approval |
 | Planning progress | 100% |
-| Implementation progress | Approximately 35% |
+| Implementation progress | Approximately 45% |
 
 ## Completed
 
@@ -17,6 +17,7 @@
 - TICKET-002 — Python Backend Foundation
 - TICKET-003 — Next.js Frontend Foundation
 - TICKET-004 — PostgreSQL Foundation
+- TICKET-005 — Redis and Celery Foundation
 
 ## TICKET-002 Acceptance State
 
@@ -44,7 +45,16 @@
 - Database configuration is secret-safe and connectivity logs omit connection details.
 - Product domain tables and TICKET-005+ systems are not included.
 
+## TICKET-005 Acceptance State
+
+- Redis 7.4 Compose service, health check, and persistent AOF volume implemented.
+- Async Redis client and secret-safe connectivity logging implemented.
+- `/ready` now requires both PostgreSQL and Redis connectivity.
+- Celery application, Redis broker/result backend, and worker service implemented.
+- JSON-only serialization, late acknowledgements, retry/backoff/jitter, and a foundation task implemented.
+- Workflow, business logic, providers, authentication, and TICKET-006+ work are not included.
+
 ## Next Work
 
-No next ticket is approved. TICKET-005 — Redis and Celery Foundation remains pending
-CEO approval and has not started.
+No next ticket is approved. TICKET-006 — MinIO Object Storage Foundation remains
+pending CEO approval and has not started.

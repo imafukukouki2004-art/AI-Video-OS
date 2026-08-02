@@ -14,6 +14,8 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
         "DATABASE_URL",
         "postgresql+psycopg://test-user:test-password@database:5432/test-db",
     )
+    monkeypatch.setenv("REDIS_URL", "redis://:redis-password@cache:6379/0")
+    monkeypatch.setenv("CELERY_BROKER_URL", "redis://:broker-password@cache:6379/0")
 
     settings = Settings(_env_file=None)
 
@@ -23,6 +25,9 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     assert settings.log_level == "DEBUG"
     assert settings.database_url.get_secret_value().endswith("@database:5432/test-db")
     assert "test-password" not in repr(settings)
+    assert settings.redis_url.get_secret_value().endswith("@cache:6379/0")
+    assert "redis-password" not in repr(settings)
+    assert "broker-password" not in repr(settings)
 
 
 def test_api_host_alias_is_supported(monkeypatch: MonkeyPatch) -> None:

@@ -2,7 +2,7 @@
 
 AI Video OS is an implementation project for producing short-form social video through a traceable, human-approved AI workflow.
 
-TICKET-002 through TICKET-004 provide executable backend, frontend, and PostgreSQL foundations. Queue, storage, provider, domain, and workflow features remain intentionally out of scope.
+TICKET-002 through TICKET-005 provide executable backend, frontend, PostgreSQL, Redis, and Celery foundations. Storage, provider, domain, and workflow features remain intentionally out of scope.
 
 ## Current Project State
 
@@ -11,9 +11,9 @@ TICKET-002 through TICKET-004 provide executable backend, frontend, and PostgreS
 | Product version | AI Video OS Version 2.0 |
 | Phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Completed | TICKET-001, TICKET-002, TICKET-003, TICKET-004 |
-| Current ticket | Awaiting TICKET-005 approval |
-| Implementation progress | Approximately 35% |
+| Completed | TICKET-001, TICKET-002, TICKET-003, TICKET-004, TICKET-005 |
+| Current ticket | Awaiting TICKET-006 approval |
+| Implementation progress | Approximately 45% |
 
 See [Project State](docs/operations/PROJECT_STATE.md) for the operational record.
 
@@ -47,6 +47,16 @@ See [Project State](docs/operations/PROJECT_STATE.md) for the operational record
 - Alembic configuration and empty initial baseline revision
 - Database-aware `GET /ready` response
 - Secret-safe database settings and connectivity logging
+
+## Implemented Redis and Celery Foundation
+
+- Redis 7.4 Compose service with health check and persistent AOF volume
+- Async Redis client with secret-safe connectivity logging
+- Database- and Redis-aware `GET /ready` response
+- Celery application using Redis broker and result backend
+- JSON-only task serialization and worker reliability defaults
+- Retry/backoff/jitter-enabled foundation test task
+- Non-root Celery worker image and Compose worker health check
 
 ## Prerequisites
 
@@ -84,15 +94,22 @@ The supported settings are:
 | `DATABASE_MAX_OVERFLOW` | `10` | Additional temporary connections |
 | `DATABASE_POOL_TIMEOUT_SECONDS` | `5` | Pool checkout timeout |
 | `DATABASE_CONNECT_TIMEOUT_SECONDS` | `3` | PostgreSQL connection timeout |
+| `REDIS_URL` | local Redis URL | API Redis connection URL (secret) |
+| `REDIS_CONNECT_TIMEOUT_SECONDS` | `3` | Redis connection timeout |
+| `REDIS_SOCKET_TIMEOUT_SECONDS` | `3` | Redis operation timeout |
+| `CELERY_BROKER_URL` | local Redis DB 0 | Celery broker URL (secret) |
+| `CELERY_RESULT_BACKEND` | local Redis DB 1 | Celery result backend URL (secret) |
+| `CELERY_TASK_MAX_RETRIES` | `3` | Foundation task retry limit |
+| `CELERY_RETRY_BACKOFF_MAX_SECONDS` | `60` | Maximum automatic retry backoff |
 
 Do not store secrets in `.env.example`, source files, images, or logs.
 
 ### Start the backend
 
-Start PostgreSQL and apply the baseline migration first:
+Start PostgreSQL and Redis, then apply the baseline migration:
 
 ```bash
-docker compose up -d postgres
+docker compose up -d postgres redis
 alembic upgrade head
 ```
 
@@ -109,7 +126,23 @@ curl http://localhost:8000/health
 curl http://localhost:8000/ready
 ```
 
-`/health` reports process liveness. `/ready` returns HTTP 200 only when application startup is complete and PostgreSQL accepts a query; otherwise it returns HTTP 503.
+`/health` reports process liveness. `/ready` returns HTTP 200 only when application startup is complete and both PostgreSQL and Redis accept checks; otherwise it returns HTTP 503.
+
+### Start the Celery worker
+
+Locally:
+
+```bash
+celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO
+```
+
+Or with Compose after Redis becomes healthy:
+
+```bash
+docker compose up -d celery-worker
+```
+
+The registered `apps.worker.tasks.foundation_test` task exists only to validate worker wiring and retry behavior. It contains no product workflow or business logic.
 
 - API documentation: <http://localhost:8000/docs>
 - OpenAPI JSON: <http://localhost:8000/openapi.json>
@@ -137,7 +170,9 @@ pytest --cov=apps.api --cov-report=term-missing
 ruff check .
 ruff format --check .
 mypy apps/api
+mypy apps/worker
 alembic upgrade head --sql
+python -c "from apps.worker.celery_app import celery_app; print(celery_app.main)"
 ```
 
 Frontend:
@@ -178,20 +213,21 @@ docker run --rm -p 3000:3000 --env API_BASE_URL=http://host.docker.internal:8000
 ## Repository Structure
 
 ```text
-apps/api/                 FastAPI application, database layer, and container definition
+apps/api/                 FastAPI application, database/Redis layers, and container definition
 apps/web/                 Next.js application, tests, and container definition
+apps/worker/              Celery application, foundation task, and worker image
 docs/operations/          Current operational project state
 migrations/               Alembic environment and baseline revision
 tests/unit/               Isolated configuration and logging tests
 tests/integration/        HTTP API and error-contract tests
 packages/                 Reserved for later ticket-owned shared packages
 infrastructure/           Reserved for later infrastructure tickets
-compose.yaml              PostgreSQL service, health check, and persistent volume
+compose.yaml              PostgreSQL, Redis, and Celery worker services
 ```
 
 ## Current Implementation Boundaries
 
-TICKET-004 does not implement domain tables, Redis, Celery, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, or the Workflow Engine.
+TICKET-005 does not implement domain tables, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, business logic, domain workflows, or the Workflow Engine.
 
 ## Security Rules
 

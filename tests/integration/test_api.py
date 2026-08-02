@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from apps.api.application import create_app
+from apps.api.cache import RedisManager
 from apps.api.config import Settings
 from apps.api.database import Database
 
@@ -18,10 +19,18 @@ def make_database(*, connected: bool = True) -> Database:
     return cast(Database, database)
 
 
-def make_app(*, database_connected: bool = True) -> FastAPI:
+def make_redis(*, connected: bool = True) -> RedisManager:
+    redis = Mock(spec=RedisManager)
+    redis.check_connection = AsyncMock(return_value=connected)
+    redis.close = AsyncMock()
+    return cast(RedisManager, redis)
+
+
+def make_app(*, database_connected: bool = True, redis_connected: bool = True) -> FastAPI:
     return create_app(
         Settings(app_env="test", log_level="CRITICAL", _env_file=None),
         database=make_database(connected=database_connected),
+        redis=make_redis(connected=redis_connected),
     )
 
 
@@ -55,6 +64,7 @@ def test_ready_response_schema() -> None:
         "service": "ai-video-os-api",
         "environment": "test",
         "database": "connected",
+        "redis": "connected",
     }
 
 
@@ -68,6 +78,21 @@ def test_ready_reports_database_failure() -> None:
         "service": "ai-video-os-api",
         "environment": "test",
         "database": "unavailable",
+        "redis": "connected",
+    }
+
+
+def test_ready_reports_redis_failure() -> None:
+    with TestClient(make_app(redis_connected=False)) as client:
+        response = client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "not_ready",
+        "service": "ai-video-os-api",
+        "environment": "test",
+        "database": "connected",
+        "redis": "unavailable",
     }
 
 

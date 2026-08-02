@@ -40,6 +40,13 @@ class Settings(BaseSettings):
     database_max_overflow: int = Field(default=10, ge=0, le=100)
     database_pool_timeout_seconds: float = Field(default=5.0, gt=0, le=60)
     database_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
+    redis_url: SecretStr = SecretStr("redis://127.0.0.1:6379/0")
+    redis_connect_timeout_seconds: float = Field(default=3.0, gt=0, le=30)
+    redis_socket_timeout_seconds: float = Field(default=3.0, gt=0, le=30)
+    celery_broker_url: SecretStr = SecretStr("redis://127.0.0.1:6379/0")
+    celery_result_backend: SecretStr = SecretStr("redis://127.0.0.1:6379/1")
+    celery_task_max_retries: int = Field(default=3, ge=0, le=20)
+    celery_retry_backoff_max_seconds: int = Field(default=60, ge=1, le=3600)
 
 
 @lru_cache
