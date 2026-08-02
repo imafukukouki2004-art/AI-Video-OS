@@ -8,10 +8,10 @@
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
 | Current task | TICKET-015 — Workflow Definition & Step Model Foundation |
-| TICKET-015 Status | In Progress |
+| TICKET-015 Status | In Review |
 | Blocking Condition | None |
 | Planning progress | 100% |
-| Implementation progress | Approximately 85% |
+| Implementation progress | Approximately 90% |
 | Next technology review | TR-02 after Milestone M4 — AI Content Pipeline Complete |
 | Technology review status | TR-01 Completed |
 
@@ -34,7 +34,8 @@
 
 ## Next Work
 
-- TICKET-015 — Awaiting CEO Approval.
+- TICKET-015 — In Review.
+- TICKET-016 — Awaiting CEO Approval.
 - TR-02 planning.
 
 ## Technology Review 01 (TR-01) Decisions
@@ -73,5 +74,5 @@ The following decisions were formalized during the final TR-01 review.
 
 ### Pilot and PR Status
 - **Manus Pilot**: SPIKE-TECH-003 — Completed / Adopt with Restrictions
-- **Pull Request**: PR #21 — Merged
-- **Issue #20**: Closed – Completed
+- **Pull Request**: PR #23 — Draft / In Review
+- **Issue #22**: Open
