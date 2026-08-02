@@ -26,7 +26,9 @@ def upgrade() -> None:
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'workflowexecutionstatus') THEN
-                CREATE TYPE workflowexecutionstatus AS ENUM ('pending', 'running', 'completed', 'failed');
+                CREATE TYPE workflowexecutionstatus AS ENUM (
+                    'pending', 'running', 'completed', 'failed'
+                );
             END IF;
         END$$;
         """
