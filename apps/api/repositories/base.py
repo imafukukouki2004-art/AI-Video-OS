@@ -27,3 +27,7 @@ class Repository[T, CreateSchema, UpdateSchema](Protocol):
     async def update(self, id: UUID, schema: UpdateSchema) -> T | None:
         """Update an existing entity instance."""
         ...
+
+    async def get_status(self, id: UUID) -> str | None:
+        """Retrieve the status of an entity."""
+        ...

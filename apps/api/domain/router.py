@@ -1,5 +1,6 @@
 """FastAPI routers for core domain entities using services."""
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, status
@@ -8,11 +9,13 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
 )
 from apps.api.domain.schemas import (
     JobCreate,
     JobResponse,
+    JobStatusResponse,
     ProjectCreate,
     ProjectResponse,
     ProjectUpdate,
@@ -121,6 +124,14 @@ async def get_workflow(workflow_id: UUID, service: WorkflowServiceDependency) ->
     return WorkflowResponse.model_validate(workflow)
 
 
+@router.post("/workflows/{workflow_id}/run", status_code=status.HTTP_200_OK)
+async def run_workflow(
+    workflow_id: UUID, service: WorkflowRuntimeServiceDependency
+) -> dict[str, Any]:
+    """Trigger synchronous execution of a workflow."""
+    return await service.execute_workflow(workflow_id)
+
+
 # --- Jobs ---
 
 
@@ -142,3 +153,18 @@ async def get_job(job_id: UUID, service: JobServiceDependency) -> JobResponse:
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return JobResponse.model_validate(job)
+
+
+@router.get("/jobs/{job_id}/status", response_model=JobStatusResponse)
+async def get_job_status(job_id: UUID, service: JobServiceDependency) -> JobStatusResponse:
+    """Retrieve the status of a job."""
+    status_val = await service.get_status(job_id)
+    if not status_val:
+        raise ApplicationError(
+            code="JOB_NOT_FOUND",
+            message="Job not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    from apps.api.domain.models import JobStatus
+
+    return JobStatusResponse(id=job_id, status=JobStatus(status_val))

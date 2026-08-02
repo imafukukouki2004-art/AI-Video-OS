@@ -82,3 +82,8 @@ class JobResponse(JobBase):
     id: UUID
     workflow_id: UUID
     created_at: datetime
+
+
+class JobStatusResponse(BaseModel):
+    id: UUID
+    status: JobStatus
