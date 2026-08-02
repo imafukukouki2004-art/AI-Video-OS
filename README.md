@@ -2,7 +2,7 @@
 
 AI Video OS is an implementation project for producing short-form social video through a traceable, human-approved AI workflow.
 
-TICKET-002 provides the executable Python backend foundation. Database, queue, storage, frontend, provider, and workflow features remain intentionally out of scope.
+TICKET-002 and TICKET-003 provide executable Python backend and Next.js frontend foundations. Database, queue, storage, provider, and workflow features remain intentionally out of scope.
 
 ## Current Project State
 
@@ -11,9 +11,9 @@ TICKET-002 provides the executable Python backend foundation. Database, queue, s
 | Product version | AI Video OS Version 2.0 |
 | Phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Completed | TICKET-001, TICKET-002 |
-| Current ticket | TICKET-003 — Next.js Frontend Foundation |
-| Implementation progress | Python backend foundation complete |
+| Completed | TICKET-001, TICKET-002, TICKET-003 |
+| Current ticket | TICKET-004 — PostgreSQL Foundation |
+| Implementation progress | Backend and frontend foundations complete |
 
 See [Project State](docs/operations/PROJECT_STATE.md) for the operational record.
 
@@ -29,9 +29,21 @@ See [Project State](docs/operations/PROJECT_STATE.md) for the operational record
 - pytest, coverage, Ruff, and mypy configuration
 - Python 3.12 non-root Docker image
 
+## Implemented Frontend Foundation
+
+- Next.js App Router with strict TypeScript
+- Tailwind CSS and a responsive root layout
+- Server-side FastAPI health client using `API_BASE_URL`
+- Backend operational and unavailable states
+- Minimal App Router error boundary
+- ESLint, Vitest, and Playwright foundation
+- Next.js standalone non-root Docker image
+
 ## Prerequisites
 
 - Python 3.12
+- Node.js 22 or later
+- pnpm 11
 - Docker (optional, for the container workflow)
 
 ## Local Development
@@ -77,7 +89,22 @@ curl http://localhost:8000/ready
 - API documentation: <http://localhost:8000/docs>
 - OpenAPI JSON: <http://localhost:8000/openapi.json>
 
+### Start the frontend
+
+In another terminal:
+
+```bash
+cd apps/web
+cp .env.local.example .env.local
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Open <http://localhost:3000>. The page fetches the backend `GET /health` endpoint and displays its current state. `API_BASE_URL` is server-only and defaults to `http://127.0.0.1:8000`.
+
 ## Verification
+
+Backend:
 
 ```bash
 pytest
@@ -86,6 +113,18 @@ ruff check .
 ruff format --check .
 mypy apps/api
 ```
+
+Frontend:
+
+```bash
+cd apps/web
+pnpm run lint
+pnpm run test
+pnpm run typecheck
+pnpm run build
+```
+
+Playwright configuration is present for later end-to-end scenarios; TICKET-003 does not add product E2E flows or browser binaries.
 
 ## Docker
 
@@ -103,22 +142,30 @@ docker run --rm -p 8000:8000 --env-file .env ai-video-os-api
 
 The image runs as a non-root user, listens on `0.0.0.0:8000`, and includes a `/health` container health check.
 
+Build and run the frontend image:
+
+```bash
+docker build -f apps/web/Dockerfile -t ai-video-os-web .
+docker run --rm -p 3000:3000 --env API_BASE_URL=http://host.docker.internal:8000 ai-video-os-web
+```
+
 ## Repository Structure
 
 ```text
 apps/api/                 FastAPI application and container definition
+apps/web/                 Next.js application, tests, and container definition
 docs/operations/          Current operational project state
 tests/unit/               Isolated configuration and logging tests
 tests/integration/        HTTP API and error-contract tests
 packages/                 Reserved for later ticket-owned shared packages
 infrastructure/           Reserved for later infrastructure tickets
 migrations/               Reserved for the database ticket
-compose.yaml              Empty service skeleton; unchanged in TICKET-002
+compose.yaml              Empty service skeleton; unchanged in TICKET-003
 ```
 
-## TICKET-002 Boundaries
+## Current Implementation Boundaries
 
-This ticket does not implement Next.js, PostgreSQL, SQLAlchemy, Alembic, Redis, Celery, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, domain entities, or the Workflow Engine.
+TICKET-003 does not implement PostgreSQL, SQLAlchemy, Alembic, Redis, Celery, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, domain entities, the Workflow Engine, or Docker Compose services.
 
 ## Security Rules
 

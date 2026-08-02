@@ -1,0 +1,12 @@
+.git
+.env
+.env.*
+!.env.example
+node_modules
+.next
+coverage
+playwright-report
+test-results
+.DS_Store
+__pycache__
+.venv

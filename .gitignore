@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!apps/web/.env.local.example
 *.pem
 *.key
 *.p12
