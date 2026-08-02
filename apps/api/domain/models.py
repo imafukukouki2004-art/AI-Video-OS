@@ -93,6 +93,15 @@ class Workflow(Base):
     )
 
 
+class WorkflowExecutionStatus(str, enum.Enum):
+    """Execution states of a workflow."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
 class Job(Base):
     """Execution instance of an individual AI task within a workflow."""
 
@@ -100,6 +109,9 @@ class Job(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     workflow_id: Mapped[UUID] = mapped_column(ForeignKey("workflows.id"), nullable=False)
+    execution_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=True
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     status: Mapped[JobStatus] = mapped_column(
         Enum(JobStatus), default=JobStatus.PENDING, nullable=False
@@ -111,3 +123,33 @@ class Job(Base):
     )
 
     workflow: Mapped["Workflow"] = relationship(back_populates="jobs")
+    execution: Mapped["WorkflowExecution | None"] = relationship(back_populates="jobs")
+
+
+class WorkflowExecution(Base):
+    """Tracking entity for a specific workflow execution run."""
+
+    __tablename__ = "workflow_executions"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_id: Mapped[UUID] = mapped_column(ForeignKey("workflows.id"), nullable=False)
+    status: Mapped[WorkflowExecutionStatus] = mapped_column(
+        Enum(WorkflowExecutionStatus), default=WorkflowExecutionStatus.PENDING, nullable=False
+    )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    failed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    workflow: Mapped["Workflow"] = relationship()
+    jobs: Mapped[list["Job"]] = relationship(
+        back_populates="execution", cascade="all, delete-orphan"
+    )

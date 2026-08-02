@@ -7,13 +7,20 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.domain.models import Job, Project, Video, Workflow
+from apps.api.domain.models import (
+    Job,
+    Project,
+    Video,
+    Workflow,
+    WorkflowExecution,
+)
 from apps.api.domain.schemas import (
     JobCreate,
     ProjectCreate,
     ProjectUpdate,
     VideoCreate,
     WorkflowCreate,
+    WorkflowExecutionCreate,
 )
 
 T = TypeVar("T")
@@ -92,3 +99,16 @@ class WorkflowRepository(SQLAlchemyRepository[Workflow, WorkflowCreate, Any]):
 class JobRepository(SQLAlchemyRepository[Job, JobCreate, Any]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Job)
+
+
+class WorkflowExecutionRepository(
+    SQLAlchemyRepository[WorkflowExecution, WorkflowExecutionCreate, Any]
+):
+    def __init__(self, session: AsyncSession) -> None:
+        super().__init__(session, WorkflowExecution)
+
+    async def list_by_workflow(self, workflow_id: UUID) -> Sequence[WorkflowExecution]:
+        result = await self.session.execute(
+            select(self.model).where(self.model.workflow_id == workflow_id)
+        )
+        return result.scalars().all()
