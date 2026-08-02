@@ -1,5 +1,6 @@
 """FastAPI routers for core domain entities using services."""
 
+from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, status
@@ -8,6 +9,7 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
 )
 from apps.api.domain.schemas import (
@@ -119,6 +121,14 @@ async def get_workflow(workflow_id: UUID, service: WorkflowServiceDependency) ->
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return WorkflowResponse.model_validate(workflow)
+
+
+@router.post("/workflows/{workflow_id}/run", status_code=status.HTTP_200_OK)
+async def run_workflow(
+    workflow_id: UUID, service: WorkflowRuntimeServiceDependency
+) -> dict[str, Any]:
+    """Trigger synchronous execution of a workflow."""
+    return await service.execute_workflow(workflow_id)
 
 
 # --- Jobs ---

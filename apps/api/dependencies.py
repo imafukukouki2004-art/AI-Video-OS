@@ -19,6 +19,7 @@ from apps.api.services import (
     JobService,
     ProjectService,
     VideoService,
+    WorkflowRuntimeService,
     WorkflowService,
 )
 from apps.api.storage import ObjectStorage
@@ -121,3 +122,15 @@ def get_job_service(repo: JobRepositoryDependency) -> JobService:
 
 
 JobServiceDependency = Annotated[JobService, Depends(get_job_service)]
+
+
+def get_workflow_runtime_service(
+    workflow_repo: WorkflowRepositoryDependency,
+    job_repo: JobRepositoryDependency,
+) -> WorkflowRuntimeService:
+    return WorkflowRuntimeService(workflow_repo, job_repo)
+
+
+WorkflowRuntimeServiceDependency = Annotated[
+    WorkflowRuntimeService, Depends(get_workflow_runtime_service)
+]
