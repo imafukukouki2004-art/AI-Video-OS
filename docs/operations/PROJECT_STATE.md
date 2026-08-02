@@ -7,8 +7,8 @@
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Current task | TICKET-009 — Core Domain Entities |
-| TICKET-009 Status | In Review |
+| Current task | Awaiting TICKET-010 CEO Approval |
+| TICKET-009 Status | Completed |
 | Blocking Condition | None |
 | Planning progress | 100% |
 | Implementation progress | Approximately 75% |
@@ -25,10 +25,11 @@
 - TICKET-006 — MinIO Object Storage Foundation
 - TICKET-007 — CI Foundation
 - TICKET-008 — Development Environment Acceptance (Pilot)
+- TICKET-009 — Core Domain Entities
 
 ## Next Work
 
-- TICKET-009 — Awaiting CEO Approval.
+- TICKET-010 — Awaiting CEO Approval.
 - TR-02 planning.
 
 ## Technology Review 01 (TR-01) Decisions
@@ -67,5 +68,5 @@ The following decisions were formalized during the final TR-01 review.
 
 ### Pilot and PR Status
 - **Manus Pilot**: SPIKE-TECH-003 — Completed / Adopt with Restrictions
-- **Pull Request**: PR #9 — Merged
-- **Issue #8**: Closed – Completed
+- **Pull Request**: PR #11 — Merged
+- **Issue #10**: Closed – Completed
