@@ -1,0 +1,1112 @@
+Development Environment Acceptance	Set up job	﻿2026-08-02T08:57:53.8214077Z Current runner version: '2.336.0'
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8263741Z ##[group]Runner Image Provisioner
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8264408Z Hosted Compute Agent
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8264876Z Version: 20260707.563
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8265356Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8265898Z Build Date: 2026-07-07T19:33:50Z
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8266302Z Worker ID: {2d8c28ec-159a-4b99-9c81-0ad97b9a2369}
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8266781Z Azure Region: westus3
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8267123Z ##[endgroup]
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8268148Z ##[group]Operating System
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8268567Z Ubuntu
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8268879Z 24.04.4
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8269197Z LTS
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8269542Z ##[endgroup]
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8269862Z ##[group]Runner Image
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8270248Z Image: ubuntu-24.04
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8270576Z Version: 20260720.247.2
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8271158Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260720.247/images/ubuntu/Ubuntu2404-Readme.md
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8272205Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260720.247
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8272775Z ##[endgroup]
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8273389Z ##[group]GITHUB_TOKEN Permissions
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8274658Z Contents: read
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8275127Z Metadata: read
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8275436Z ##[endgroup]
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8276777Z Secret source: Actions
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8277385Z Prepare workflow directory
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8509794Z Prepare all required actions
+Development Environment Acceptance	Set up job	2026-08-02T08:57:53.8541083Z Getting action download info
+Development Environment Acceptance	Set up job	2026-08-02T08:57:54.1271360Z Download action repository 'actions/checkout@v6' (SHA:d23441a48e516b6c34aea4fa41551a30e30af803)
+Development Environment Acceptance	Set up job	2026-08-02T08:57:55.0435981Z Download action repository 'actions/setup-python@v6' (SHA:ece7cb06caefa5fff74198d8649806c4678c61a1)
+Development Environment Acceptance	Set up job	2026-08-02T08:57:55.2122718Z Complete job name: Development Environment Acceptance
+Development Environment Acceptance	Check out repository	﻿2026-08-02T08:57:55.2667174Z ##[group]Run actions/checkout@v6
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2667939Z with:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2668497Z   repository: imafukukouki2004-art/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2673381Z   token: ***
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2673871Z   ssh-strict: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2674369Z   ssh-user: git
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2674970Z   persist-credentials: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2675532Z   clean: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2676044Z   sparse-checkout-cone-mode: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2676650Z   fetch-depth: 1
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2677139Z   fetch-tags: false
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2677649Z   show-progress: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2678156Z   lfs: false
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2678645Z   submodules: false
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2679165Z   set-safe-directory: true
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2679756Z   allow-unsafe-pr-checkout: false
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2680424Z env:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2680890Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2681482Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2682093Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2682727Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2683299Z   APP_ENV: test
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2684283Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2685143Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2685811Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.2686464Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3387054Z Syncing repository: imafukukouki2004-art/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3389056Z ##[group]Getting Git version info
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3389909Z Working directory is '/home/runner/work/AI-Video-OS/AI-Video-OS'
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3391148Z [command]/usr/bin/git version
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3409896Z git version 2.54.0
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3423926Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3435103Z Temporarily overriding HOME='/home/runner/work/_temp/387e132c-253e-4222-b2af-7738be94445f' before making global git config changes
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3437534Z Adding repository directory to the temporary git global config as a safe directory
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3439737Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/AI-Video-OS/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3470136Z Deleting the contents of '/home/runner/work/AI-Video-OS/AI-Video-OS'
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3472686Z ##[group]Determining repository object format
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3474304Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3475707Z ##[group]Initializing the repository
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3477813Z [command]/usr/bin/git init /home/runner/work/AI-Video-OS/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3837718Z hint: Using 'master' as the name for the initial branch. This default branch name
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3839654Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3840827Z hint: to use in all of your new repositories, which will suppress this warning,
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3842071Z hint: call:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3842576Z hint:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3843182Z hint: 	git config --global init.defaultBranch <name>
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3843881Z hint:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3844620Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3846241Z hint: 'development'. The just-created branch can be renamed via this command:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3847094Z hint:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3847564Z hint: 	git branch -m <name>
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3848105Z hint:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3848814Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3850009Z Initialized empty Git repository in /home/runner/work/AI-Video-OS/AI-Video-OS/.git/
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3852259Z [command]/usr/bin/git remote add origin https://github.com/imafukukouki2004-art/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3878854Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3879734Z ##[group]Disabling automatic garbage collection
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3882081Z [command]/usr/bin/git config --local gc.auto 0
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3909386Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3910682Z ##[group]Setting up auth
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3911272Z Removing SSH command configuration
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3914056Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.3942059Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4175187Z Removing HTTP extra header
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4180771Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4209484Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4375686Z Removing includeIf entries pointing to credentials config files
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4380026Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4408359Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4581976Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4615012Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git.path /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4642028Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4667114Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4698003Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4720972Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4721784Z ##[group]Fetching the repository
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:55.4726829Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a7e64582e0d9a8d704792e7559c4d1e1bf20cd4e:refs/remotes/pull/9/merge
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0320760Z From https://github.com/imafukukouki2004-art/AI-Video-OS
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0321939Z  * [new ref]         a7e64582e0d9a8d704792e7559c4d1e1bf20cd4e -> pull/9/merge
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0340465Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0341322Z ##[group]Determining the checkout info
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0342206Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0344613Z [command]/usr/bin/git sparse-checkout disable
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0375899Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0402237Z ##[group]Checking out the ref
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0403112Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/9/merge
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0464469Z Note: switching to 'refs/remotes/pull/9/merge'.
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0465192Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0465892Z You are in 'detached HEAD' state. You can look around, make experimental
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0467059Z changes and commit them, and you can discard any commits you make in this
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0468518Z state without impacting any branches by switching back to a branch.
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0469435Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0470055Z If you want to create a new branch to retain commits you create, you may
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0471505Z do so (now or later) by using -c with the switch command. Example:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0472304Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0472651Z   git switch -c <new-branch-name>
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0473214Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0473539Z Or undo this operation with:
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0474030Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0474317Z   git switch -
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0475121Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0475754Z Turn off this advice by setting config variable advice.detachedHead to false
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0476687Z 
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0477714Z HEAD is now at a7e6458 Merge 4a18cc3b0b2dd9a28ad731ce41f430b4adf472cc into fd3dc485c5ffb84666f161ae662538dbcb074e69
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0480404Z ##[endgroup]
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0501925Z [command]/usr/bin/git log -1 --format=%H
+Development Environment Acceptance	Check out repository	2026-08-02T08:57:56.0522696Z a7e64582e0d9a8d704792e7559c4d1e1bf20cd4e
+Development Environment Acceptance	Set up Python	﻿2026-08-02T08:57:56.0803946Z ##[group]Run actions/setup-python@v6
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0804575Z with:
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0805099Z   python-version: 3.12
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0805586Z   cache: pip
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0806076Z   cache-dependency-path: pyproject.toml
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0806680Z   check-latest: false
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0811162Z   token: ***
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0811627Z   update-environment: true
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0812157Z   allow-prereleases: false
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0812681Z   freethreaded: false
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0813142Z env:
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0813609Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0814173Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0814734Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0815360Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0815895Z   APP_ENV: test
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0816781Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0817418Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0818052Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.0818702Z ##[endgroup]
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.1623616Z ##[group]Installed versions
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.5063339Z Successfully set up CPython (3.12.13)
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.5064320Z ##[endgroup]
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:56.5316975Z [command]/opt/hostedtoolcache/Python/3.12.13/x64/bin/pip cache dir
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:59.4020198Z /home/runner/.cache/pip
+Development Environment Acceptance	Set up Python	2026-08-02T08:57:59.6394159Z Cache hit for: setup-python-Linux-x64-24.04-Ubuntu-python-3.12.13-pip-81c78b9de54a8cb70032d0bf4c47b11a88d5b9c618551842afedca95dc0b32ef
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:00.9250922Z Received 29360128 of 69605389 (42.2%), 28.0 MBs/sec
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:01.2129283Z Received 69605389 of 69605389 (100.0%), 51.4 MBs/sec
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:01.2129800Z Cache Size: ~66 MB (69605389 B)
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:01.2200189Z [command]/usr/bin/tar -xf /home/runner/work/_temp/45088fd8-ecce-4acc-8c5a-87f747b8b28f/cache.tzst -P -C /home/runner/work/AI-Video-OS/AI-Video-OS --use-compress-program unzstd
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:01.3046546Z Cache restored successfully
+Development Environment Acceptance	Set up Python	2026-08-02T08:58:01.3079619Z Cache restored from key: setup-python-Linux-x64-24.04-Ubuntu-python-3.12.13-pip-81c78b9de54a8cb70032d0bf4c47b11a88d5b9c618551842afedca95dc0b32ef
+Development Environment Acceptance	Install dependencies	﻿2026-08-02T08:58:01.3211924Z ##[group]Run python -m pip install --editable ".[dev]"
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3212209Z ^[[36;1mpython -m pip install --editable ".[dev]"^[[0m
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3253766Z shell: /usr/bin/bash -e {0}
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3253938Z env:
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3254060Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3254208Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3254356Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3254548Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3254683Z   APP_ENV: test
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3255332Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3255528Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3255697Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3255895Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3256132Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3256362Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3256605Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3256818Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3257045Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:01.3257231Z ##[endgroup]
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:02.8390044Z Obtaining file:///home/runner/work/AI-Video-OS/AI-Video-OS
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:02.8403688Z   Installing build dependencies: started
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.4217993Z   Installing build dependencies: finished with status 'done'
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.4222466Z   Checking if build backend supports build_editable: started
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.6446641Z   Checking if build backend supports build_editable: finished with status 'done'
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.6453551Z   Getting requirements to build editable: started
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.8590511Z   Getting requirements to build editable: finished with status 'done'
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.8596841Z   Preparing editable metadata (pyproject.toml): started
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:03.9812805Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.0523065Z Collecting alembic==1.16.4 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.0532240Z   Using cached alembic-1.16.4-py3-none-any.whl.metadata (7.3 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.1586768Z Collecting boto3==1.39.9 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.1596260Z   Using cached boto3-1.39.9-py3-none-any.whl.metadata (6.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.6864062Z Collecting celery==5.5.3 (from celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.6872805Z   Using cached celery-5.5.3-py3-none-any.whl.metadata (22 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7173989Z Collecting fastapi==0.116.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7182007Z   Using cached fastapi-0.116.1-py3-none-any.whl.metadata (28 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7349273Z Collecting httpx==0.28.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7356873Z   Using cached httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7528569Z Collecting psycopg==3.2.9 (from psycopg[binary]==3.2.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.7536200Z   Using cached psycopg-3.2.9-py3-none-any.whl.metadata (4.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8145038Z Collecting pydantic==2.11.7 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8155270Z   Using cached pydantic-2.11.7-py3-none-any.whl.metadata (67 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8327416Z Collecting pydantic-settings==2.10.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8334879Z   Using cached pydantic_settings-2.10.1-py3-none-any.whl.metadata (3.4 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8467912Z Collecting python-multipart==0.0.20 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8475276Z   Using cached python_multipart-0.0.20-py3-none-any.whl.metadata (1.8 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8649710Z Collecting redis==5.2.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:04.8658201Z   Using cached redis-5.2.1-py3-none-any.whl.metadata (9.1 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.0355853Z Collecting sqlalchemy==2.0.41 (from sqlalchemy[asyncio]==2.0.41->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.0365835Z   Using cached sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.0746264Z Collecting structlog==25.4.0 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.0755282Z   Using cached structlog-25.4.0-py3-none-any.whl.metadata (7.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.1065986Z Collecting uvicorn==0.35.0 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.1073664Z   Using cached uvicorn-0.35.0-py3-none-any.whl.metadata (6.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.1623286Z Collecting mypy==1.17.0 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.1633210Z   Using cached mypy-1.17.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2232800Z Collecting pytest==8.4.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2241344Z   Using cached pytest-8.4.1-py3-none-any.whl.metadata (7.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2405085Z Collecting pytest-asyncio==1.1.0 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2412428Z   Using cached pytest_asyncio-1.1.0-py3-none-any.whl.metadata (4.1 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2549196Z Collecting pytest-cov==6.2.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.2556268Z   Using cached pytest_cov-6.2.1-py3-none-any.whl.metadata (30 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4220449Z Collecting ruff==0.12.4 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4229967Z   Using cached ruff-0.12.4-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (25 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4398593Z Collecting Mako (from alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4405891Z   Using cached mako-1.3.12-py3-none-any.whl.metadata (2.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4553313Z Collecting typing-extensions>=4.12 (from alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.4563445Z   Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6036397Z Collecting botocore<1.40.0,>=1.39.9 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6046298Z   Using cached botocore-1.39.17-py3-none-any.whl.metadata (5.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6210953Z Collecting jmespath<2.0.0,>=0.7.1 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6218124Z   Using cached jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6362734Z Collecting s3transfer<0.14.0,>=0.13.0 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6370258Z   Using cached s3transfer-0.13.1-py3-none-any.whl.metadata (1.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6524005Z Collecting billiard<5.0,>=4.2.1 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6531599Z   Using cached billiard-4.2.4-py3-none-any.whl.metadata (4.8 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6716794Z Collecting kombu<5.6,>=5.5.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6724422Z   Using cached kombu-5.5.4-py3-none-any.whl.metadata (3.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6870593Z Collecting vine<6.0,>=5.1.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.6877329Z   Using cached vine-5.1.0-py3-none-any.whl.metadata (2.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.7030606Z Collecting click<9.0,>=8.1.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.7038258Z   Using cached click-8.4.2-py3-none-any.whl.metadata (2.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9348918Z Collecting click-didyoumean>=0.3.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9357482Z   Using cached click_didyoumean-0.3.1-py3-none-any.whl.metadata (3.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9483256Z Collecting click-repl>=0.2.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9490174Z   Using cached click_repl-0.3.0-py3-none-any.whl.metadata (3.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9612904Z Collecting click-plugins>=1.1.1 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9619837Z   Using cached click_plugins-1.1.1.2-py2.py3-none-any.whl.metadata (6.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9755987Z Collecting python-dateutil>=2.8.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:05.9762838Z   Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.0344729Z Collecting starlette<0.48.0,>=0.40.0 (from fastapi==0.116.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.0353859Z   Using cached starlette-0.47.3-py3-none-any.whl.metadata (6.2 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.0636564Z Collecting annotated-types>=0.6.0 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.0643635Z   Using cached annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4438475Z Collecting pydantic-core==2.33.2 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4449071Z   Using cached pydantic_core-2.33.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4588844Z Collecting typing-inspection>=0.4.0 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4597127Z   Using cached typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4760743Z Collecting anyio (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4767934Z   Using cached anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4924094Z Collecting certifi (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.4932705Z   Using cached certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.5148372Z Collecting httpcore==1.* (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.5156113Z   Using cached httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6471646Z Collecting idna (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6480578Z   Using cached idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6623847Z Collecting mypy_extensions>=1.0.0 (from mypy==1.17.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6631547Z   Using cached mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6768418Z Collecting pathspec>=0.9.0 (from mypy==1.17.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.6776111Z   Using cached pathspec-1.1.1-py3-none-any.whl.metadata (14 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7592022Z Collecting psycopg-binary==3.2.9 (from psycopg[binary]==3.2.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7602784Z   Using cached psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7779956Z Collecting python-dotenv>=0.21.0 (from pydantic-settings==2.10.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7788610Z   Using cached python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7930822Z Collecting iniconfig>=1 (from pytest==8.4.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.7938813Z   Using cached iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8088132Z Collecting packaging>=20 (from pytest==8.4.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8096180Z   Using cached packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8233079Z Collecting pluggy<2,>=1.5 (from pytest==8.4.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8240784Z   Using cached pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8405077Z Collecting pygments>=2.7.2 (from pytest==8.4.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:06.8413075Z   Using cached pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.1080034Z Collecting coverage>=7.5 (from coverage[toml]>=7.5->pytest-cov==6.2.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.1090009Z   Using cached coverage-7.15.2-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.4599670Z Collecting greenlet>=1 (from sqlalchemy==2.0.41->sqlalchemy[asyncio]==2.0.41->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.4608677Z   Using cached greenlet-3.5.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8022915Z Collecting h11>=0.8 (from uvicorn==0.35.0->uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8031507Z   Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8321992Z Collecting httptools>=0.6.3 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8331212Z   Using cached httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8581139Z Collecting pyyaml>=5.1 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8589888Z   Using cached pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8843911Z Collecting uvloop>=0.15.1 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.8852893Z   Using cached uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.9289210Z Collecting watchfiles>=0.13 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.9298688Z   Using cached watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.9886238Z Collecting websockets>=10.4 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:07.9895889Z   Using cached websockets-17.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.0097836Z Collecting urllib3!=2.2.0,<3,>=1.25.4 (from botocore<1.40.0,>=1.39.9->boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.0105839Z   Using cached urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.0895766Z Collecting amqp<6.0.0,>=5.1.1 (from kombu<5.6,>=5.5.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.0905003Z   Using cached amqp-5.3.1-py3-none-any.whl.metadata (8.9 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.1106257Z Collecting tzdata>=2025.2 (from kombu<5.6,>=5.5.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.1114623Z   Using cached tzdata-2026.3-py2.py3-none-any.whl.metadata (1.4 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.1277570Z Collecting six>=1.5 (from python-dateutil>=2.8.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.1285023Z   Using cached six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2082668Z Collecting prompt-toolkit>=3.0.36 (from click-repl>=0.2.0->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2091902Z   Using cached prompt_toolkit-3.0.53-py3-none-any.whl.metadata (6.4 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2287084Z Collecting wcwidth>=0.1.4 (from prompt-toolkit>=3.0.36->click-repl>=0.2.0->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2294550Z   Using cached wcwidth-0.8.2-py3-none-any.whl.metadata (43 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2726712Z Collecting MarkupSafe>=0.9.2 (from Mako->alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2736452Z   Using cached markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2769006Z Using cached alembic-1.16.4-py3-none-any.whl (247 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2776687Z Using cached boto3-1.39.9-py3-none-any.whl (139 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2783587Z Using cached celery-5.5.3-py3-none-any.whl (438 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2791320Z Using cached fastapi-0.116.1-py3-none-any.whl (95 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2798255Z Using cached pydantic-2.11.7-py3-none-any.whl (444 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2805968Z Using cached httpx-0.28.1-py3-none-any.whl (73 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2812838Z Using cached mypy-1.17.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (12.7 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2850678Z Using cached psycopg-3.2.9-py3-none-any.whl (202 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2858088Z Using cached psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.4 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2875074Z Using cached pydantic_core-2.33.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2887187Z Using cached pydantic_settings-2.10.1-py3-none-any.whl (45 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2893564Z Using cached pytest-8.4.1-py3-none-any.whl (365 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2900858Z Using cached pytest_asyncio-1.1.0-py3-none-any.whl (15 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2907208Z Using cached pytest_cov-6.2.1-py3-none-any.whl (24 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2913507Z Using cached python_multipart-0.0.20-py3-none-any.whl (24 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2919772Z Using cached redis-5.2.1-py3-none-any.whl (261 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2926812Z Using cached ruff-0.12.4-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (11.3 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2962262Z Using cached sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2977643Z Using cached structlog-25.4.0-py3-none-any.whl (68 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2983842Z Using cached uvicorn-0.35.0-py3-none-any.whl (66 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2990256Z Using cached billiard-4.2.4-py3-none-any.whl (87 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.2996650Z Using cached botocore-1.39.17-py3-none-any.whl (13.9 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3035471Z Using cached click-8.4.2-py3-none-any.whl (119 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3042267Z Using cached httpcore-1.0.9-py3-none-any.whl (78 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3048917Z Using cached jmespath-1.1.0-py3-none-any.whl (20 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3055231Z Using cached kombu-5.5.4-py3-none-any.whl (210 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3061807Z Using cached vine-5.1.0-py3-none-any.whl (9.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3068062Z Using cached amqp-5.3.1-py3-none-any.whl (50 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3074284Z Using cached pluggy-1.6.0-py3-none-any.whl (20 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3080830Z Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3087807Z Using cached s3transfer-0.13.1-py3-none-any.whl (85 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3094113Z Using cached starlette-0.47.3-py3-none-any.whl (72 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3103115Z Using cached anyio-4.14.2-py3-none-any.whl (125 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3110096Z Using cached urllib3-2.7.0-py3-none-any.whl (131 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3117350Z Using cached annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3123816Z Using cached click_didyoumean-0.3.1-py3-none-any.whl (3.6 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3130382Z Using cached click_plugins-1.1.1.2-py2.py3-none-any.whl (11 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3136871Z Using cached click_repl-0.3.0-py3-none-any.whl (10 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3143627Z Using cached coverage-7.15.2-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (256 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3151021Z Using cached greenlet-3.5.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3159370Z Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3166276Z Using cached httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3173760Z Using cached idna-3.18-py3-none-any.whl (65 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3180565Z Using cached iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3187088Z Using cached mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3193452Z Using cached packaging-26.2-py3-none-any.whl (100 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3200145Z Using cached pathspec-1.1.1-py3-none-any.whl (57 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3206780Z Using cached prompt_toolkit-3.0.53-py3-none-any.whl (392 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3214162Z Using cached pygments-2.20.0-py3-none-any.whl (1.2 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3223577Z Using cached python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3230677Z Using cached pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3239430Z Using cached six-1.17.0-py2.py3-none-any.whl (11 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3246059Z Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3252621Z Using cached typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3259238Z Using cached tzdata-2026.3-py2.py3-none-any.whl (348 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3267054Z Using cached uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3283815Z Using cached watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3291519Z Using cached wcwidth-0.8.2-py3-none-any.whl (323 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3299346Z Using cached websockets-17.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (220 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3306304Z Using cached certifi-2026.7.22-py3-none-any.whl (136 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3314278Z Using cached mako-1.3.12-py3-none-any.whl (78 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.3324572Z Using cached markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.4569649Z Building wheels for collected packages: ai-video-os
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.4576189Z   Building editable for ai-video-os (pyproject.toml): started
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.5949407Z   Building editable for ai-video-os (pyproject.toml): finished with status 'done'
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.5953888Z   Created wheel for ai-video-os: filename=ai_video_os-0.1.0-0.editable-py3-none-any.whl size=8210 sha256=f306955449fd5b7a9e554079f020da35d6ae02466790ead796a6a6c48721cc28
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.5954890Z   Stored in directory: /tmp/pip-ephem-wheel-cache-o467u10w/wheels/9a/ff/bb/924f3be85f6ca2558707fcf2c28bbfed62ab11508cd50aed8f
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.5969334Z Successfully built ai-video-os
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:08.6566378Z Installing collected packages: websockets, wcwidth, vine, uvloop, urllib3, tzdata, typing-extensions, structlog, six, ruff, redis, pyyaml, python-multipart, python-dotenv, pygments, psycopg-binary, pluggy, pathspec, packaging, mypy_extensions, MarkupSafe, jmespath, iniconfig, idna, httptools, h11, greenlet, coverage, click, certifi, billiard, annotated-types, uvicorn, typing-inspection, sqlalchemy, python-dateutil, pytest, pydantic-core, psycopg, prompt-toolkit, mypy, Mako, httpcore, click-plugins, click-didyoumean, anyio, amqp, watchfiles, starlette, pytest-cov, pytest-asyncio, pydantic, kombu, httpx, click-repl, botocore, alembic, s3transfer, pydantic-settings, fastapi, celery, boto3, ai-video-os
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:16.2103433Z 
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:16.2132363Z Successfully installed Mako-1.3.12 MarkupSafe-3.0.3 ai-video-os-0.1.0 alembic-1.16.4 amqp-5.3.1 annotated-types-0.8.0 anyio-4.14.2 billiard-4.2.4 boto3-1.39.9 botocore-1.39.17 celery-5.5.3 certifi-2026.7.22 click-8.4.2 click-didyoumean-0.3.1 click-plugins-1.1.1.2 click-repl-0.3.0 coverage-7.15.2 fastapi-0.116.1 greenlet-3.5.4 h11-0.16.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 idna-3.18 iniconfig-2.3.0 jmespath-1.1.0 kombu-5.5.4 mypy-1.17.0 mypy_extensions-1.1.0 packaging-26.2 pathspec-1.1.1 pluggy-1.6.0 prompt-toolkit-3.0.53 psycopg-3.2.9 psycopg-binary-3.2.9 pydantic-2.11.7 pydantic-core-2.33.2 pydantic-settings-2.10.1 pygments-2.20.0 pytest-8.4.1 pytest-asyncio-1.1.0 pytest-cov-6.2.1 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 python-multipart-0.0.20 pyyaml-6.0.3 redis-5.2.1 ruff-0.12.4 s3transfer-0.13.1 six-1.17.0 sqlalchemy-2.0.41 starlette-0.47.3 structlog-25.4.0 typing-extensions-4.16.0 typing-inspection-0.4.2 tzdata-2026.3 urllib3-2.7.0 uvicorn-0.35.0 uvloop-0.22.1 vine-5.1.0 watchfiles-1.2.0 wcwidth-0.8.2 websockets-17.0.1
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:16.2141090Z 
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:16.2141211Z [notice] A new release of pip is available: 26.1.2 -> 26.2
+Development Environment Acceptance	Install dependencies	2026-08-02T08:58:16.2141535Z [notice] To update, run: pip install --upgrade pip
+Development Environment Acceptance	Start infrastructure	﻿2026-08-02T08:58:16.5332212Z ##[group]Run docker compose up -d postgres redis minio celery-worker
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5332535Z ^[[36;1mdocker compose up -d postgres redis minio celery-worker^[[0m
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5332752Z ^[[36;1mdocker compose run --rm minio-init^[[0m
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368232Z shell: /usr/bin/bash -e {0}
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368381Z env:
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368500Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368643Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368790Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5368933Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5369066Z   APP_ENV: test
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5369595Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5369768Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5369930Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5370125Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5370356Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5370628Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5370835Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5371041Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5371249Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.5371425Z ##[endgroup]
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.6993224Z  minio Pulling 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.6993499Z  redis Pulling 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:16.6993968Z  postgres Pulling 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6337617Z  897d797d2723 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6337917Z  f5a655897537 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338063Z  63e63047b377 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338273Z  627d9d06d3d0 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338419Z  93ebed1aef27 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338563Z  4f4fb700ef54 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338701Z  db197c512a33 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6338833Z  627d9d06d3d0 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6339081Z  93ebed1aef27 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6339205Z  4f4fb700ef54 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.6339320Z  db197c512a33 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.8597057Z  63e63047b377 Downloading [>                                                  ]    3.5kB/194.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.8599112Z  897d797d2723 Downloading [>                                                  ]  48.54kB/3.647MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.8624194Z  f5a655897537 Downloading [==================================================>]     949B/949B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9119902Z  55afa1ecc21d Already exists 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9123063Z  f5a655897537 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9123389Z  f5a655897537 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9123700Z  63e63047b377 Downloading [==================================================>]  194.3kB/194.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9124049Z  63e63047b377 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9124269Z  63e63047b377 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9244165Z  897d797d2723 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9244499Z  897d797d2723 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:20.9256890Z  897d797d2723 Extracting [>                                                  ]  65.54kB/3.647MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0601638Z  d949f716ce77 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0602034Z  8c577d69454d Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0602270Z  546fbfcace65 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0602482Z  d0c8865a0302 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0602703Z  cf67644788eb Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0602861Z  df0d0d229f33 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0603050Z  62481e699c81 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0603228Z  68a66c893f7c Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0603409Z  d7ab9c0b242a Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0603629Z  39c8ce9a80d2 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0603834Z  d949f716ce77 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0604014Z  8c577d69454d Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0604197Z  546fbfcace65 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0604376Z  d0c8865a0302 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0605130Z  cf67644788eb Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0605312Z  62481e699c81 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0605492Z  68a66c893f7c Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0605677Z  d7ab9c0b242a Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0605859Z  df0d0d229f33 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0606039Z  39c8ce9a80d2 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0611246Z  897d797d2723 Extracting [===>                                               ]  262.1kB/3.647MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0841856Z  603858638485 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0842130Z  34a3e2652f22 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0842350Z  9cf33c25d575 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0842571Z  ae8ed6ddf5d2 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0842787Z  b1aad2d5f399 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843001Z  5635b2c7f90f Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843214Z  4635b503f9b2 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843387Z  e5d94dfa43d9 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843524Z  7bd7d677a4b5 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843690Z  603858638485 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0843921Z  34a3e2652f22 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844107Z  9cf33c25d575 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844228Z  ae8ed6ddf5d2 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844346Z  b1aad2d5f399 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844510Z  5635b2c7f90f Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844702Z  4635b503f9b2 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0844991Z  e5d94dfa43d9 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0862859Z  7bd7d677a4b5 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0898977Z  4f4fb700ef54 Downloading [==================================================>]      32B/32B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0902081Z  4f4fb700ef54 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.0903018Z  627d9d06d3d0 Downloading [>                                                  ]  130.5kB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1067628Z  93ebed1aef27 Downloading [==================================================>]      99B/99B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1068232Z  93ebed1aef27 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1068598Z  93ebed1aef27 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1375528Z  627d9d06d3d0 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1384701Z  627d9d06d3d0 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1385156Z  897d797d2723 Extracting [==================================================>]  3.647MB/3.647MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.1385799Z  897d797d2723 Extracting [==================================================>]  3.647MB/3.647MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.2845585Z  d949f716ce77 Downloading [>                                                  ]  81.28kB/7.241MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.2846332Z  db197c512a33 Downloading [==================================================>]     605B/605B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.2846892Z  db197c512a33 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.2847159Z  db197c512a33 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3054689Z  d949f716ce77 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3056042Z  d949f716ce77 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3060208Z  d949f716ce77 Extracting [>                                                  ]   98.3kB/7.241MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3187097Z  8c577d69454d Downloading [==================================================>]     427B/427B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3187533Z  8c577d69454d Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.3187776Z  8c577d69454d Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4669661Z  546fbfcace65 Downloading [>                                                  ]  32.13kB/1.639MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4757562Z  546fbfcace65 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4758092Z  546fbfcace65 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4782973Z  897d797d2723 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4808230Z  d949f716ce77 Extracting [==>                                                ]  294.9kB/7.241MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4829566Z  d0c8865a0302 Downloading [=>                                                 ]    3.5kB/128.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4857764Z  d0c8865a0302 Downloading [==================================================>]  128.3kB/128.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4858142Z  d0c8865a0302 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.4858386Z  d0c8865a0302 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.5198961Z  cf67644788eb Downloading [>                                                  ]  425.3kB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.5827182Z  d949f716ce77 Extracting [========================================>          ]    5.8MB/7.241MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.6062205Z  cf67644788eb Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.6062883Z  cf67644788eb Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.6356106Z  d949f716ce77 Extracting [==================================================>]  7.241MB/7.241MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.7807676Z  68a66c893f7c Downloading [>                                                  ]  3.458kB/180.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8486289Z  62481e699c81 Downloading [>                                                  ]  32.13kB/2.402MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8487121Z  df0d0d229f33 Downloading [>                                                  ]    114kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8509712Z  68a66c893f7c Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8510003Z  68a66c893f7c Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8709511Z  62481e699c81 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8710823Z  62481e699c81 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8712355Z  f5a655897537 Extracting [==================================================>]     949B/949B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8713848Z  f5a655897537 Extracting [==================================================>]     949B/949B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8736797Z  d949f716ce77 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8756445Z  8c577d69454d Extracting [==================================================>]     427B/427B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.8767048Z  8c577d69454d Extracting [==================================================>]     427B/427B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.9169623Z  df0d0d229f33 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:21.9170029Z  df0d0d229f33 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.0564964Z  d7ab9c0b242a Downloading [==============>                                    ]    3.5kB/11.88kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.0668073Z  39c8ce9a80d2 Downloading [==================================================>]     496B/496B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.0706926Z  d7ab9c0b242a Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.0707220Z  39c8ce9a80d2 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.0707453Z  39c8ce9a80d2 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.1197780Z  603858638485 Downloading [==================================================>]     970B/970B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.1198270Z  603858638485 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.1198502Z  603858638485 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.1198802Z  603858638485 Extracting [==================================================>]     970B/970B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.1203247Z  603858638485 Extracting [==================================================>]     970B/970B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.2844746Z  9cf33c25d575 Downloading [==================================================>]     116B/116B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3107373Z  9cf33c25d575 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3107868Z  9cf33c25d575 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3108179Z  34a3e2652f22 Downloading [>                                                  ]  15.79kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3150055Z  ae8ed6ddf5d2 Downloading [>                                                  ]  540.7kB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3160478Z  34a3e2652f22 Downloading [==================================================>]  900.3kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3160837Z  34a3e2652f22 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.3161110Z  34a3e2652f22 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.4847283Z  b1aad2d5f399 Downloading [=================>                                 ]  3.501kB/9.949kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.5027889Z  5635b2c7f90f Downloading [==================================================>]     128B/128B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.5455626Z  5635b2c7f90f Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.5456153Z  5635b2c7f90f Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.5462039Z  ae8ed6ddf5d2 Downloading [=========>                                         ]  21.06MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.5497631Z  b1aad2d5f399 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7261247Z  e5d94dfa43d9 Downloading [============================>                      ]  3.501kB/6.106kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7689660Z  4635b503f9b2 Downloading [==================================================>]     171B/171B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7698690Z  e5d94dfa43d9 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7698944Z  4635b503f9b2 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7699182Z  4635b503f9b2 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.7699486Z  ae8ed6ddf5d2 Downloading [========================>                          ]  55.05MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.9644534Z  7bd7d677a4b5 Downloading [==================================================>]     183B/183B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.9737870Z  7bd7d677a4b5 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.9738101Z  7bd7d677a4b5 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:22.9746163Z  ae8ed6ddf5d2 Downloading [========================>                          ]  56.13MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:23.1499635Z  ae8ed6ddf5d2 Downloading [============================>                      ]  64.74MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:23.2677251Z  ae8ed6ddf5d2 Downloading [======================================>            ]  85.76MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:23.3162549Z  ae8ed6ddf5d2 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:23.3162833Z  ae8ed6ddf5d2 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:24.2487881Z  603858638485 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:24.5979924Z  34a3e2652f22 Extracting [=>                                                 ]  32.77kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:25.4091513Z  34a3e2652f22 Extracting [==============>                                    ]  262.1kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:25.5286903Z  34a3e2652f22 Extracting [====================>                              ]  360.4kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:25.5332460Z  34a3e2652f22 Extracting [==================================================>]  900.3kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:25.5335111Z  34a3e2652f22 Extracting [==================================================>]  900.3kB/900.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2175561Z  8c577d69454d Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2175953Z  f5a655897537 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2176342Z  34a3e2652f22 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2184893Z  63e63047b377 Extracting [========>                                          ]  32.77kB/194.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2250698Z  9cf33c25d575 Extracting [==================================================>]     116B/116B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2251328Z  9cf33c25d575 Extracting [==================================================>]     116B/116B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2253112Z  546fbfcace65 Extracting [>                                                  ]  32.77kB/1.639MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2260494Z  63e63047b377 Extracting [==================================================>]  194.3kB/194.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2306670Z  9cf33c25d575 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2335588Z  63e63047b377 Extracting [==================================================>]  194.3kB/194.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2425420Z  ae8ed6ddf5d2 Extracting [>                                                  ]  557.1kB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.2683345Z  546fbfcace65 Extracting [==================================================>]  1.639MB/1.639MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.4386986Z  ae8ed6ddf5d2 Extracting [==>                                                ]  5.014MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5098290Z  546fbfcace65 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5110945Z  63e63047b377 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5112487Z  d0c8865a0302 Extracting [============>                                      ]  32.77kB/128.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5124044Z  d0c8865a0302 Extracting [==================================================>]  128.3kB/128.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5136881Z  627d9d06d3d0 Extracting [>                                                  ]  131.1kB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.5446817Z  ae8ed6ddf5d2 Extracting [=====>                                             ]  12.26MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.6102312Z  d0c8865a0302 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.6199877Z  cf67644788eb Extracting [>                                                  ]    426kB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.6200894Z  627d9d06d3d0 Extracting [=>                                                 ]  262.1kB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.6456092Z  ae8ed6ddf5d2 Extracting [==========>                                        ]   23.4MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.7209643Z  cf67644788eb Extracting [======>                                            ]  5.112MB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.7227354Z  627d9d06d3d0 Extracting [====================>                              ]  5.112MB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.7476762Z  ae8ed6ddf5d2 Extracting [===============>                                   ]  35.09MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.8249116Z  627d9d06d3d0 Extracting [==========================================>        ]  10.49MB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.8278128Z  cf67644788eb Extracting [=============>                                     ]   11.5MB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.8482363Z  ae8ed6ddf5d2 Extracting [====================>                              ]  45.12MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.8585871Z  627d9d06d3d0 Extracting [==================================================>]  12.41MB/12.41MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.9279888Z  cf67644788eb Extracting [=========================>                         ]   21.3MB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:26.9496568Z  ae8ed6ddf5d2 Extracting [========================>                          ]  54.59MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.0381560Z  cf67644788eb Extracting [=======================================>           ]  32.37MB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.0527085Z  ae8ed6ddf5d2 Extracting [==========================>                        ]  60.16MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.1138526Z  cf67644788eb Extracting [==================================================>]  41.32MB/41.32MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.1562725Z  ae8ed6ddf5d2 Extracting [===============================>                   ]  70.19MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.2691590Z  ae8ed6ddf5d2 Extracting [================================>                  ]  74.09MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.4145122Z  ae8ed6ddf5d2 Extracting [====================================>              ]  81.89MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.5483689Z  ae8ed6ddf5d2 Extracting [====================================>              ]     83MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.6509900Z  ae8ed6ddf5d2 Extracting [=======================================>           ]  88.57MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.7546355Z  ae8ed6ddf5d2 Extracting [===========================================>       ]  96.93MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:27.9223417Z  ae8ed6ddf5d2 Extracting [============================================>      ]  99.16MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:28.1008553Z  ae8ed6ddf5d2 Extracting [==================================================>]  112.4MB/112.4MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3254217Z  ae8ed6ddf5d2 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3254652Z  627d9d06d3d0 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3255093Z  cf67644788eb Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3264355Z  93ebed1aef27 Extracting [==================================================>]      99B/99B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3269394Z  93ebed1aef27 Extracting [==================================================>]      99B/99B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3329462Z  df0d0d229f33 Extracting [>                                                  ]  131.1kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3354534Z  b1aad2d5f399 Extracting [==================================================>]  9.949kB/9.949kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3361380Z  b1aad2d5f399 Extracting [==================================================>]  9.949kB/9.949kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3382212Z  93ebed1aef27 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3403487Z  4f4fb700ef54 Extracting [==================================================>]      32B/32B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3409566Z  4f4fb700ef54 Extracting [==================================================>]      32B/32B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3512473Z  b1aad2d5f399 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3623438Z  5635b2c7f90f Extracting [==================================================>]     128B/128B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3637614Z  5635b2c7f90f Extracting [==================================================>]     128B/128B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3652613Z  4f4fb700ef54 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3694329Z  db197c512a33 Extracting [==================================================>]     605B/605B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.3695082Z  db197c512a33 Extracting [==================================================>]     605B/605B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4353907Z  df0d0d229f33 Extracting [========================>                          ]  5.374MB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4734114Z  db197c512a33 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4735107Z  5635b2c7f90f Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4759983Z  4635b503f9b2 Extracting [==================================================>]     171B/171B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4765720Z  4635b503f9b2 Extracting [==================================================>]     171B/171B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.4820680Z  redis Pulled 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.5051097Z  df0d0d229f33 Extracting [==================================================>]  11.07MB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.6554306Z  4635b503f9b2 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.6554733Z  df0d0d229f33 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.6563749Z  62481e699c81 Extracting [>                                                  ]  32.77kB/2.402MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.6822102Z  e5d94dfa43d9 Extracting [==================================================>]  6.106kB/6.106kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.6823319Z  e5d94dfa43d9 Extracting [==================================================>]  6.106kB/6.106kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.7099780Z  62481e699c81 Extracting [==================================================>]  2.402MB/2.402MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8243564Z  62481e699c81 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8249555Z  e5d94dfa43d9 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8252076Z  68a66c893f7c Extracting [=========>                                         ]  32.77kB/180.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8263289Z  7bd7d677a4b5 Extracting [==================================================>]     183B/183B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8266707Z  7bd7d677a4b5 Extracting [==================================================>]     183B/183B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8366623Z  68a66c893f7c Extracting [==================================================>]  180.3kB/180.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8378701Z  68a66c893f7c Extracting [==================================================>]  180.3kB/180.3kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8491142Z  7bd7d677a4b5 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8498376Z  68a66c893f7c Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8512251Z  d7ab9c0b242a Extracting [==================================================>]  11.88kB/11.88kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8518864Z  d7ab9c0b242a Extracting [==================================================>]  11.88kB/11.88kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8562928Z  postgres Pulled 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8581064Z  d7ab9c0b242a Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8590778Z  39c8ce9a80d2 Extracting [==================================================>]     496B/496B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8594641Z  39c8ce9a80d2 Extracting [==================================================>]     496B/496B
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8671055Z  39c8ce9a80d2 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.8721134Z  minio Pulled 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:29.9465494Z #1 [internal] load local bake definitions
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1392269Z #1 reading from stdin 422B done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1392624Z #1 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1392737Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1392824Z #2 [internal] load build definition from Dockerfile
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1393014Z #2 transferring dockerfile: 728B done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1393161Z #2 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1393224Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.1393367Z #3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.3250208Z #3 ...
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.3250437Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.3250581Z #4 [auth] docker/dockerfile:pull token for registry-1.docker.io
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.3250786Z #4 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.4752708Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:30.4753467Z #3 resolve image config for docker-image://docker.io/docker/dockerfile:1
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.0817915Z #3 DONE 1.1s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1877129Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1878147Z #5 docker-image://docker.io/docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1878749Z #5 resolve docker.io/docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89 done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1879115Z #5 sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89 9.08kB / 9.08kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1879441Z #5 sha256:e82bbc85c3cb06cf2a5a27b058208b43984448acbcd6a832cd1491933d4376dd 1.13kB / 1.13kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1879763Z #5 sha256:1a998cca4d41cfecafb1989342c5e7378bc992589af7d47510c4b854bebfc7d7 1.33kB / 1.33kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.1880095Z #5 sha256:50ba52cd6a2c01eaf1a9efbedc7c75b5da5e3965c1586001c722980487a73fd7 13.63MB / 14.36MB 0.1s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.2883583Z #5 sha256:50ba52cd6a2c01eaf1a9efbedc7c75b5da5e3965c1586001c722980487a73fd7 14.36MB / 14.36MB 0.2s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.4150236Z #5 sha256:50ba52cd6a2c01eaf1a9efbedc7c75b5da5e3965c1586001c722980487a73fd7 14.36MB / 14.36MB 0.2s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.4150794Z #5 extracting sha256:50ba52cd6a2c01eaf1a9efbedc7c75b5da5e3965c1586001c722980487a73fd7 0.1s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.6507252Z #5 DONE 0.4s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.6507438Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.6507575Z #6 [internal] load metadata for docker.io/library/python:3.12-slim
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.8141182Z #6 ...
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.8141379Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.8141519Z #7 [auth] library/python:pull token for registry-1.docker.io
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.8141719Z #7 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.9644365Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:31.9645334Z #6 [internal] load metadata for docker.io/library/python:3.12-slim
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.3076058Z #6 DONE 0.8s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6491539Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6492024Z #8 [internal] load build context
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6492368Z #8 transferring context: 52.69kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6492599Z #8 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6492695Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6492998Z #9 [1/8] FROM docker.io/library/python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6493666Z #9 resolve docker.io/library/python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6494232Z #9 sha256:48347b15c85fd6dde9c5b0259f378fbaee3ce231b30a42f2f2bcc4ea0285cbc9 0B / 12.11MB 0.1s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6494746Z #9 sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de 10.37kB / 10.37kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6495250Z #9 sha256:cab2dbf575e971934a81e4622f5aba17aa7929719bd7e31033a3a83b97fd0464 1.75kB / 1.75kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6495578Z #9 sha256:25c5b8011a3425a140bf5fa73be0feabd3c0d5b323eecb19dc02437a368ae075 5.66kB / 5.66kB done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6495907Z #9 sha256:062e450697faa5f02a3a74eba9864ee4d79bc9cfbd65769fc6cdff2c05c6a053 11.53MB / 29.78MB 0.1s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.6496225Z #9 sha256:98db2485a0d07a8914586b02387e3813aa7e9fed79ab252898d3e96e21c717ea 0B / 1.29MB 0.1s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.8493449Z #9 sha256:48347b15c85fd6dde9c5b0259f378fbaee3ce231b30a42f2f2bcc4ea0285cbc9 12.11MB / 12.11MB 0.3s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.8493923Z #9 sha256:062e450697faa5f02a3a74eba9864ee4d79bc9cfbd65769fc6cdff2c05c6a053 29.78MB / 29.78MB 0.3s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.8494263Z #9 sha256:98db2485a0d07a8914586b02387e3813aa7e9fed79ab252898d3e96e21c717ea 1.29MB / 1.29MB 0.3s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.9681723Z #9 sha256:48347b15c85fd6dde9c5b0259f378fbaee3ce231b30a42f2f2bcc4ea0285cbc9 12.11MB / 12.11MB 0.4s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.9682585Z #9 sha256:98db2485a0d07a8914586b02387e3813aa7e9fed79ab252898d3e96e21c717ea 1.29MB / 1.29MB 0.4s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:32.9683481Z #9 extracting sha256:062e450697faa5f02a3a74eba9864ee4d79bc9cfbd65769fc6cdff2c05c6a053
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:33.0745991Z #9 sha256:062e450697faa5f02a3a74eba9864ee4d79bc9cfbd65769fc6cdff2c05c6a053 29.78MB / 29.78MB 0.4s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:33.1756935Z #9 sha256:fd079632edc0ab4e9d10c77ec348d5057a976e6fc508e93855548096dec2ae1e 250B / 250B 0.5s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:33.6030986Z #9 extracting sha256:062e450697faa5f02a3a74eba9864ee4d79bc9cfbd65769fc6cdff2c05c6a053 0.5s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:33.6031872Z #9 extracting sha256:98db2485a0d07a8914586b02387e3813aa7e9fed79ab252898d3e96e21c717ea 0.1s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:34.4585304Z #9 extracting sha256:48347b15c85fd6dde9c5b0259f378fbaee3ce231b30a42f2f2bcc4ea0285cbc9
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:34.9253689Z #9 extracting sha256:48347b15c85fd6dde9c5b0259f378fbaee3ce231b30a42f2f2bcc4ea0285cbc9 0.3s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.0673658Z #9 extracting sha256:fd079632edc0ab4e9d10c77ec348d5057a976e6fc508e93855548096dec2ae1e
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.2181304Z #9 extracting sha256:fd079632edc0ab4e9d10c77ec348d5057a976e6fc508e93855548096dec2ae1e done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.2926654Z #9 DONE 2.7s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.4440758Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.4441215Z #10 [2/8] WORKDIR /app
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.5705586Z #10 DONE 0.3s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.7214314Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.7215122Z #11 [3/8] RUN groupadd --system worker && useradd --system --gid worker --create-home worker
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:35.8533235Z #11 DONE 0.3s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0671506Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0671798Z #12 [4/8] COPY pyproject.toml README.md ./
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672060Z #12 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672135Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672211Z #13 [5/8] COPY apps/__init__.py apps/__init__.py
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672382Z #13 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672448Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672506Z #14 [6/8] COPY apps/api apps/api
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672646Z #14 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672708Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672770Z #15 [7/8] COPY apps/worker apps/worker
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672914Z #15 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0672975Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.0673046Z #16 [8/8] RUN pip install --no-cache-dir .
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:36.9133650Z #16 0.996 Processing /app
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:37.0657436Z #16 0.998   Installing build dependencies: started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:38.5852873Z #16 2.668   Installing build dependencies: finished with status 'done'
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:38.7361949Z #16 2.669   Getting requirements to build wheel: started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:38.9459785Z #16 3.029   Getting requirements to build wheel: finished with status 'done'
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.0972361Z #16 3.030   Preparing metadata (pyproject.toml): started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.3027276Z #16 3.386   Preparing metadata (pyproject.toml): finished with status 'done'
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.4172932Z #16 3.449 Collecting alembic==1.16.4 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.4173428Z #16 3.500   Downloading alembic-1.16.4-py3-none-any.whl.metadata (7.3 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.5993796Z #16 3.682 Collecting boto3==1.39.9 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7103937Z #16 3.692   Downloading boto3-1.39.9-py3-none-any.whl.metadata (6.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7104505Z #16 3.715 Collecting celery==5.5.3 (from celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7105123Z #16 3.724   Downloading celery-5.5.3-py3-none-any.whl.metadata (22 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7105502Z #16 3.765 Collecting fastapi==0.116.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7105879Z #16 3.775   Downloading fastapi-0.116.1-py3-none-any.whl.metadata (28 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.7106297Z #16 3.794 Collecting httpx==0.28.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.8104353Z #16 3.803   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.8105088Z #16 3.818 Collecting psycopg==3.2.9 (from psycopg[binary]==3.2.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.8105369Z #16 3.828   Downloading psycopg-3.2.9-py3-none-any.whl.metadata (4.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.8105603Z #16 3.883 Collecting pydantic==2.11.7 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:39.8105840Z #16 3.894   Downloading pydantic-2.11.7-py3-none-any.whl.metadata (67 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0470859Z #16 3.917 Collecting pydantic-settings==2.10.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0471470Z #16 3.928   Downloading pydantic_settings-2.10.1-py3-none-any.whl.metadata (3.4 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0471952Z #16 3.941 Collecting python-multipart==0.0.20 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0472418Z #16 3.950   Downloading python_multipart-0.0.20-py3-none-any.whl.metadata (1.8 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0473593Z #16 3.970 Collecting redis==5.2.1 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0473970Z #16 3.980   Downloading redis-5.2.1-py3-none-any.whl.metadata (9.1 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.0520991Z #16 4.135 Collecting sqlalchemy==2.0.41 (from sqlalchemy[asyncio]==2.0.41->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1544498Z #16 4.146   Downloading sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1545301Z #16 4.167 Collecting structlog==25.4.0 (from ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1545708Z #16 4.178   Downloading structlog-25.4.0-py3-none-any.whl.metadata (7.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1546136Z #16 4.198 Collecting uvicorn==0.35.0 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1546595Z #16 4.207   Downloading uvicorn-0.35.0-py3-none-any.whl.metadata (6.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1547014Z #16 4.228 Collecting Mako (from alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.1547395Z #16 4.238   Downloading mako-1.3.12-py3-none-any.whl.metadata (2.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.3285927Z #16 4.252 Collecting typing-extensions>=4.12 (from alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.3286497Z #16 4.261   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.3724453Z #16 4.455 Collecting botocore<1.40.0,>=1.39.9 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4760146Z #16 4.466   Downloading botocore-1.39.17-py3-none-any.whl.metadata (5.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4760529Z #16 4.479 Collecting jmespath<2.0.0,>=0.7.1 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4760802Z #16 4.488   Downloading jmespath-1.1.0-py3-none-any.whl.metadata (7.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4761069Z #16 4.504 Collecting s3transfer<0.14.0,>=0.13.0 (from boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4761343Z #16 4.513   Downloading s3transfer-0.13.1-py3-none-any.whl.metadata (1.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4761637Z #16 4.530 Collecting billiard<5.0,>=4.2.1 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4761964Z #16 4.539   Downloading billiard-4.2.4-py3-none-any.whl.metadata (4.8 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.4762242Z #16 4.559 Collecting kombu<5.6,>=5.5.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5795281Z #16 4.570   Downloading kombu-5.5.4-py3-none-any.whl.metadata (3.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5795841Z #16 4.584 Collecting vine<6.0,>=5.1.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5796290Z #16 4.593   Downloading vine-5.1.0-py3-none-any.whl.metadata (2.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5796720Z #16 4.609 Collecting click<9.0,>=8.1.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5797156Z #16 4.618   Downloading click-8.4.2-py3-none-any.whl.metadata (2.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5797638Z #16 4.632 Collecting click-didyoumean>=0.3.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5798172Z #16 4.641   Downloading click_didyoumean-0.3.1-py3-none-any.whl.metadata (3.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5798712Z #16 4.654 Collecting click-repl>=0.2.0 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.5799175Z #16 4.663   Downloading click_repl-0.3.0-py3-none-any.whl.metadata (3.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6907830Z #16 4.675 Collecting click-plugins>=1.1.1 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6908291Z #16 4.684   Downloading click_plugins-1.1.1.2-py2.py3-none-any.whl.metadata (6.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6908616Z #16 4.697 Collecting python-dateutil>=2.8.2 (from celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6908950Z #16 4.706   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6909249Z #16 4.729 Collecting starlette<0.48.0,>=0.40.0 (from fastapi==0.116.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6909526Z #16 4.739   Downloading starlette-0.47.3-py3-none-any.whl.metadata (6.2 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.6910189Z #16 4.774 Collecting anyio (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8746402Z #16 4.783   Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8746774Z #16 4.800 Collecting certifi (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8747027Z #16 4.810   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8747291Z #16 4.825 Collecting httpcore==1.* (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8747536Z #16 4.834   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8747773Z #16 4.848 Collecting idna (from httpx==0.28.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8747993Z #16 4.857   Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:40.8748258Z #16 4.958 Collecting psycopg-binary==3.2.9 (from psycopg[binary]==3.2.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.0561243Z #16 4.968   Downloading psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.0561818Z #16 4.980 Collecting annotated-types>=0.6.0 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.0562169Z #16 4.989   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.2616717Z #16 5.345 Collecting pydantic-core==2.33.2 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4093037Z #16 5.355   Downloading pydantic_core-2.33.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4093762Z #16 5.369 Collecting typing-inspection>=0.4.0 (from pydantic==2.11.7->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4094257Z #16 5.378   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4094730Z #16 5.412 Collecting python-dotenv>=0.21.0 (from pydantic-settings==2.10.1->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4095392Z #16 5.422   Downloading python_dotenv-1.2.2-py3-none-any.whl.metadata (27 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.4095888Z #16 5.492 Collecting greenlet>=1 (from sqlalchemy==2.0.41->sqlalchemy[asyncio]==2.0.41->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5322502Z #16 5.502   Downloading greenlet-3.5.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5323166Z #16 5.520 Collecting h11>=0.8 (from uvicorn==0.35.0->uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5323593Z #16 5.529   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5323998Z #16 5.550 Collecting httptools>=0.6.3 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5324577Z #16 5.560   Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (3.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5325250Z #16 5.583 Collecting pyyaml>=5.1 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5325641Z #16 5.592   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.5326030Z #16 5.615 Collecting uvloop>=0.15.1 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.6455252Z #16 5.625   Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (4.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.6455794Z #16 5.666 Collecting watchfiles>=0.13 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.6456148Z #16 5.676   Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.6456488Z #16 5.728 Collecting websockets>=10.4 (from uvicorn[standard]==0.35.0->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7495797Z #16 5.738   Downloading websockets-17.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7496588Z #16 5.767 Collecting urllib3!=2.2.0,<3,>=1.25.4 (from botocore<1.40.0,>=1.39.9->boto3==1.39.9->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7497627Z #16 5.777   Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7498184Z #16 5.805 Collecting prompt-toolkit>=3.0.36 (from click-repl>=0.2.0->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7498725Z #16 5.814   Downloading prompt_toolkit-3.0.53-py3-none-any.whl.metadata (6.4 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.7499187Z #16 5.833 Collecting amqp<6.0.0,>=5.1.1 (from kombu<5.6,>=5.5.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9725008Z #16 5.842   Downloading amqp-5.3.1-py3-none-any.whl.metadata (8.9 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9725483Z #16 5.857 Collecting tzdata>=2025.2 (from kombu<5.6,>=5.5.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9725808Z #16 5.867   Downloading tzdata-2026.3-py2.py3-none-any.whl.metadata (1.4 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9726119Z #16 5.880 Collecting packaging (from kombu<5.6,>=5.5.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9726454Z #16 5.890   Downloading packaging-26.2-py3-none-any.whl.metadata (3.5 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9726761Z #16 5.904 Collecting six>=1.5 (from python-dateutil>=2.8.2->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9727062Z #16 5.913   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:41.9727323Z #16 6.055 Collecting MarkupSafe>=0.9.2 (from Mako->alembic==1.16.4->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0757971Z #16 6.065   Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0758597Z #16 6.082 Collecting wcwidth>=0.1.4 (from prompt-toolkit>=3.0.36->click-repl>=0.2.0->celery==5.5.3->celery[redis]==5.5.3->ai-video-os==0.1.0)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0759026Z #16 6.092   Downloading wcwidth-0.8.2-py3-none-any.whl.metadata (43 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0759271Z #16 6.109 Downloading alembic-1.16.4-py3-none-any.whl (247 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0759510Z #16 6.129 Downloading boto3-1.39.9-py3-none-any.whl (139 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0759783Z #16 6.140 Downloading celery-5.5.3-py3-none-any.whl (438 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.0760002Z #16 6.159 Downloading fastapi-0.116.1-py3-none-any.whl (95 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1800968Z #16 6.169 Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1801342Z #16 6.179 Downloading psycopg-3.2.9-py3-none-any.whl (202 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1801565Z #16 6.190 Downloading pydantic-2.11.7-py3-none-any.whl (444 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1801798Z #16 6.203 Downloading pydantic_settings-2.10.1-py3-none-any.whl (45 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1802046Z #16 6.212 Downloading python_multipart-0.0.20-py3-none-any.whl (24 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1802267Z #16 6.221 Downloading redis-5.2.1-py3-none-any.whl (261 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1802554Z #16 6.233 Downloading sqlalchemy-2.0.41-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1803271Z #16 6.254    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 164.7 MB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.1803572Z #16 6.263 Downloading structlog-25.4.0-py3-none-any.whl (68 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2939978Z #16 6.273 Downloading uvicorn-0.35.0-py3-none-any.whl (66 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2940604Z #16 6.282 Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2941177Z #16 6.292 Downloading psycopg_binary-3.2.9-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.4 MB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2941945Z #16 6.304    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 375.0 MB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2942261Z #16 6.314 Downloading pydantic_core-2.33.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2942608Z #16 6.320    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 455.0 MB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2942847Z #16 6.330 Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2943070Z #16 6.339 Downloading billiard-4.2.4-py3-none-any.whl (87 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.2943762Z #16 6.349 Downloading botocore-1.39.17-py3-none-any.whl (13.9 MB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4025054Z #16 6.377    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.9/13.9 MB 524.6 MB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4025843Z #16 6.387 Downloading click-8.4.2-py3-none-any.whl (119 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4026380Z #16 6.396 Downloading click_didyoumean-0.3.1-py3-none-any.whl (3.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4026677Z #16 6.406 Downloading click_plugins-1.1.1.2-py2.py3-none-any.whl (11 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4026920Z #16 6.415 Downloading click_repl-0.3.0-py3-none-any.whl (10 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4027211Z #16 6.424 Downloading greenlet-3.5.4-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (621 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4027654Z #16 6.426    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 621.5/621.5 kB 1.3 GB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4027889Z #16 6.435 Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4028204Z #16 6.445 Downloading httptools-0.8.0-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (523 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4028575Z #16 6.457 Downloading jmespath-1.1.0-py3-none-any.whl (20 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4028781Z #16 6.467 Downloading kombu-5.5.4-py3-none-any.whl (210 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4028981Z #16 6.477 Downloading vine-5.1.0-py3-none-any.whl (9.6 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.4029217Z #16 6.486 Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5038625Z #16 6.495 Downloading python_dotenv-1.2.2-py3-none-any.whl (22 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5039077Z #16 6.505 Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5039717Z #16 6.507    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 1.3 GB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5039958Z #16 6.516 Downloading s3transfer-0.13.1-py3-none-any.whl (85 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5040205Z #16 6.525 Downloading starlette-0.47.3-py3-none-any.whl (72 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5040455Z #16 6.535 Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5040671Z #16 6.544 Downloading idna-3.18-py3-none-any.whl (65 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5040891Z #16 6.553 Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5041135Z #16 6.562 Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5041461Z #16 6.571 Downloading uvloop-0.22.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (4.4 MB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5041833Z #16 6.578    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.4/4.4 MB 866.6 MB/s eta 0:00:00
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.5042142Z #16 6.587 Downloading watchfiles-1.2.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (456 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6057714Z #16 6.596 Downloading websockets-17.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (220 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6058135Z #16 6.606 Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6058388Z #16 6.615 Downloading mako-1.3.12-py3-none-any.whl (78 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6058632Z #16 6.624 Downloading amqp-5.3.1-py3-none-any.whl (50 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6058945Z #16 6.633 Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6059278Z #16 6.642 Downloading prompt_toolkit-3.0.53-py3-none-any.whl (392 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6059501Z #16 6.653 Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6059747Z #16 6.662 Downloading tzdata-2026.3-py2.py3-none-any.whl (348 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6060085Z #16 6.671 Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6060375Z #16 6.680 Downloading packaging-26.2-py3-none-any.whl (100 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.6060706Z #16 6.689 Downloading wcwidth-0.8.2-py3-none-any.whl (323 kB)
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.8045932Z #16 6.737 Building wheels for collected packages: ai-video-os
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:42.8046348Z #16 6.737   Building wheel for ai-video-os (pyproject.toml): started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:43.0279551Z #16 7.111   Building wheel for ai-video-os (pyproject.toml): finished with status 'done'
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:43.2286735Z #16 7.111   Created wheel for ai-video-os: filename=ai_video_os-0.1.0-py3-none-any.whl size=24131 sha256=d2161bafc915f747ecc89e511fa7a62d8ac26b52442404a89fde9bb9958d156c
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:43.2287359Z #16 7.112   Stored in directory: /tmp/pip-ephem-wheel-cache-kik_oo8c/wheels/54/1b/b7/aa63e25c8f14f4f2ae7b04e6097bdecb770e455c5c1ee0a600
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:43.2287675Z #16 7.113 Successfully built ai-video-os
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:43.2288740Z #16 7.161 Installing collected packages: websockets, wcwidth, vine, uvloop, urllib3, tzdata, typing-extensions, structlog, six, redis, pyyaml, python-multipart, python-dotenv, psycopg-binary, packaging, MarkupSafe, jmespath, idna, httptools, h11, greenlet, click, certifi, billiard, annotated-types, uvicorn, typing-inspection, sqlalchemy, python-dateutil, pydantic-core, psycopg, prompt-toolkit, Mako, httpcore, click-plugins, click-didyoumean, anyio, amqp, watchfiles, starlette, pydantic, kombu, httpx, click-repl, botocore, alembic, s3transfer, pydantic-settings, fastapi, celery, boto3, ai-video-os
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:47.4173981Z #16 11.50 Successfully installed Mako-1.3.12 MarkupSafe-3.0.3 ai-video-os-0.1.0 alembic-1.16.4 amqp-5.3.1 annotated-types-0.8.0 anyio-4.14.2 billiard-4.2.4 boto3-1.39.9 botocore-1.39.17 celery-5.5.3 certifi-2026.7.22 click-8.4.2 click-didyoumean-0.3.1 click-plugins-1.1.1.2 click-repl-0.3.0 fastapi-0.116.1 greenlet-3.5.4 h11-0.16.0 httpcore-1.0.9 httptools-0.8.0 httpx-0.28.1 idna-3.18 jmespath-1.1.0 kombu-5.5.4 packaging-26.2 prompt-toolkit-3.0.53 psycopg-3.2.9 psycopg-binary-3.2.9 pydantic-2.11.7 pydantic-core-2.33.2 pydantic-settings-2.10.1 python-dateutil-2.9.0.post0 python-dotenv-1.2.2 python-multipart-0.0.20 pyyaml-6.0.3 redis-5.2.1 s3transfer-0.13.1 six-1.17.0 sqlalchemy-2.0.41 starlette-0.47.3 structlog-25.4.0 typing-extensions-4.16.0 typing-inspection-0.4.2 tzdata-2026.3 urllib3-2.7.0 uvicorn-0.35.0 uvloop-0.22.1 vine-5.1.0 watchfiles-1.2.0 wcwidth-0.8.2 websockets-17.0.1
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:47.5675116Z #16 11.50 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:48.9185170Z #16 DONE 13.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:49.0314132Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:49.0314689Z #17 exporting to image
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:49.0315074Z #17 exporting layers
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.0614930Z #17 exporting layers 1.0s done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.2164600Z #17 writing image sha256:0503d1e232423d39051df21b6c5d37f30c26113030e5da10afbdfa2f895f243e done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.2165193Z #17 naming to docker.io/library/ai-video-os-celery-worker done
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.2165434Z #17 DONE 1.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.4254656Z 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.4255340Z #18 resolving provenance for metadata file
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.4323216Z #18 DONE 0.0s
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.4323907Z  celery-worker  Built
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.4333425Z  Network ai-video-os_default  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5242932Z  Network ai-video-os_default  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5247747Z  Volume "ai-video-os_minio_data"  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5259404Z  Volume "ai-video-os_minio_data"  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5261514Z  Volume "ai-video-os_postgres_data"  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5268743Z  Volume "ai-video-os_postgres_data"  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5270966Z  Volume "ai-video-os_redis_data"  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5282246Z  Volume "ai-video-os_redis_data"  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5286976Z  Container ai-video-os-redis-1  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5287253Z  Container ai-video-os-minio-1  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5287509Z  Container ai-video-os-postgres-1  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5490538Z  Container ai-video-os-minio-1  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5491654Z  Container ai-video-os-postgres-1  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5493678Z  Container ai-video-os-redis-1  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.5494174Z  Container ai-video-os-celery-worker-1  Creating
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.6012064Z  Container ai-video-os-celery-worker-1  Created
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.6022240Z  Container ai-video-os-minio-1  Starting
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.6024269Z  Container ai-video-os-redis-1  Starting
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:50.6024535Z  Container ai-video-os-postgres-1  Starting
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:51.2253277Z  Container ai-video-os-redis-1  Started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:51.2253577Z  Container ai-video-os-redis-1  Waiting
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:51.2253866Z  Container ai-video-os-minio-1  Started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:51.2268842Z  Container ai-video-os-postgres-1  Started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:56.7271475Z  Container ai-video-os-redis-1  Healthy
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:56.7271897Z  Container ai-video-os-celery-worker-1  Starting
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:57.0697142Z  Container ai-video-os-celery-worker-1  Started
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:57.1344207Z  Container ai-video-os-minio-1  Running
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:57.1361272Z  minio-init Pulling 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1770844Z  d949f716ce77 Already exists 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1782106Z  8c577d69454d Already exists 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1797796Z  3a3fd2aa552d Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1798306Z  8242a3e5dca2 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1798486Z  2566c79cc301 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1798691Z  5d145a3de6f4 Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1798888Z  4da90d54f1de Pulling fs layer 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1799091Z  5d145a3de6f4 Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.1799214Z  4da90d54f1de Waiting 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3787521Z  3a3fd2aa552d Downloading [=>                                                 ]  3.529kB/129.9kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3800838Z  8242a3e5dca2 Downloading [==>                                                ]  3.501kB/70.45kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3810716Z  3a3fd2aa552d Downloading [==================================================>]  129.9kB/129.9kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3811991Z  3a3fd2aa552d Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3815015Z  3a3fd2aa552d Extracting [============>                                      ]  32.77kB/129.9kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3815650Z  8242a3e5dca2 Downloading [==================================================>]  70.45kB/70.45kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3816172Z  8242a3e5dca2 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3816558Z  8242a3e5dca2 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3822924Z  3a3fd2aa552d Extracting [==================================================>]  129.9kB/129.9kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3825535Z  3a3fd2aa552d Extracting [==================================================>]  129.9kB/129.9kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3839670Z  2566c79cc301 Downloading [==============>                                    ]    3.5kB/11.87kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3840154Z  2566c79cc301 Downloading [==================================================>]  11.87kB/11.87kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3840426Z  2566c79cc301 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.3840614Z  2566c79cc301 Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.4168417Z  3a3fd2aa552d Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.4469244Z  8242a3e5dca2 Extracting [=======================>                           ]  32.77kB/70.45kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.4474001Z  8242a3e5dca2 Extracting [==================================================>]  70.45kB/70.45kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.4478643Z  8242a3e5dca2 Extracting [==================================================>]  70.45kB/70.45kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.5257392Z  8242a3e5dca2 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.5658642Z  5d145a3de6f4 Downloading [>                                                  ]    114kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.5667626Z  2566c79cc301 Extracting [==================================================>]  11.87kB/11.87kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.5673282Z  2566c79cc301 Extracting [==================================================>]  11.87kB/11.87kB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.5890150Z  4da90d54f1de Downloading [>                                                  ]    114kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.6164318Z  5d145a3de6f4 Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.6191682Z  4da90d54f1de Verifying Checksum 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.6191880Z  4da90d54f1de Download complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.7458995Z  2566c79cc301 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.7479849Z  5d145a3de6f4 Extracting [>                                                  ]  131.1kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:58.8455796Z  5d145a3de6f4 Extracting [==================================================>]  11.07MB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.2211522Z  5d145a3de6f4 Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.2231444Z  4da90d54f1de Extracting [>                                                  ]  131.1kB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.3234016Z  4da90d54f1de Extracting [=============================>                     ]  6.554MB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.3595349Z  4da90d54f1de Extracting [==================================================>]  11.07MB/11.07MB
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.5658915Z  4da90d54f1de Pull complete 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:58:59.8652290Z  minio-init Pulled 
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:59:00.7188647Z Added `local` successfully.
+Development Environment Acceptance	Start infrastructure	2026-08-02T08:59:00.7296369Z Bucket created successfully `local/ai-video-os-assets`.
+Development Environment Acceptance	Run migrations	﻿2026-08-02T08:59:01.0054146Z ##[group]Run alembic upgrade head
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0054449Z ^[[36;1malembic upgrade head^[[0m
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099175Z shell: /usr/bin/bash -e {0}
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099340Z env:
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099457Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099603Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099750Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0099904Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0100038Z   APP_ENV: test
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0100615Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0100790Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0100954Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0101145Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0101378Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0101616Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0101822Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0102060Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0102267Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.0102444Z ##[endgroup]
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.9558622Z INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.9565664Z INFO  [alembic.runtime.migration] Will assume transactional DDL.
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.9676807Z INFO  [alembic.runtime.migration] Running upgrade  -> 20260802_0001, Establish the PostgreSQL migration baseline.
+Development Environment Acceptance	Run migrations	2026-08-02T08:59:01.9687532Z INFO  [alembic.runtime.migration] Running upgrade 20260802_0001 -> 20260802_0002, Add asset metadata foundation.
+Development Environment Acceptance	Start API	﻿2026-08-02T08:59:02.0583197Z ##[group]Run uvicorn apps.api.main:app --host 127.0.0.1 --port 8000 &
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0583512Z ^[[36;1muvicorn apps.api.main:app --host 127.0.0.1 --port 8000 &^[[0m
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0583702Z ^[[36;1msleep 10^[[0m
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619137Z shell: /usr/bin/bash -e {0}
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619288Z env:
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619406Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619549Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619695Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619834Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0619967Z   APP_ENV: test
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0620372Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0620540Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0620705Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0620899Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0621128Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0621380Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0621744Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0621950Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0622158Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+Development Environment Acceptance	Start API	2026-08-02T08:59:02.0622338Z ##[endgroup]
+Development Environment Acceptance	Start API	2026-08-02T08:59:03.2802409Z INFO:     Started server process [3364]
+Development Environment Acceptance	Start API	2026-08-02T08:59:03.2802796Z INFO:     Waiting for application startup.
+Development Environment Acceptance	Start API	2026-08-02T08:59:03.2851421Z {"version": "0.1.0", "event": "application_started", "level": "info", "timestamp": "2026-08-02T08:59:03.284987Z", "service": "ai-video-os-api", "environment": "test", "message": "application_started", "request_id": null}
+Development Environment Acceptance	Start API	2026-08-02T08:59:03.2851900Z INFO:     Application startup complete.
+Development Environment Acceptance	Start API	2026-08-02T08:59:03.2855161Z INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+Development Environment Acceptance	Run Acceptance Suite	﻿2026-08-02T08:59:17.0731107Z ##[group]Run python scripts/acceptance_suite.py
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0731343Z ^[[36;1mpython scripts/acceptance_suite.py^[[0m
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0765751Z shell: /usr/bin/bash -e {0}
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0765898Z env:
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766015Z   MINIO_ROOT_USER: minioadmin
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766157Z   MINIO_ROOT_PASSWORD: minioadmin
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766303Z   STORAGE_ACCESS_KEY: minioadmin
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766442Z   STORAGE_SECRET_KEY: minioadmin
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766576Z   APP_ENV: test
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0766965Z   DATABASE_URL: ***127.0.0.1:5432/ai_video_os
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0767140Z   REDIS_URL: redis://127.0.0.1:6379/0
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0767302Z   STORAGE_ENDPOINT_URL: http://127.0.0.1:9000
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0767491Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0767722Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib/pkgconfig
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0767949Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0768177Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0768384Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.13/x64
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0768598Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.13/x64/lib
+Development Environment Acceptance	Run Acceptance Suite	2026-08-02T08:59:17.0768775Z ##[endgroup]
+Development Environment Acceptance	Post Set up Python	﻿2026-08-02T08:59:17.1048117Z Post job cleanup.
+Development Environment Acceptance	Post Set up Python	2026-08-02T08:59:17.1824040Z Cache hit occurred on the primary key setup-python-Linux-x64-24.04-Ubuntu-python-3.12.13-pip-81c78b9de54a8cb70032d0bf4c47b11a88d5b9c618551842afedca95dc0b32ef, not saving cache.
+Development Environment Acceptance	Post Check out repository	﻿2026-08-02T08:59:17.1927956Z Post job cleanup.
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2445911Z [command]/usr/bin/git version
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2476606Z git version 2.54.0
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2502021Z Temporarily overriding HOME='/home/runner/work/_temp/d421968c-d42f-4c47-9b4c-851c310c86c0' before making global git config changes
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2502691Z Adding repository directory to the temporary git global config as a safe directory
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2505943Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/AI-Video-OS/AI-Video-OS
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2532813Z Removing SSH command configuration
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2537079Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2589820Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2787711Z Removing HTTP extra header
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2788398Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.2819298Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3010658Z Removing includeIf entries pointing to credentials config files
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3016689Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3040349Z includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3041104Z includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git/worktrees/*.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3041346Z includeif.gitdir:/github/workspace/.git.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3041555Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3048765Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3069782Z /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3078901Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git.path /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3110544Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git/worktrees/*.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3131310Z /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3138473Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/AI-Video-OS/AI-Video-OS/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3166909Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3186981Z /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3192866Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3723791Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3747665Z /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3754450Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3788716Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Development Environment Acceptance	Post Check out repository	2026-08-02T08:59:17.3972343Z Removing credentials config '/home/runner/work/_temp/git-credentials-1e8aec62-a3db-47ca-8580-aded253f0d28.config'
+Development Environment Acceptance	Complete job	﻿2026-08-02T08:59:17.4111121Z Cleaning up orphan processes
+Development Environment Acceptance	Complete job	2026-08-02T08:59:17.4421169Z Terminate orphan process: pid (3364) (uvicorn)
