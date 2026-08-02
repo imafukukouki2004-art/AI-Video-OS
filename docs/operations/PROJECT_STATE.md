@@ -8,8 +8,8 @@
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
 | Current task | TICKET-008 — Development Environment Acceptance (Pilot) |
-| TICKET-008 Status | In Review / Celery Acceptance Pending |
-| Blocking Condition | Celery Worker and broker integration have not yet been verified |
+| TICKET-008 Status | In Review / Acceptance Verified |
+| Blocking Condition | None |
 | Planning progress | 100% |
 | Implementation progress | Approximately 65% |
 | Next technology review | TR-02 after Milestone M4 — AI Content Pipeline Complete |
@@ -41,9 +41,6 @@ The following decisions were formalized during the final TR-01 review.
 - **Development Environment Acceptance Suite**: Automated integration verification.
 - **Branch Protection and Required Checks**: Enforced via CI and PR workflow.
 - **GitHub-native Secret Protection**: Use of GitHub Secrets for sensitive data.
-- **Actions SHA Pinning**: Security hardening for CI workflows.
-- **Dependabot**: Automated dependency updates.
-- **Development Command / Documentation整理**: Unified CLI and docs.
 
 ### Deferred / Post-M1 Evaluation
 - **TP-002: GitHub Plugin Workflow**: Defer.
@@ -56,15 +53,19 @@ The following decisions were formalized during the final TR-01 review.
 - **TP-006: Test Support Tool**: SPIKE-TECH-002 assigned.
 - **TP-009: Manus Implementation Agent**: SPIKE-TECH-003 assigned.
 
-### Rejected / Not Adopted
-- *None at this stage.*
+### Technical Backlog
+- **Actions SHA Pinning**: Security hardening for CI workflows.
+- **Dependabot**: Automated dependency updates.
+- **Development Command / Documentation整理**: Unified CLI and docs.
 
-### Research Spikes
-- **SPIKE-TECH-001**: Documentation Automation
-- **SPIKE-TECH-002**: Test Support Tool
-- **SPIKE-TECH-003**: Manus Implementation Agent Pilot (Current)
+### Rejected / Not Adopted
+- **External Coverage Service**: Not adopted for M1.
+- **Additional Test Framework**: Not adopted for M1.
+- **CD (Continuous Deployment)**: Out of scope for TR-01.
+- **Kubernetes**: Out of scope for TR-01.
+- **Production Environment / Product Features**: Not included in TR-01 scope.
 
 ### Pilot and PR Status
-- **Manus Pilot**: SPIKE-TECH-003 — In Progress / Conditional Pass
-- **Pull Request**: PR #9 — Draft / Changes Required
+- **Manus Pilot**: SPIKE-TECH-003 — In Progress / Conditional Adopt
+- **Pull Request**: PR #9 — Draft / Acceptance Verified
 - **Issue #8**: Open
