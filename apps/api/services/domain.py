@@ -10,6 +10,7 @@ from apps.api.domain.models import (
     Video,
     Workflow,
     WorkflowExecution,
+    WorkflowExecutionHistory,
     WorkflowStep,
 )
 from apps.api.domain.schemas import (
@@ -19,12 +20,14 @@ from apps.api.domain.schemas import (
     VideoCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
+    WorkflowExecutionHistoryCreate,
     WorkflowStepCreate,
 )
 from apps.api.repositories import (
     JobRepository,
     ProjectRepository,
     VideoRepository,
+    WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -87,3 +90,20 @@ class WorkflowExecutionService(BaseService[WorkflowExecution, WorkflowExecutionC
     async def list_by_workflow(self, workflow_id: UUID) -> Sequence[WorkflowExecution]:
         repo = cast(WorkflowExecutionRepository, self.repository)
         return await repo.list_by_workflow(workflow_id)
+
+
+class WorkflowExecutionHistoryService(
+    BaseService[WorkflowExecutionHistory, WorkflowExecutionHistoryCreate, Any]
+):
+    """Service for workflow execution audit trails."""
+
+    def __init__(self, repository: WorkflowExecutionHistoryRepository) -> None:
+        super().__init__(repository)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowExecutionHistory]:
+        repo = cast(WorkflowExecutionHistoryRepository, self.repository)
+        return await repo.list_by_execution(execution_id)
+
+    async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowExecutionHistory]:
+        repo = cast(WorkflowExecutionHistoryRepository, self.repository)
+        return await repo.list_by_step(step_id)

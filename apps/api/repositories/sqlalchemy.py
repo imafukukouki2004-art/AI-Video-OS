@@ -13,6 +13,7 @@ from apps.api.domain.models import (
     Video,
     Workflow,
     WorkflowExecution,
+    WorkflowExecutionHistory,
     WorkflowStep,
 )
 from apps.api.domain.schemas import (
@@ -22,6 +23,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
+    WorkflowExecutionHistoryCreate,
     WorkflowStepCreate,
 )
 
@@ -125,5 +127,28 @@ class WorkflowExecutionRepository(
     async def list_by_workflow(self, workflow_id: UUID) -> Sequence[WorkflowExecution]:
         result = await self.session.execute(
             select(self.model).where(self.model.workflow_id == workflow_id)
+        )
+        return result.scalars().all()
+
+
+class WorkflowExecutionHistoryRepository(
+    SQLAlchemyRepository[WorkflowExecutionHistory, WorkflowExecutionHistoryCreate, Any]
+):
+    def __init__(self, session: AsyncSession) -> None:
+        super().__init__(session, WorkflowExecutionHistory)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowExecutionHistory]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_execution_id == execution_id)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
+    async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowExecutionHistory]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_step_id == step_id)
+            .order_by(self.model.created_at)
         )
         return result.scalars().all()

@@ -195,3 +195,29 @@ class WorkflowExecution(Base):
     jobs: Mapped[list["Job"]] = relationship(
         back_populates="execution", cascade="all, delete-orphan"
     )
+    history: Mapped[list["WorkflowExecutionHistory"]] = relationship(
+        back_populates="execution", cascade="all, delete-orphan"
+    )
+
+
+class WorkflowExecutionHistory(Base):
+    """Audit trail of state transitions for a workflow execution."""
+
+    __tablename__ = "workflow_execution_history"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_execution_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=False
+    )
+    workflow_step_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_steps.id"), nullable=True
+    )
+    from_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    to_status: Mapped[str] = mapped_column(String(50), nullable=False)
+    message: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+
+    execution: Mapped["WorkflowExecution"] = relationship(back_populates="history")
+    step: Mapped["WorkflowStep | None"] = relationship()

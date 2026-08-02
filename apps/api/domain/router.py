@@ -9,6 +9,7 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowExecutionHistoryServiceDependency,
     WorkflowExecutionServiceDependency,
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
@@ -24,6 +25,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     VideoResponse,
     WorkflowCreate,
+    WorkflowExecutionHistoryResponse,
     WorkflowExecutionResponse,
     WorkflowResponse,
     WorkflowStepResponse,
@@ -161,6 +163,18 @@ async def get_workflow_execution(
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return WorkflowExecutionResponse.model_validate(execution)
+
+
+@router.get(
+    "/workflow-executions/{execution_id}/history",
+    response_model=list[WorkflowExecutionHistoryResponse],
+)
+async def list_execution_history(
+    execution_id: UUID, service: WorkflowExecutionHistoryServiceDependency
+) -> list[WorkflowExecutionHistoryResponse]:
+    """Retrieve the audit trail for a specific execution."""
+    history = await service.list_by_execution(execution_id)
+    return [WorkflowExecutionHistoryResponse.model_validate(h) for h in history]
 
 
 # --- Jobs ---

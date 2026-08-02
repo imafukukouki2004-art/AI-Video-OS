@@ -13,6 +13,7 @@ from apps.api.repositories import (
     JobRepository,
     ProjectRepository,
     VideoRepository,
+    WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -21,6 +22,7 @@ from apps.api.services import (
     JobService,
     ProjectService,
     VideoService,
+    WorkflowExecutionHistoryService,
     WorkflowExecutionService,
     WorkflowRuntimeService,
     WorkflowService,
@@ -120,6 +122,17 @@ WorkflowExecutionRepositoryDependency = Annotated[
 ]
 
 
+def get_workflow_execution_history_repository(
+    session: DatabaseSessionDependency,
+) -> WorkflowExecutionHistoryRepository:
+    return WorkflowExecutionHistoryRepository(session)
+
+
+WorkflowExecutionHistoryRepositoryDependency = Annotated[
+    WorkflowExecutionHistoryRepository, Depends(get_workflow_execution_history_repository)
+]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -168,13 +181,25 @@ WorkflowExecutionServiceDependency = Annotated[
 ]
 
 
+def get_workflow_execution_history_service(
+    repo: WorkflowExecutionHistoryRepositoryDependency,
+) -> WorkflowExecutionHistoryService:
+    return WorkflowExecutionHistoryService(repo)
+
+
+WorkflowExecutionHistoryServiceDependency = Annotated[
+    WorkflowExecutionHistoryService, Depends(get_workflow_execution_history_service)
+]
+
+
 def get_workflow_runtime_service(
     workflow_repo: WorkflowRepositoryDependency,
     job_repo: JobRepositoryDependency,
     execution_repo: WorkflowExecutionRepositoryDependency,
     step_repo: WorkflowStepRepositoryDependency,
+    history_repo: WorkflowExecutionHistoryRepositoryDependency,
 ) -> WorkflowRuntimeService:
-    return WorkflowRuntimeService(workflow_repo, job_repo, execution_repo, step_repo)
+    return WorkflowRuntimeService(workflow_repo, job_repo, execution_repo, step_repo, history_repo)
 
 
 WorkflowRuntimeServiceDependency = Annotated[

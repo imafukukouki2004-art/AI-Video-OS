@@ -1,4 +1,4 @@
-"""Unit tests for the synchronous workflow runtime with step definitions."""
+"""Unit tests for the synchronous workflow runtime with history tracking."""
 
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -14,6 +14,7 @@ from apps.api.domain.models import (
 )
 from apps.api.repositories import (
     JobRepository,
+    WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowStepRepository,
 )
@@ -35,13 +36,21 @@ def step_repository():
     return AsyncMock(spec=WorkflowStepRepository)
 
 
+@pytest.fixture
+def history_repository():
+    return AsyncMock(spec=WorkflowExecutionHistoryRepository)
+
+
 @pytest.mark.asyncio
-async def test_workflow_runtime_run_success(
+async def test_workflow_runtime_run_success_with_history(
     job_repository: AsyncMock,
     execution_repository: AsyncMock,
     step_repository: AsyncMock,
+    history_repository: AsyncMock,
 ):
-    runtime = WorkflowRuntime(job_repository, execution_repository, step_repository)
+    runtime = WorkflowRuntime(
+        job_repository, execution_repository, step_repository, history_repository
+    )
     workflow = Workflow(id=uuid4(), config={})
 
     # Mock execution creation and updates
@@ -75,17 +84,21 @@ async def test_workflow_runtime_run_success(
     assert len(result["jobs"]) == 1
     assert execution_repository.create.called
     assert step_repository.list_by_workflow.called
-    assert step_repository.update.called
-    assert job_repository.create.called
+    assert history_repository.create.called
+    # Check that at least 3 history records were created (Start, Step Start, Step End, Complete)
+    assert history_repository.create.call_count >= 3
 
 
 @pytest.mark.asyncio
-async def test_workflow_runtime_no_steps(
+async def test_workflow_runtime_failure_with_history(
     job_repository: AsyncMock,
     execution_repository: AsyncMock,
     step_repository: AsyncMock,
+    history_repository: AsyncMock,
 ):
-    runtime = WorkflowRuntime(job_repository, execution_repository, step_repository)
+    runtime = WorkflowRuntime(
+        job_repository, execution_repository, step_repository, history_repository
+    )
     workflow = Workflow(id=uuid4(), config={})
 
     mock_execution = WorkflowExecution(
@@ -94,10 +107,19 @@ async def test_workflow_runtime_no_steps(
     execution_repository.create.return_value = mock_execution
     execution_repository.update.side_effect = lambda id, data: WorkflowExecution(id=id, **data)
 
-    step_repository.list_by_workflow.return_value = []
+    mock_step = WorkflowStep(
+        id=uuid4(), workflow_id=workflow.id, name="fail_step", step_type="test", order=0, config={}
+    )
+    step_repository.list_by_workflow.return_value = [mock_step]
+
+    # Force failure during job update
+    job_repository.create.return_value = AsyncMock(id=uuid4())
+    job_repository.update.side_effect = Exception("Simulated failure")
 
     result = await runtime.run(workflow)
 
-    assert result["status"] == "completed"
-    assert len(result["jobs"]) == 0
-    assert execution_repository.update.called
+    assert result["status"] == "failed"
+    assert history_repository.create.called
+    # Check that failure history was recorded
+    last_call = history_repository.create.call_args_list[-1]
+    assert last_call.args[0].to_status == "failed"

@@ -8,6 +8,7 @@ from fastapi import status
 from apps.api.errors.exceptions import ApplicationError
 from apps.api.repositories import (
     JobRepository,
+    WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -24,9 +25,12 @@ class WorkflowRuntimeService:
         job_repository: JobRepository,
         execution_repository: WorkflowExecutionRepository,
         step_repository: WorkflowStepRepository,
+        history_repository: WorkflowExecutionHistoryRepository,
     ) -> None:
         self.workflow_repository = workflow_repository
-        self.runtime = WorkflowRuntime(job_repository, execution_repository, step_repository)
+        self.runtime = WorkflowRuntime(
+            job_repository, execution_repository, step_repository, history_repository
+        )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:
         """Trigger synchronous execution of a workflow."""

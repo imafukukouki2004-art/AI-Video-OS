@@ -137,3 +137,22 @@ class WorkflowStepResponse(WorkflowStepBase):
     workflow_id: UUID
     created_at: datetime
     updated_at: datetime
+
+
+class WorkflowExecutionHistoryBase(BaseModel):
+    workflow_execution_id: UUID
+    workflow_step_id: UUID | None = None
+    from_status: str
+    to_status: str
+    message: str | None = None
+
+
+class WorkflowExecutionHistoryCreate(WorkflowExecutionHistoryBase):
+    pass
+
+
+class WorkflowExecutionHistoryResponse(WorkflowExecutionHistoryBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    created_at: datetime
