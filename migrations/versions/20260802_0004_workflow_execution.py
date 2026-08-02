@@ -19,12 +19,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Ensure enum type exists with correct values
-    op.execute("DROP TYPE IF EXISTS workflowexecutionstatus CASCADE")
-    op.execute(
-        "CREATE TYPE workflowexecutionstatus AS ENUM ('pending', 'running', 'completed', 'failed')"
-    )
-
     # Create workflow_executions table
     op.create_table(
         "workflow_executions",
@@ -32,7 +26,14 @@ def upgrade() -> None:
         sa.Column("workflow_id", sa.UUID(), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("PENDING", "RUNNING", "COMPLETED", "FAILED", name="workflowexecutionstatus"),
+            sa.Enum(
+                "PENDING",
+                "RUNNING",
+                "COMPLETED",
+                "FAILED",
+                name="workflowexecutionstatus",
+                create_type=True,
+            ),
             nullable=False,
         ),
         sa.Column("started_at", sa.DateTime(timezone=True), nullable=True),
