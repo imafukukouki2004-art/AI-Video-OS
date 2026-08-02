@@ -19,14 +19,6 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    # Create workflow_step_status enum if not exists
-    op.execute(
-        "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'workflowstepstatus') "
-        "THEN CREATE TYPE workflowstepstatus AS ENUM "
-        "('pending', 'running', 'completed', 'failed'); "
-        "END IF; END $$;"
-    )
-
     # Create workflow_steps table
     op.create_table(
         "workflow_steps",
@@ -38,7 +30,14 @@ def upgrade() -> None:
         sa.Column("config", sa.dialects.postgresql.JSONB(astext_type=sa.Text()), nullable=False),
         sa.Column(
             "status",
-            sa.Enum("PENDING", "RUNNING", "COMPLETED", "FAILED", name="workflowstepstatus"),
+            sa.Enum(
+                "PENDING",
+                "RUNNING",
+                "COMPLETED",
+                "FAILED",
+                name="workflowstepstatus",
+                create_type=True,
+            ),
             nullable=False,
         ),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
