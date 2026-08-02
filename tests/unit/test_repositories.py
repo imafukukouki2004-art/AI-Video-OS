@@ -6,9 +6,18 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.api.domain.models import Project, ProjectStatus
-from apps.api.domain.schemas import ProjectCreate, ProjectUpdate
-from apps.api.repositories.sqlalchemy import ProjectRepository
+from apps.api.domain.models import Job, Project, ProjectStatus, Video, Workflow
+from apps.api.domain.schemas import (
+    ProjectCreate,
+    ProjectUpdate,
+    VideoCreate,
+)
+from apps.api.repositories.sqlalchemy import (
+    JobRepository,
+    ProjectRepository,
+    VideoRepository,
+    WorkflowRepository,
+)
 
 
 @pytest.fixture
@@ -21,12 +30,10 @@ async def test_project_repository_create(session: AsyncMock):
     repo = ProjectRepository(session)
     project_in = ProjectCreate(name="Test Project")
 
-    # Mock refresh to set ID
     def mock_refresh(obj):
         obj.id = uuid4()
 
     session.refresh.side_effect = mock_refresh
-
     project = await repo.create(project_in)
 
     assert project.name == "Test Project"
@@ -53,6 +60,22 @@ async def test_project_repository_get_by_id(session: AsyncMock):
 
 
 @pytest.mark.asyncio
+async def test_project_repository_list(session: AsyncMock):
+    repo = ProjectRepository(session)
+    mock_projects = [Project(name="P1"), Project(name="P2")]
+
+    result = Mock()
+    result.scalars.return_value.all.return_value = mock_projects
+    session.execute.return_value = result
+
+    projects = await repo.list()
+
+    assert len(projects) == 2
+    assert projects[0].name == "P1"
+    assert projects[1].name == "P2"
+
+
+@pytest.mark.asyncio
 async def test_project_repository_update(session: AsyncMock):
     repo = ProjectRepository(session)
     project_id = uuid4()
@@ -69,3 +92,21 @@ async def test_project_repository_update(session: AsyncMock):
     assert updated_project.name == "New Name"
     assert updated_project.status == ProjectStatus.PROCESSING
     session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_other_repositories_smoke(session: AsyncMock):
+    # Verify that other repositories correctly instantiate and use their models
+    video_repo = VideoRepository(session)
+    workflow_repo = WorkflowRepository(session)
+    job_repo = JobRepository(session)
+
+    assert video_repo.model == Video
+    assert workflow_repo.model == Workflow
+    assert job_repo.model == Job
+
+    # Smoke test for create on VideoRepository
+    video_in = VideoCreate(project_id=uuid4(), title="V1")
+    await video_repo.create(video_in)
+    session.add.assert_called()
+    session.commit.assert_awaited()
