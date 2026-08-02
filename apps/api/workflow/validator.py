@@ -1,0 +1,45 @@
+"""Validator for ensuring workflow definitions are structurally sound."""
+
+from apps.api.domain.models import Workflow, WorkflowStep
+from apps.api.domain.schemas import WorkflowValidationResult
+
+
+class WorkflowValidator:
+    """Validator for structural and logical consistency of workflows."""
+
+    async def validate(
+        self, workflow: Workflow, steps: list[WorkflowStep]
+    ) -> WorkflowValidationResult:
+        """
+        Perform structural validation on a workflow and its steps.
+        """
+        errors: list[str] = []
+        warnings: list[str] = []
+
+        # 1. Workflow existence check
+        if not workflow:
+            errors.append("Workflow definition not found.")
+            return WorkflowValidationResult(valid=False, errors=errors, warnings=warnings)
+
+        # 2. Step existence check
+        if not steps:
+            errors.append("Workflow has no steps defined.")
+
+        # 3. Step order consistency
+        orders = [s.order for s in steps]
+        if orders != sorted(orders):
+            errors.append("Workflow steps are not in correct sequential order.")
+
+        if len(set(orders)) != len(orders):
+            errors.append("Workflow contains duplicate step order indices.")
+
+        # 4. Required fields check for each step
+        for i, step in enumerate(steps):
+            if not step.name:
+                errors.append(f"Step at index {i} is missing a name.")
+            if not step.step_type:
+                errors.append(f"Step '{step.name or i}' is missing a step type.")
+            if step.config is None:
+                errors.append(f"Step '{step.name or i}' has null configuration.")
+
+        return WorkflowValidationResult(valid=len(errors) == 0, errors=errors, warnings=warnings)

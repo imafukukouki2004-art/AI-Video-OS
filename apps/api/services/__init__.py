@@ -10,6 +10,7 @@ from apps.api.services.domain import (
     WorkflowStepService,
 )
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
+from apps.api.services.workflow_validation import WorkflowValidationService
 
 __all__ = [
     "JobService",
@@ -20,4 +21,5 @@ __all__ = [
     "WorkflowRuntimeService",
     "WorkflowService",
     "WorkflowStepService",
+    "WorkflowValidationService",
 ]
