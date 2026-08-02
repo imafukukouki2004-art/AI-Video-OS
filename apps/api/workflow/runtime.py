@@ -1,63 +1,84 @@
-"""Workflow runtime for orchestrating job execution."""
+"""Workflow runtime for orchestrating job execution with state tracking."""
 
 import logging
+from datetime import UTC, datetime
 from typing import Any
 
-from apps.api.domain.models import JobStatus, Workflow
-from apps.api.domain.schemas import JobCreate
-from apps.api.repositories import JobRepository
+from apps.api.domain.models import (
+    JobStatus,
+    Workflow,
+    WorkflowExecutionStatus,
+)
+from apps.api.domain.schemas import JobCreate, WorkflowExecutionCreate
+from apps.api.repositories import JobRepository, WorkflowExecutionRepository
 
 logger = logging.getLogger(__name__)
 
 
 class WorkflowRuntime:
-    """Synchronous workflow runtime foundation."""
+    """Synchronous workflow runtime with execution state tracking."""
 
-    def __init__(self, job_repository: JobRepository) -> None:
+    def __init__(
+        self,
+        job_repository: JobRepository,
+        execution_repository: WorkflowExecutionRepository,
+    ) -> None:
         self.job_repository = job_repository
+        self.execution_repository = execution_repository
 
     async def run(self, workflow: Workflow) -> dict[str, Any]:
         """
-        Execute a workflow synchronously.
-
-        This foundation implementation reads steps from workflow config,
-        creates jobs, and simulates their execution.
+        Execute a workflow synchronously and track its state.
         """
         logger.info(f"Starting workflow runtime for workflow: {workflow.id}")
+
+        # 1. Create WorkflowExecution (PENDING)
+        execution_in = WorkflowExecutionCreate(workflow_id=workflow.id)
+        execution = await self.execution_repository.create(execution_in)
+
+        # 2. Update Execution to RUNNING
+        updated_execution = await self.execution_repository.update(
+            execution.id,
+            {"status": WorkflowExecutionStatus.RUNNING, "started_at": datetime.now(UTC)},
+        )
+        if not updated_execution:
+            return {"status": "failed", "error": "Failed to initialize execution"}
+        execution = updated_execution
 
         steps = workflow.config.get("steps", [])
         if not steps:
             logger.warning(f"No steps defined for workflow {workflow.id}")
-            return {"status": "completed", "jobs": []}
+            await self.execution_repository.update(
+                execution.id,
+                {"status": WorkflowExecutionStatus.COMPLETED, "completed_at": datetime.now(UTC)},
+            )
+            return {"status": "completed", "jobs": [], "execution_id": execution.id}
 
         executed_jobs = []
 
         for step in steps:
             step_name = step.get("name", "unnamed_step")
-            logger.info(f"Executing step: {step_name}")
+            logger.info(f"Executing step: {step_name} in execution {execution.id}")
 
-            # 1. Create Job (PENDING)
+            # 3. Create Job (PENDING) linked to execution
             job_in = JobCreate(
-                workflow_id=workflow.id, name=step_name, input_data=step.get("input", {})
+                workflow_id=workflow.id,
+                execution_id=execution.id,
+                name=step_name,
+                input_data=step.get("input", {}),
             )
             job = await self.job_repository.create(job_in)
 
-            # 2. Update to RUNNING
-            # Note: In a real system, this would be handled by a worker.
-            # Here we do it synchronously as per TICKET-013 scope.
-            updated_job = await self.job_repository.update(
-                job.id,
-                {"status": JobStatus.RUNNING},
-            )
+            # 4. Update Job to RUNNING
+            updated_job = await self.job_repository.update(job.id, {"status": JobStatus.RUNNING})
             if updated_job:
                 job = updated_job
 
             try:
-                # 3. Simulate Execution
-                # In future tickets, this will call AI Providers or Celery tasks.
+                # 5. Simulate Execution
                 logger.info(f"Simulating execution for job {job.id}")
 
-                # 4. Update to COMPLETED
+                # 6. Update Job to COMPLETED
                 result_data = {"result": f"Simulated output for {step_name}"}
                 updated_job = await self.job_repository.update(
                     job.id,
@@ -69,15 +90,30 @@ class WorkflowRuntime:
 
             except Exception as e:
                 logger.error(f"Job {job.id} failed: {e!s}")
-                await self.job_repository.update(
-                    job.id,
-                    {"status": JobStatus.FAILED},
+                await self.job_repository.update(job.id, {"status": JobStatus.FAILED})
+
+                # Update Execution to FAILED
+                await self.execution_repository.update(
+                    execution.id,
+                    {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
                 )
+
                 return {
                     "status": "failed",
                     "error": str(e),
+                    "execution_id": execution.id,
                     "completed_jobs": [j.id for j in executed_jobs],
                 }
 
-        logger.info(f"Workflow {workflow.id} completed successfully")
-        return {"status": "completed", "jobs": [j.id for j in executed_jobs]}
+        # 7. Update Execution to COMPLETED
+        logger.info(f"Workflow {workflow.id} completed successfully (Execution: {execution.id})")
+        await self.execution_repository.update(
+            execution.id,
+            {"status": WorkflowExecutionStatus.COMPLETED, "completed_at": datetime.now(UTC)},
+        )
+
+        return {
+            "status": "completed",
+            "execution_id": execution.id,
+            "jobs": [j.id for j in executed_jobs],
+        }

@@ -9,6 +9,7 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowExecutionServiceDependency,
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
 )
@@ -22,6 +23,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     VideoResponse,
     WorkflowCreate,
+    WorkflowExecutionResponse,
     WorkflowResponse,
 )
 from apps.api.errors.exceptions import ApplicationError
@@ -130,6 +132,24 @@ async def run_workflow(
 ) -> dict[str, Any]:
     """Trigger synchronous execution of a workflow."""
     return await service.execute_workflow(workflow_id)
+
+
+# --- Workflow Executions ---
+
+
+@router.get("/workflow-executions/{execution_id}", response_model=WorkflowExecutionResponse)
+async def get_workflow_execution(
+    execution_id: UUID, service: WorkflowExecutionServiceDependency
+) -> WorkflowExecutionResponse:
+    """Retrieve a workflow execution by ID."""
+    execution = await service.get_by_id(execution_id)
+    if not execution:
+        raise ApplicationError(
+            code="EXECUTION_NOT_FOUND",
+            message="Workflow execution not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    return WorkflowExecutionResponse.model_validate(execution)
 
 
 # --- Jobs ---

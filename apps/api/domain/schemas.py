@@ -6,7 +6,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from apps.api.domain.models import JobStatus, ProjectStatus
+from apps.api.domain.models import JobStatus, ProjectStatus, WorkflowExecutionStatus
 
 
 class ProjectBase(BaseModel):
@@ -74,6 +74,7 @@ class JobBase(BaseModel):
 
 class JobCreate(JobBase):
     workflow_id: UUID
+    execution_id: UUID | None = None
 
 
 class JobResponse(JobBase):
@@ -81,9 +82,30 @@ class JobResponse(JobBase):
 
     id: UUID
     workflow_id: UUID
+    execution_id: UUID | None
     created_at: datetime
 
 
 class JobStatusResponse(BaseModel):
     id: UUID
     status: JobStatus
+
+
+class WorkflowExecutionBase(BaseModel):
+    workflow_id: UUID
+    status: WorkflowExecutionStatus = WorkflowExecutionStatus.PENDING
+
+
+class WorkflowExecutionCreate(WorkflowExecutionBase):
+    pass
+
+
+class WorkflowExecutionResponse(WorkflowExecutionBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    started_at: datetime | None
+    completed_at: datetime | None
+    failed_at: datetime | None
+    created_at: datetime
+    updated_at: datetime

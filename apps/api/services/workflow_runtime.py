@@ -6,7 +6,11 @@ from uuid import UUID
 from fastapi import status
 
 from apps.api.errors.exceptions import ApplicationError
-from apps.api.repositories import JobRepository, WorkflowRepository
+from apps.api.repositories import (
+    JobRepository,
+    WorkflowExecutionRepository,
+    WorkflowRepository,
+)
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -14,10 +18,13 @@ class WorkflowRuntimeService:
     """Service for orchestrating workflow execution."""
 
     def __init__(
-        self, workflow_repository: WorkflowRepository, job_repository: JobRepository
+        self,
+        workflow_repository: WorkflowRepository,
+        job_repository: JobRepository,
+        execution_repository: WorkflowExecutionRepository,
     ) -> None:
         self.workflow_repository = workflow_repository
-        self.runtime = WorkflowRuntime(job_repository)
+        self.runtime = WorkflowRuntime(job_repository, execution_repository)
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:
         """Trigger synchronous execution of a workflow."""
