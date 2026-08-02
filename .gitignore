@@ -37,7 +37,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# IDE and editor
+# IDE and operating system
 .idea/
 .vscode/*
 !.vscode/extensions.json
@@ -45,8 +45,6 @@ pnpm-debug.log*
 *.swp
 *.swo
 *~
-
-# Operating system
 .DS_Store
 Thumbs.db
 
@@ -59,12 +57,10 @@ data/
 artifacts/
 exports/
 
-# Containers
+# Containers and test output
 *.pid
 docker-compose.override.yml
 compose.override.yaml
-
-# Test output
 playwright-report/
 test-results/
 

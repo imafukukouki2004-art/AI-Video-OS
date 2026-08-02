@@ -1,6 +1,5 @@
 name: ai-video-os
 
-# TICKET-001 repository foundation only.
-# Application services, databases, queues, and object storage will be added
-# by their respective implementation tickets.
+# Services are introduced by their respective implementation tickets.
+# TICKET-002 intentionally does not add databases, queues, or object storage.
 services: {}
