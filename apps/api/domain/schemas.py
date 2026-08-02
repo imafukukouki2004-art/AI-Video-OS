@@ -162,3 +162,22 @@ class WorkflowValidationResult(BaseModel):
     valid: bool
     errors: list[str] = []
     warnings: list[str] = []
+
+
+class WorkflowExecutionErrorBase(BaseModel):
+    workflow_execution_id: UUID
+    workflow_step_id: UUID | None = None
+    error_code: str = Field(..., min_length=1, max_length=100)
+    error_message: str = Field(..., min_length=1, max_length=1000)
+    error_type: str = Field(..., min_length=1, max_length=100)
+
+
+class WorkflowExecutionErrorCreate(WorkflowExecutionErrorBase):
+    pass
+
+
+class WorkflowExecutionErrorResponse(WorkflowExecutionErrorBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    created_at: datetime

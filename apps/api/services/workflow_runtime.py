@@ -8,6 +8,7 @@ from fastapi import status
 from apps.api.errors.exceptions import ApplicationError
 from apps.api.repositories import (
     JobRepository,
+    WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
@@ -26,10 +27,15 @@ class WorkflowRuntimeService:
         execution_repository: WorkflowExecutionRepository,
         step_repository: WorkflowStepRepository,
         history_repository: WorkflowExecutionHistoryRepository,
+        error_repository: WorkflowExecutionErrorRepository,
     ) -> None:
         self.workflow_repository = workflow_repository
         self.runtime = WorkflowRuntime(
-            job_repository, execution_repository, step_repository, history_repository
+            job_repository,
+            execution_repository,
+            step_repository,
+            history_repository,
+            error_repository,
         )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:

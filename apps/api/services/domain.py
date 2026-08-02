@@ -10,6 +10,7 @@ from apps.api.domain.models import (
     Video,
     Workflow,
     WorkflowExecution,
+    WorkflowExecutionError,
     WorkflowExecutionHistory,
     WorkflowStep,
 )
@@ -20,6 +21,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
+    WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
     WorkflowStepCreate,
 )
@@ -27,6 +29,7 @@ from apps.api.repositories import (
     JobRepository,
     ProjectRepository,
     VideoRepository,
+    WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
@@ -106,4 +109,21 @@ class WorkflowExecutionHistoryService(
 
     async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowExecutionHistory]:
         repo = cast(WorkflowExecutionHistoryRepository, self.repository)
+        return await repo.list_by_step(step_id)
+
+
+class WorkflowExecutionErrorService(
+    BaseService[WorkflowExecutionError, WorkflowExecutionErrorCreate, Any]
+):
+    """Service for workflow execution error management."""
+
+    def __init__(self, repository: WorkflowExecutionErrorRepository) -> None:
+        super().__init__(repository)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowExecutionError]:
+        repo = cast(WorkflowExecutionErrorRepository, self.repository)
+        return await repo.list_by_execution(execution_id)
+
+    async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowExecutionError]:
+        repo = cast(WorkflowExecutionErrorRepository, self.repository)
         return await repo.list_by_step(step_id)

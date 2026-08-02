@@ -13,10 +13,12 @@ from apps.api.domain.models import (
 from apps.api.domain.schemas import (
     JobCreate,
     WorkflowExecutionCreate,
+    WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
 )
 from apps.api.repositories import (
     JobRepository,
+    WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionRepository,
     WorkflowStepRepository,
@@ -35,11 +37,13 @@ class WorkflowRuntime:
         execution_repository: WorkflowExecutionRepository,
         step_repository: WorkflowStepRepository,
         history_repository: WorkflowExecutionHistoryRepository,
+        error_repository: WorkflowExecutionErrorRepository,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
         self.step_repository = step_repository
         self.history_repository = history_repository
+        self.error_repository = error_repository
         self.validator = WorkflowValidator()
 
     async def _record_history(
@@ -58,6 +62,23 @@ class WorkflowRuntime:
             message=message,
         )
         await self.history_repository.create(history_in)
+
+    async def _record_error(
+        self,
+        execution_id: Any,
+        error_code: str,
+        message: str,
+        error_type: str,
+        step_id: Any | None = None,
+    ) -> None:
+        error_in = WorkflowExecutionErrorCreate(
+            workflow_execution_id=execution_id,
+            workflow_step_id=step_id,
+            error_code=error_code,
+            error_message=message,
+            error_type=error_type,
+        )
+        await self.error_repository.create(error_in)
 
     async def run(self, workflow: Workflow) -> dict[str, Any]:
         """
@@ -154,20 +175,34 @@ class WorkflowRuntime:
 
             except Exception as e:
                 logger.error(f"Step {step.id} failed: {e!s}")
+
+                # Integrated failure flow:
+                # A. Create Error Record
+                await self._record_error(
+                    execution.id,
+                    error_code="STEP_EXECUTION_FAILED",
+                    message=str(e),
+                    error_type=type(e).__name__,
+                    step_id=step.id,
+                )
+
+                # B. Update Step Status
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
+
+                # C. Update Execution Status to FAILED
+                from_exec_status = str(execution.status)
+                await self.execution_repository.update(
+                    execution.id,
+                    {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
+                )
+
+                # D. Record History
                 await self._record_history(
                     execution.id,
                     "running",
                     "failed",
                     step_id=step.id,
                     message=f"Step {step.name} failed: {e!s}",
-                )
-
-                # Update Execution to FAILED
-                from_exec_status = str(execution.status)
-                await self.execution_repository.update(
-                    execution.id,
-                    {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
                 )
                 await self._record_history(
                     execution.id, from_exec_status, "failed", message=f"Execution failed: {e!s}"
