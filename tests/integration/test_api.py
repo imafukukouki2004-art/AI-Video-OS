@@ -10,6 +10,7 @@ from apps.api.application import create_app
 from apps.api.cache import RedisManager
 from apps.api.config import Settings
 from apps.api.database import Database
+from apps.api.storage import ObjectStorage, S3ObjectStorage
 
 
 def make_database(*, connected: bool = True) -> Database:
@@ -26,11 +27,25 @@ def make_redis(*, connected: bool = True) -> RedisManager:
     return cast(RedisManager, redis)
 
 
-def make_app(*, database_connected: bool = True, redis_connected: bool = True) -> FastAPI:
+def make_storage(*, connected: bool = True) -> ObjectStorage:
+    storage = Mock(spec=S3ObjectStorage)
+    storage.ensure_bucket = AsyncMock()
+    storage.check_connection = AsyncMock(return_value=connected)
+    storage.close = AsyncMock()
+    return cast(ObjectStorage, storage)
+
+
+def make_app(
+    *,
+    database_connected: bool = True,
+    redis_connected: bool = True,
+    storage_connected: bool = True,
+) -> FastAPI:
     return create_app(
         Settings(app_env="test", log_level="CRITICAL", _env_file=None),
         database=make_database(connected=database_connected),
         redis=make_redis(connected=redis_connected),
+        storage=make_storage(connected=storage_connected),
     )
 
 
@@ -65,6 +80,7 @@ def test_ready_response_schema() -> None:
         "environment": "test",
         "database": "connected",
         "redis": "connected",
+        "storage": "connected",
     }
 
 
@@ -79,6 +95,7 @@ def test_ready_reports_database_failure() -> None:
         "environment": "test",
         "database": "unavailable",
         "redis": "connected",
+        "storage": "connected",
     }
 
 
@@ -93,6 +110,22 @@ def test_ready_reports_redis_failure() -> None:
         "environment": "test",
         "database": "connected",
         "redis": "unavailable",
+        "storage": "connected",
+    }
+
+
+def test_ready_reports_storage_failure() -> None:
+    with TestClient(make_app(storage_connected=False)) as client:
+        response = client.get("/ready")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "not_ready",
+        "service": "ai-video-os-api",
+        "environment": "test",
+        "database": "connected",
+        "redis": "connected",
+        "storage": "unavailable",
     }
 
 

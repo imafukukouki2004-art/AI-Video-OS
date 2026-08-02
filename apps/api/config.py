@@ -47,6 +47,15 @@ class Settings(BaseSettings):
     celery_result_backend: SecretStr = SecretStr("redis://127.0.0.1:6379/1")
     celery_task_max_retries: int = Field(default=3, ge=0, le=20)
     celery_retry_backoff_max_seconds: int = Field(default=60, ge=1, le=3600)
+    storage_endpoint_url: str = "http://127.0.0.1:9000"
+    storage_access_key: SecretStr = Field(default_factory=lambda: SecretStr(""))
+    storage_secret_key: SecretStr = Field(default_factory=lambda: SecretStr(""))
+    storage_bucket: str = Field(default="ai-video-os-assets", pattern=r"^[a-z0-9][a-z0-9.-]+$")
+    storage_region: str = "us-east-1"
+    storage_max_upload_bytes: int = Field(default=26_214_400, ge=1, le=1_073_741_824)
+    storage_presigned_expiry_seconds: int = Field(default=900, ge=60, le=604_800)
+    storage_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
+    storage_read_timeout_seconds: int = Field(default=10, ge=1, le=120)
 
 
 @lru_cache

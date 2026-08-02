@@ -7,9 +7,9 @@
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Current task | Awaiting TICKET-006 approval |
+| Current task | TICKET-007 — Pending roadmap alignment and CEO approval |
 | Planning progress | 100% |
-| Implementation progress | Approximately 45% |
+| Implementation progress | Approximately 55% |
 
 ## Completed
 
@@ -18,6 +18,7 @@
 - TICKET-003 — Next.js Frontend Foundation
 - TICKET-004 — PostgreSQL Foundation
 - TICKET-005 — Redis and Celery Foundation
+- TICKET-006 — MinIO Object Storage Foundation
 
 ## TICKET-002 Acceptance State
 
@@ -54,7 +55,16 @@
 - JSON-only serialization, late acknowledgements, retry/backoff/jitter, and a foundation task implemented.
 - Workflow, business logic, providers, authentication, and TICKET-006+ work are not included.
 
+## TICKET-006 Acceptance State
+
+- MinIO service, health check, persistent volume, and idempotent bucket initializer implemented.
+- S3-compatible Object Storage Adapter and secret-safe connectivity checks implemented.
+- `/ready` now requires PostgreSQL, Redis, and object storage connectivity.
+- Asset metadata model and Alembic revision implemented.
+- Validated upload, metadata, download, and presigned URL APIs implemented.
+- Asset versioning, media processing, rendering, workflows, and TICKET-007+ work are not included.
+
 ## Next Work
 
-No next ticket is approved. TICKET-006 — MinIO Object Storage Foundation remains
-pending CEO approval and has not started.
+TICKET-006 — MinIO Object Storage Foundation is completed.
+TICKET-007 remains pending roadmap alignment and explicit CEO approval. No TICKET-007 implementation has started.

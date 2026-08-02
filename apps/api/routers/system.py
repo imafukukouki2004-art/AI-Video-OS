@@ -3,7 +3,12 @@
 from fastapi import APIRouter, Request, Response, status
 from pydantic import BaseModel
 
-from apps.api.dependencies import DatabaseDependency, RedisDependency, SettingsDependency
+from apps.api.dependencies import (
+    DatabaseDependency,
+    RedisDependency,
+    SettingsDependency,
+    StorageDependency,
+)
 
 router = APIRouter(tags=["system"])
 
@@ -20,6 +25,7 @@ class ReadyResponse(BaseModel):
     environment: str
     database: str
     redis: str
+    storage: str
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -40,12 +46,14 @@ async def ready(
     settings: SettingsDependency,
     database: DatabaseDependency,
     redis: RedisDependency,
+    storage: StorageDependency,
 ) -> ReadyResponse:
-    """Report readiness when application, PostgreSQL, and Redis are healthy."""
+    """Report readiness when application infrastructure dependencies are healthy."""
 
     database_ready = await database.check_connection()
     redis_ready = await redis.check_connection()
-    is_ready = request.app.state.ready and database_ready and redis_ready
+    storage_ready = await storage.check_connection()
+    is_ready = request.app.state.ready and database_ready and redis_ready and storage_ready
     if not is_ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     return ReadyResponse(
@@ -54,4 +62,5 @@ async def ready(
         environment=settings.app_env,
         database="connected" if database_ready else "unavailable",
         redis="connected" if redis_ready else "unavailable",
+        storage="connected" if storage_ready else "unavailable",
     )

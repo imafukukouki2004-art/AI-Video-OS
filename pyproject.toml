@@ -11,12 +11,14 @@ requires-python = ">=3.12,<3.13"
 license = { text = "MIT" }
 dependencies = [
   "alembic==1.16.4",
+  "boto3==1.39.9",
   "celery[redis]==5.5.3",
   "fastapi==0.116.1",
   "httpx==0.28.1",
   "psycopg[binary]==3.2.9",
   "pydantic==2.11.7",
   "pydantic-settings==2.10.1",
+  "python-multipart==0.0.20",
   "redis==5.2.1",
   "sqlalchemy[asyncio]==2.0.41",
   "structlog==25.4.0",
@@ -65,4 +67,8 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = ["celery", "celery.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["boto3", "boto3.*", "botocore", "botocore.*"]
 ignore_missing_imports = true
