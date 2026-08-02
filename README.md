@@ -2,7 +2,7 @@
 
 AI Video OS is an implementation project for producing short-form social video through a traceable, human-approved AI workflow.
 
-TICKET-002 and TICKET-003 provide executable Python backend and Next.js frontend foundations. Database, queue, storage, provider, and workflow features remain intentionally out of scope.
+TICKET-002 through TICKET-004 provide executable backend, frontend, and PostgreSQL foundations. Queue, storage, provider, domain, and workflow features remain intentionally out of scope.
 
 ## Current Project State
 
@@ -11,9 +11,9 @@ TICKET-002 and TICKET-003 provide executable Python backend and Next.js frontend
 | Product version | AI Video OS Version 2.0 |
 | Phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Completed | TICKET-001, TICKET-002, TICKET-003 |
-| Current ticket | TICKET-004 — PostgreSQL Foundation |
-| Implementation progress | Backend and frontend foundations complete |
+| Completed | TICKET-001, TICKET-002, TICKET-003, TICKET-004 |
+| Current ticket | Awaiting TICKET-005 approval |
+| Implementation progress | Approximately 35% |
 
 See [Project State](docs/operations/PROJECT_STATE.md) for the operational record.
 
@@ -38,6 +38,15 @@ See [Project State](docs/operations/PROJECT_STATE.md) for the operational record
 - Minimal App Router error boundary
 - ESLint, Vitest, and Playwright foundation
 - Next.js standalone non-root Docker image
+
+## Implemented PostgreSQL Foundation
+
+- PostgreSQL 17 Compose service with health check and persistent volume
+- SQLAlchemy 2.x async engine using psycopg
+- Request-scoped `AsyncSession` dependency
+- Alembic configuration and empty initial baseline revision
+- Database-aware `GET /ready` response
+- Secret-safe database settings and connectivity logging
 
 ## Prerequisites
 
@@ -70,10 +79,24 @@ The supported settings are:
 | `APP_DEBUG` | `false` | FastAPI debug mode |
 | `LOG_LEVEL` | `INFO` | Structured logging threshold |
 | `LOG_FORMAT` | `json` | `json` or local `console` output |
+| `DATABASE_URL` | local PostgreSQL URL | SQLAlchemy psycopg connection URL (secret) |
+| `DATABASE_POOL_SIZE` | `5` | Persistent connection pool size |
+| `DATABASE_MAX_OVERFLOW` | `10` | Additional temporary connections |
+| `DATABASE_POOL_TIMEOUT_SECONDS` | `5` | Pool checkout timeout |
+| `DATABASE_CONNECT_TIMEOUT_SECONDS` | `3` | PostgreSQL connection timeout |
 
 Do not store secrets in `.env.example`, source files, images, or logs.
 
 ### Start the backend
+
+Start PostgreSQL and apply the baseline migration first:
+
+```bash
+docker compose up -d postgres
+alembic upgrade head
+```
+
+Then start the API:
 
 ```bash
 uvicorn apps.api.main:app --reload --host "${APP_HOST:-0.0.0.0}" --port "${APP_PORT:-8000}"
@@ -85,6 +108,8 @@ Verify the service:
 curl http://localhost:8000/health
 curl http://localhost:8000/ready
 ```
+
+`/health` reports process liveness. `/ready` returns HTTP 200 only when application startup is complete and PostgreSQL accepts a query; otherwise it returns HTTP 503.
 
 - API documentation: <http://localhost:8000/docs>
 - OpenAPI JSON: <http://localhost:8000/openapi.json>
@@ -112,6 +137,7 @@ pytest --cov=apps.api --cov-report=term-missing
 ruff check .
 ruff format --check .
 mypy apps/api
+alembic upgrade head --sql
 ```
 
 Frontend:
@@ -152,20 +178,20 @@ docker run --rm -p 3000:3000 --env API_BASE_URL=http://host.docker.internal:8000
 ## Repository Structure
 
 ```text
-apps/api/                 FastAPI application and container definition
+apps/api/                 FastAPI application, database layer, and container definition
 apps/web/                 Next.js application, tests, and container definition
 docs/operations/          Current operational project state
+migrations/               Alembic environment and baseline revision
 tests/unit/               Isolated configuration and logging tests
 tests/integration/        HTTP API and error-contract tests
 packages/                 Reserved for later ticket-owned shared packages
 infrastructure/           Reserved for later infrastructure tickets
-migrations/               Reserved for the database ticket
-compose.yaml              Empty service skeleton; unchanged in TICKET-003
+compose.yaml              PostgreSQL service, health check, and persistent volume
 ```
 
 ## Current Implementation Boundaries
 
-TICKET-003 does not implement PostgreSQL, SQLAlchemy, Alembic, Redis, Celery, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, domain entities, the Workflow Engine, or Docker Compose services.
+TICKET-004 does not implement domain tables, Redis, Celery, MinIO/S3, OpenAI integrations, media generation, FFmpeg, authentication, or the Workflow Engine.
 
 ## Security Rules
 

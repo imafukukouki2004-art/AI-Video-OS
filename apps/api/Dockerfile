@@ -15,6 +15,8 @@ COPY apps/api/__init__.py apps/api/__init__.py
 RUN pip install --no-cache-dir .
 
 COPY --chown=app:app apps/api apps/api
+COPY --chown=app:app alembic.ini alembic.ini
+COPY --chown=app:app migrations migrations
 
 USER app
 EXPOSE 8000

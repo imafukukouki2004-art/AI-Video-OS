@@ -10,6 +10,10 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("APP_ENV", "test")
     monkeypatch.setenv("APP_PORT", "9000")
     monkeypatch.setenv("LOG_LEVEL", "DEBUG")
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgresql+psycopg://test-user:test-password@database:5432/test-db",
+    )
 
     settings = Settings(_env_file=None)
 
@@ -17,6 +21,8 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     assert settings.app_env == "test"
     assert settings.app_port == 9000
     assert settings.log_level == "DEBUG"
+    assert settings.database_url.get_secret_value().endswith("@database:5432/test-db")
+    assert "test-password" not in repr(settings)
 
 
 def test_api_host_alias_is_supported(monkeypatch: MonkeyPatch) -> None:

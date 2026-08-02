@@ -3,7 +3,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AliasChoices, Field
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     app_debug: bool = False
     log_level: Literal["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"] = "INFO"
     log_format: Literal["json", "console"] = "json"
+    database_url: SecretStr = SecretStr(
+        "postgresql+psycopg://ai_video_os:change-me-local-only@127.0.0.1:5432/ai_video_os"
+    )
+    database_pool_size: int = Field(default=5, ge=1, le=50)
+    database_max_overflow: int = Field(default=10, ge=0, le=100)
+    database_pool_timeout_seconds: float = Field(default=5.0, gt=0, le=60)
+    database_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
 
 
 @lru_cache

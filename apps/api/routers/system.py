@@ -1,9 +1,9 @@
 """Process health and application readiness endpoints."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response, status
 from pydantic import BaseModel
 
-from apps.api.dependencies import SettingsDependency
+from apps.api.dependencies import DatabaseDependency, SettingsDependency
 
 router = APIRouter(tags=["system"])
 
@@ -18,6 +18,7 @@ class ReadyResponse(BaseModel):
     status: str
     service: str
     environment: str
+    database: str
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -32,12 +33,21 @@ async def health(settings: SettingsDependency) -> HealthResponse:
 
 
 @router.get("/ready", response_model=ReadyResponse)
-async def ready(request: Request, settings: SettingsDependency) -> ReadyResponse:
-    """Report readiness based only on application initialization in TICKET-002."""
+async def ready(
+    request: Request,
+    response: Response,
+    settings: SettingsDependency,
+    database: DatabaseDependency,
+) -> ReadyResponse:
+    """Report readiness only when application startup and PostgreSQL are healthy."""
 
-    status = "ready" if request.app.state.ready else "not_ready"
+    database_ready = await database.check_connection()
+    is_ready = request.app.state.ready and database_ready
+    if not is_ready:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     return ReadyResponse(
-        status=status,
+        status="ready" if is_ready else "not_ready",
         service=settings.app_name,
         environment=settings.app_env,
+        database="connected" if database_ready else "unavailable",
     )

@@ -7,15 +7,16 @@
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Current task | TICKET-004 — PostgreSQL Foundation |
+| Current task | Awaiting TICKET-005 approval |
 | Planning progress | 100% |
-| Implementation progress | 3 implementation tickets completed |
+| Implementation progress | Approximately 35% |
 
 ## Completed
 
 - TICKET-001 — Repository Initialization
 - TICKET-002 — Python Backend Foundation
 - TICKET-003 — Next.js Frontend Foundation
+- TICKET-004 — PostgreSQL Foundation
 
 ## TICKET-002 Acceptance State
 
@@ -34,7 +35,16 @@
 - Standalone non-root frontend Dockerfile and local environment example added.
 - No database, queue, storage, provider, workflow, authentication, or Compose work added.
 
-## Next Approved Work
+## TICKET-004 Acceptance State
 
-TICKET-004 — PostgreSQL Foundation. This file records the next task only; no
-TICKET-004 implementation is included in the TICKET-003 change set.
+- PostgreSQL 17 Compose service, health check, and persistent volume implemented.
+- SQLAlchemy async engine, psycopg driver, and request-scoped session dependency implemented.
+- Alembic environment and empty initial baseline revision implemented.
+- `/ready` now validates PostgreSQL connectivity and returns 503 when unavailable.
+- Database configuration is secret-safe and connectivity logs omit connection details.
+- Product domain tables and TICKET-005+ systems are not included.
+
+## Next Work
+
+No next ticket is approved. TICKET-005 — Redis and Celery Foundation remains pending
+CEO approval and has not started.
