@@ -15,6 +15,7 @@ from apps.api.repositories import (
     VideoRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
+    WorkflowStepRepository,
 )
 from apps.api.services import (
     JobService,
@@ -23,6 +24,7 @@ from apps.api.services import (
     WorkflowExecutionService,
     WorkflowRuntimeService,
     WorkflowService,
+    WorkflowStepService,
 )
 from apps.api.storage import ObjectStorage
 
@@ -91,6 +93,15 @@ def get_workflow_repository(session: DatabaseSessionDependency) -> WorkflowRepos
 WorkflowRepositoryDependency = Annotated[WorkflowRepository, Depends(get_workflow_repository)]
 
 
+def get_workflow_step_repository(session: DatabaseSessionDependency) -> WorkflowStepRepository:
+    return WorkflowStepRepository(session)
+
+
+WorkflowStepRepositoryDependency = Annotated[
+    WorkflowStepRepository, Depends(get_workflow_step_repository)
+]
+
+
 def get_job_repository(session: DatabaseSessionDependency) -> JobRepository:
     return JobRepository(session)
 
@@ -123,11 +134,20 @@ def get_video_service(repo: VideoRepositoryDependency) -> VideoService:
 VideoServiceDependency = Annotated[VideoService, Depends(get_video_service)]
 
 
-def get_workflow_service(repo: WorkflowRepositoryDependency) -> WorkflowService:
-    return WorkflowService(repo)
+def get_workflow_service(
+    repo: WorkflowRepositoryDependency, step_repo: WorkflowStepRepositoryDependency
+) -> WorkflowService:
+    return WorkflowService(repo, step_repo)
 
 
 WorkflowServiceDependency = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+def get_workflow_step_service(repo: WorkflowStepRepositoryDependency) -> WorkflowStepService:
+    return WorkflowStepService(repo)
+
+
+WorkflowStepServiceDependency = Annotated[WorkflowStepService, Depends(get_workflow_step_service)]
 
 
 def get_job_service(repo: JobRepositoryDependency) -> JobService:
@@ -152,8 +172,9 @@ def get_workflow_runtime_service(
     workflow_repo: WorkflowRepositoryDependency,
     job_repo: JobRepositoryDependency,
     execution_repo: WorkflowExecutionRepositoryDependency,
+    step_repo: WorkflowStepRepositoryDependency,
 ) -> WorkflowRuntimeService:
-    return WorkflowRuntimeService(workflow_repo, job_repo, execution_repo)
+    return WorkflowRuntimeService(workflow_repo, job_repo, execution_repo, step_repo)
 
 
 WorkflowRuntimeServiceDependency = Annotated[

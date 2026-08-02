@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -88,9 +88,49 @@ class Workflow(Base):
     )
 
     project: Mapped["Project"] = relationship(back_populates="workflows")
+    steps: Mapped[list["WorkflowStep"]] = relationship(
+        back_populates="workflow", cascade="all, delete-orphan", order_by="WorkflowStep.order"
+    )
     jobs: Mapped[list["Job"]] = relationship(
         back_populates="workflow", cascade="all, delete-orphan"
     )
+
+
+class WorkflowStepStatus(str, enum.Enum):
+    """Execution states of a workflow step."""
+
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
+
+class WorkflowStep(Base):
+    """Persistent definition of an individual step within a workflow."""
+
+    __tablename__ = "workflow_steps"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_id: Mapped[UUID] = mapped_column(ForeignKey("workflows.id"), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    step_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    order: Mapped[int] = mapped_column(Integer, nullable=False)
+    config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    status: Mapped[WorkflowStepStatus] = mapped_column(
+        Enum(WorkflowStepStatus), default=WorkflowStepStatus.PENDING, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+    workflow: Mapped["Workflow"] = relationship(back_populates="steps")
+    jobs: Mapped[list["Job"]] = relationship(back_populates="step", cascade="all, delete-orphan")
 
 
 class WorkflowExecutionStatus(str, enum.Enum):
@@ -109,6 +149,7 @@ class Job(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     workflow_id: Mapped[UUID] = mapped_column(ForeignKey("workflows.id"), nullable=False)
+    step_id: Mapped[UUID | None] = mapped_column(ForeignKey("workflow_steps.id"), nullable=True)
     execution_id: Mapped[UUID | None] = mapped_column(
         ForeignKey("workflow_executions.id"), nullable=True
     )
@@ -123,6 +164,7 @@ class Job(Base):
     )
 
     workflow: Mapped["Workflow"] = relationship(back_populates="jobs")
+    step: Mapped["WorkflowStep | None"] = relationship(back_populates="jobs")
     execution: Mapped["WorkflowExecution | None"] = relationship(back_populates="jobs")
 
 
