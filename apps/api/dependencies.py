@@ -15,6 +15,12 @@ from apps.api.repositories import (
     VideoRepository,
     WorkflowRepository,
 )
+from apps.api.services import (
+    JobService,
+    ProjectService,
+    VideoService,
+    WorkflowService,
+)
 from apps.api.storage import ObjectStorage
 
 SettingsDependency = Annotated[Settings, Depends(get_settings)]
@@ -87,3 +93,31 @@ def get_job_repository(session: DatabaseSessionDependency) -> JobRepository:
 
 
 JobRepositoryDependency = Annotated[JobRepository, Depends(get_job_repository)]
+
+
+def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
+    return ProjectService(repo)
+
+
+ProjectServiceDependency = Annotated[ProjectService, Depends(get_project_service)]
+
+
+def get_video_service(repo: VideoRepositoryDependency) -> VideoService:
+    return VideoService(repo)
+
+
+VideoServiceDependency = Annotated[VideoService, Depends(get_video_service)]
+
+
+def get_workflow_service(repo: WorkflowRepositoryDependency) -> WorkflowService:
+    return WorkflowService(repo)
+
+
+WorkflowServiceDependency = Annotated[WorkflowService, Depends(get_workflow_service)]
+
+
+def get_job_service(repo: JobRepositoryDependency) -> JobService:
+    return JobService(repo)
+
+
+JobServiceDependency = Annotated[JobService, Depends(get_job_service)]
