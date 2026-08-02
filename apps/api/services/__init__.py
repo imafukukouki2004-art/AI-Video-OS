@@ -6,6 +6,7 @@ from apps.api.services.domain import (
     VideoService,
     WorkflowExecutionService,
     WorkflowService,
+    WorkflowStepService,
 )
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 
@@ -16,4 +17,5 @@ __all__ = [
     "WorkflowExecutionService",
     "WorkflowRuntimeService",
     "WorkflowService",
+    "WorkflowStepService",
 ]

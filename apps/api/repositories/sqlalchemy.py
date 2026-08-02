@@ -13,6 +13,7 @@ from apps.api.domain.models import (
     Video,
     Workflow,
     WorkflowExecution,
+    WorkflowStep,
 )
 from apps.api.domain.schemas import (
     JobCreate,
@@ -21,6 +22,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
+    WorkflowStepCreate,
 )
 
 T = TypeVar("T")
@@ -94,6 +96,19 @@ class VideoRepository(SQLAlchemyRepository[Video, VideoCreate, Any]):
 class WorkflowRepository(SQLAlchemyRepository[Workflow, WorkflowCreate, Any]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Workflow)
+
+
+class WorkflowStepRepository(SQLAlchemyRepository[WorkflowStep, WorkflowStepCreate, Any]):
+    def __init__(self, session: AsyncSession) -> None:
+        super().__init__(session, WorkflowStep)
+
+    async def list_by_workflow(self, workflow_id: UUID) -> Sequence[WorkflowStep]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_id == workflow_id)
+            .order_by(self.model.order)
+        )
+        return result.scalars().all()
 
 
 class JobRepository(SQLAlchemyRepository[Job, JobCreate, Any]):

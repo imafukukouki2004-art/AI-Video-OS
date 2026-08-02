@@ -6,6 +6,7 @@ from apps.api.repositories.sqlalchemy import (
     VideoRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
+    WorkflowStepRepository,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "VideoRepository",
     "WorkflowExecutionRepository",
     "WorkflowRepository",
+    "WorkflowStepRepository",
 ]

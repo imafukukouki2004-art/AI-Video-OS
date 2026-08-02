@@ -10,6 +10,7 @@ from apps.api.domain.models import (
     Video,
     Workflow,
     WorkflowExecution,
+    WorkflowStep,
 )
 from apps.api.domain.schemas import (
     JobCreate,
@@ -18,6 +19,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
+    WorkflowStepCreate,
 )
 from apps.api.repositories import (
     JobRepository,
@@ -25,6 +27,7 @@ from apps.api.repositories import (
     VideoRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
+    WorkflowStepRepository,
 )
 from apps.api.services.base import BaseService
 
@@ -46,8 +49,26 @@ class VideoService(BaseService[Video, VideoCreate, Any]):
 class WorkflowService(BaseService[Workflow, WorkflowCreate, Any]):
     """Service for workflow-related use cases."""
 
-    def __init__(self, repository: WorkflowRepository) -> None:
+    def __init__(
+        self, repository: WorkflowRepository, step_repository: WorkflowStepRepository
+    ) -> None:
         super().__init__(repository)
+        self.step_repository = step_repository
+
+    async def list_steps(self, workflow_id: UUID) -> Sequence[WorkflowStep]:
+        """Retrieve all steps for a workflow ordered by execution order."""
+        return await self.step_repository.list_by_workflow(workflow_id)
+
+
+class WorkflowStepService(BaseService[WorkflowStep, WorkflowStepCreate, Any]):
+    """Service for workflow step management."""
+
+    def __init__(self, repository: WorkflowStepRepository) -> None:
+        super().__init__(repository)
+
+    async def list_by_workflow(self, workflow_id: UUID) -> Sequence[WorkflowStep]:
+        repo = cast(WorkflowStepRepository, self.repository)
+        return await repo.list_by_workflow(workflow_id)
 
 
 class JobService(BaseService[Job, JobCreate, Any]):

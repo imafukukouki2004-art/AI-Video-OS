@@ -10,6 +10,7 @@ from apps.api.repositories import (
     JobRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
+    WorkflowStepRepository,
 )
 from apps.api.workflow.runtime import WorkflowRuntime
 
@@ -22,9 +23,10 @@ class WorkflowRuntimeService:
         workflow_repository: WorkflowRepository,
         job_repository: JobRepository,
         execution_repository: WorkflowExecutionRepository,
+        step_repository: WorkflowStepRepository,
     ) -> None:
         self.workflow_repository = workflow_repository
-        self.runtime = WorkflowRuntime(job_repository, execution_repository)
+        self.runtime = WorkflowRuntime(job_repository, execution_repository, step_repository)
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:
         """Trigger synchronous execution of a workflow."""

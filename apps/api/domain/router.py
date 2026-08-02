@@ -12,6 +12,7 @@ from apps.api.dependencies import (
     WorkflowExecutionServiceDependency,
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
+    WorkflowStepServiceDependency,
 )
 from apps.api.domain.schemas import (
     JobCreate,
@@ -25,6 +26,7 @@ from apps.api.domain.schemas import (
     WorkflowCreate,
     WorkflowExecutionResponse,
     WorkflowResponse,
+    WorkflowStepResponse,
 )
 from apps.api.errors.exceptions import ApplicationError
 
@@ -132,6 +134,15 @@ async def run_workflow(
 ) -> dict[str, Any]:
     """Trigger synchronous execution of a workflow."""
     return await service.execute_workflow(workflow_id)
+
+
+@router.get("/workflows/{workflow_id}/steps", response_model=list[WorkflowStepResponse])
+async def list_workflow_steps(
+    workflow_id: UUID, service: WorkflowStepServiceDependency
+) -> list[WorkflowStepResponse]:
+    """Retrieve all steps for a specific workflow."""
+    steps = await service.list_by_workflow(workflow_id)
+    return [WorkflowStepResponse.model_validate(s) for s in steps]
 
 
 # --- Workflow Executions ---
