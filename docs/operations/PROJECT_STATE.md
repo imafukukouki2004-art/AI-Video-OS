@@ -7,8 +7,8 @@
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
 | Current milestone | M1 — Development Environment Ready |
-| Current task | TICKET-010 — Core Domain API |
-| TICKET-010 Status | In Review |
+| Current task | Awaiting TICKET-011 CEO Approval |
+| TICKET-010 Status | Completed |
 | Blocking Condition | None |
 | Planning progress | 100% |
 | Implementation progress | Approximately 80% |
@@ -26,10 +26,11 @@
 - TICKET-007 — CI Foundation
 - TICKET-008 — Development Environment Acceptance (Pilot)
 - TICKET-009 — Core Domain Entities
+- TICKET-010 — Core Domain API
 
 ## Next Work
 
-- TICKET-010 — Awaiting CEO Approval.
+- TICKET-011 — Awaiting CEO Approval.
 - TR-02 planning.
 
 ## Technology Review 01 (TR-01) Decisions
@@ -68,5 +69,5 @@ The following decisions were formalized during the final TR-01 review.
 
 ### Pilot and PR Status
 - **Manus Pilot**: SPIKE-TECH-003 — Completed / Adopt with Restrictions
-- **Pull Request**: PR #11 — Merged
-- **Issue #10**: Closed – Completed
+- **Pull Request**: PR #13 — Merged
+- **Issue #12**: Closed – Completed
