@@ -14,6 +14,7 @@ from apps.api.dependencies import (
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
     WorkflowStepServiceDependency,
+    WorkflowValidationServiceDependency,
 )
 from apps.api.domain.schemas import (
     JobCreate,
@@ -29,6 +30,7 @@ from apps.api.domain.schemas import (
     WorkflowExecutionResponse,
     WorkflowResponse,
     WorkflowStepResponse,
+    WorkflowValidationResult,
 )
 from apps.api.errors.exceptions import ApplicationError
 
@@ -128,6 +130,14 @@ async def get_workflow(workflow_id: UUID, service: WorkflowServiceDependency) ->
             status_code=status.HTTP_404_NOT_FOUND,
         )
     return WorkflowResponse.model_validate(workflow)
+
+
+@router.post("/workflows/{workflow_id}/validate", response_model=WorkflowValidationResult)
+async def validate_workflow(
+    workflow_id: UUID, service: WorkflowValidationServiceDependency
+) -> WorkflowValidationResult:
+    """Validate a workflow definition."""
+    return await service.validate_workflow(workflow_id)
 
 
 @router.post("/workflows/{workflow_id}/run", status_code=status.HTTP_200_OK)

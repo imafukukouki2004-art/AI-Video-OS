@@ -156,3 +156,9 @@ class WorkflowExecutionHistoryResponse(WorkflowExecutionHistoryBase):
 
     id: UUID
     created_at: datetime
+
+
+class WorkflowValidationResult(BaseModel):
+    valid: bool
+    errors: list[str] = []
+    warnings: list[str] = []

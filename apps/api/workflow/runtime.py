@@ -21,6 +21,7 @@ from apps.api.repositories import (
     WorkflowExecutionRepository,
     WorkflowStepRepository,
 )
+from apps.api.workflow.validator import WorkflowValidator
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class WorkflowRuntime:
         self.execution_repository = execution_repository
         self.step_repository = step_repository
         self.history_repository = history_repository
+        self.validator = WorkflowValidator()
 
     async def _record_history(
         self,
@@ -63,11 +65,24 @@ class WorkflowRuntime:
         """
         logger.info(f"Starting workflow runtime for workflow: {workflow.id}")
 
-        # 1. Create WorkflowExecution (PENDING)
+        # 1. Retrieve Steps from Repository
+        steps = await self.step_repository.list_by_workflow(workflow.id)
+
+        # 2. Validation Guard
+        validation_result = await self.validator.validate(workflow, list(steps))
+        if not validation_result.valid:
+            logger.error(f"Workflow {workflow.id} validation failed: {validation_result.errors}")
+            return {
+                "status": "failed",
+                "error": "Workflow validation failed",
+                "validation_errors": validation_result.errors,
+            }
+
+        # 3. Create WorkflowExecution (PENDING)
         execution_in = WorkflowExecutionCreate(workflow_id=workflow.id)
         execution = await self.execution_repository.create(execution_in)
 
-        # 2. Update Execution to RUNNING
+        # 4. Update Execution to RUNNING
         from_status = str(execution.status)
         updated_execution = await self.execution_repository.update(
             execution.id,
@@ -81,27 +96,13 @@ class WorkflowRuntime:
             execution.id, from_status, str(execution.status), message="Execution started"
         )
 
-        # 3. Retrieve Steps from Repository
-        steps = await self.step_repository.list_by_workflow(workflow.id)
-        if not steps:
-            logger.warning(f"No steps defined for workflow {workflow.id}")
-            from_status = str(execution.status)
-            await self.execution_repository.update(
-                execution.id,
-                {"status": WorkflowExecutionStatus.COMPLETED, "completed_at": datetime.now(UTC)},
-            )
-            await self._record_history(
-                execution.id, from_status, "completed", message="Completed with no steps"
-            )
-            return {"status": "completed", "jobs": [], "execution_id": execution.id}
-
         executed_jobs = []
 
         for step in steps:
             logger.info(f"Executing step: {step.name} (ID: {step.id}) in execution {execution.id}")
 
             try:
-                # 4. Update Step to RUNNING
+                # 5. Update Step to RUNNING
                 from_step_status = str(step.status)
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.RUNNING})
                 await self._record_history(
@@ -112,7 +113,7 @@ class WorkflowRuntime:
                     message=f"Step {step.name} started",
                 )
 
-                # 5. Create Job (PENDING) linked to execution and step
+                # 6. Create Job (PENDING) linked to execution and step
                 job_in = JobCreate(
                     workflow_id=workflow.id,
                     step_id=step.id,
@@ -122,17 +123,17 @@ class WorkflowRuntime:
                 )
                 job = await self.job_repository.create(job_in)
 
-                # 6. Update Job to RUNNING
+                # 7. Update Job to RUNNING
                 updated_job = await self.job_repository.update(
                     job.id, {"status": JobStatus.RUNNING}
                 )
                 if updated_job:
                     job = updated_job
 
-                # 7. Simulate Execution
+                # 8. Simulate Execution
                 logger.info(f"Simulating execution for job {job.id}")
 
-                # 8. Update Job and Step to COMPLETED
+                # 9. Update Job and Step to COMPLETED
                 result_data = {"result": f"Simulated output for {step.name}"}
                 updated_job = await self.job_repository.update(
                     job.id,
@@ -153,8 +154,6 @@ class WorkflowRuntime:
 
             except Exception as e:
                 logger.error(f"Step {step.id} failed: {e!s}")
-                # Note: job might not have been created yet if create failed
-                # But we should still mark the step and execution as failed
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
                 await self._record_history(
                     execution.id,
@@ -181,7 +180,7 @@ class WorkflowRuntime:
                     "completed_jobs": [j.id for j in executed_jobs],
                 }
 
-        # 9. Update Execution to COMPLETED
+        # 10. Update Execution to COMPLETED
         logger.info(f"Workflow {workflow.id} completed successfully (Execution: {execution.id})")
         from_exec_status = str(execution.status)
         await self.execution_repository.update(

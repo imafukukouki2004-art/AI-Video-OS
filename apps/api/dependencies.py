@@ -27,6 +27,7 @@ from apps.api.services import (
     WorkflowRuntimeService,
     WorkflowService,
     WorkflowStepService,
+    WorkflowValidationService,
 )
 from apps.api.storage import ObjectStorage
 
@@ -189,6 +190,18 @@ def get_workflow_execution_history_service(
 
 WorkflowExecutionHistoryServiceDependency = Annotated[
     WorkflowExecutionHistoryService, Depends(get_workflow_execution_history_service)
+]
+
+
+def get_workflow_validation_service(
+    workflow_repo: WorkflowRepositoryDependency,
+    step_repo: WorkflowStepRepositoryDependency,
+) -> WorkflowValidationService:
+    return WorkflowValidationService(workflow_repo, step_repo)
+
+
+WorkflowValidationServiceDependency = Annotated[
+    WorkflowValidationService, Depends(get_workflow_validation_service)
 ]
 
 

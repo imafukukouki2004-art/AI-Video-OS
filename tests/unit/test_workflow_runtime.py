@@ -123,3 +123,25 @@ async def test_workflow_runtime_failure_with_history(
     # Check that failure history was recorded
     last_call = history_repository.create.call_args_list[-1]
     assert last_call.args[0].to_status == "failed"
+
+
+@pytest.mark.asyncio
+async def test_workflow_runtime_guard_prevents_execution(
+    job_repository: AsyncMock,
+    execution_repository: AsyncMock,
+    step_repository: AsyncMock,
+    history_repository: AsyncMock,
+):
+    runtime = WorkflowRuntime(
+        job_repository, execution_repository, step_repository, history_repository
+    )
+    workflow = Workflow(id=uuid4(), config={})
+
+    # Mock no steps (invalid)
+    step_repository.list_by_workflow.return_value = []
+
+    result = await runtime.run(workflow)
+
+    assert result["status"] == "failed"
+    assert "validation_errors" in result
+    assert execution_repository.create.called is False
