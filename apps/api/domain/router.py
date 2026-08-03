@@ -154,6 +154,23 @@ async def run_workflow(
     return await service.execute_workflow(workflow_id)
 
 
+@router.post(
+    "/workflows/{workflow_id}/enqueue",
+    response_model=WorkflowEnqueueResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def enqueue_workflow(
+    workflow_id: UUID, service: WorkflowQueueServiceDependency
+) -> WorkflowEnqueueResponse:
+    """Trigger asynchronous execution of a workflow."""
+    execution_id, task_id = await service.enqueue_workflow(workflow_id)
+    return WorkflowEnqueueResponse(
+        execution_id=execution_id,
+        task_id=task_id,
+        status="QUEUED",
+    )
+
+
 @router.get("/workflows/{workflow_id}/steps", response_model=list[WorkflowStepResponse])
 async def list_workflow_steps(
     workflow_id: UUID, service: WorkflowStepServiceDependency

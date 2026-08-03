@@ -2,11 +2,13 @@
 
 import asyncio
 import logging
+from datetime import UTC, datetime
 from typing import Any, TypedDict
 from uuid import UUID
 
 from apps.api.config import get_settings
 from apps.api.database.manager import Database
+from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.repositories import (
     JobRepository,
     WorkflowExecutionErrorRepository,
@@ -96,7 +98,20 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
 
         # Trigger execution
         logger.info(f"Worker starting execution {execution_id} for workflow {workflow.id}")
-        result = await runtime.run(workflow)
-        logger.info(f"Worker completed execution {execution_id} with status {result.get('status')}")
-
-        return result
+        try:
+            result = await runtime.run(workflow, execution_id=execution_id)
+            logger.info(
+                f"Worker completed execution {execution_id} with status {result.get('status')}"
+            )
+            return result
+        except Exception as e:
+            logger.exception(f"Unexpected error in worker for execution {execution_id}")
+            # Final safety update to FAILED if runtime failed to catch it
+            await execution_repo.update(
+                execution_id,
+                {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
+            )
+            return {"status": "failed", "error": str(e)}
+        finally:
+            # Worker cleanup - Dispose database engine
+            await db.dispose()

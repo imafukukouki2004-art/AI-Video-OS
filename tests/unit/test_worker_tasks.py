@@ -41,13 +41,14 @@ async def test_execute_workflow_execution_async_success():
         mock_session = AsyncMock()
         mock_db_instance = mock_db_class.return_value
         mock_db_instance.session_factory.return_value.__aenter__.return_value = mock_session
+        mock_db_instance.dispose = AsyncMock()
         
         result = await _execute_workflow_execution_async(str(execution_id))
         
         assert result["status"] == "completed"
         mock_execution_repo.get_by_id.assert_called_once_with(execution_id)
         mock_workflow_repo.get_by_id.assert_called_once_with(workflow_id)
-        mock_runtime.run.assert_called_once_with(mock_workflow)
+        mock_runtime.run.assert_called_once_with(mock_workflow, execution_id=execution_id)
 
 @pytest.mark.asyncio
 async def test_execute_workflow_execution_async_not_found():
@@ -68,6 +69,7 @@ async def test_execute_workflow_execution_async_not_found():
         mock_session = AsyncMock()
         mock_db_instance = mock_db_class.return_value
         mock_db_instance.session_factory.return_value.__aenter__.return_value = mock_session
+        mock_db_instance.dispose = AsyncMock()
         
         result = await _execute_workflow_execution_async(str(execution_id))
         

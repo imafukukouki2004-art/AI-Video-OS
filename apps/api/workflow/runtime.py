@@ -91,9 +91,10 @@ class WorkflowRuntime:
         )
         await self.metric_repository.create(metric_in)
 
-    async def run(self, workflow: Workflow) -> dict[str, Any]:
+    async def run(self, workflow: Workflow, execution_id: Any | None = None) -> dict[str, Any]:
         """
         Execute a workflow synchronously and track its state, history, and metrics.
+        If execution_id is provided, use the existing execution record.
         """
         logger.info(f"Starting workflow runtime for workflow: {workflow.id}")
         start_time = time.perf_counter()
@@ -105,15 +106,32 @@ class WorkflowRuntime:
         validation_result = await self.validator.validate(workflow, list(steps))
         if not validation_result.valid:
             logger.error(f"Workflow {workflow.id} validation failed: {validation_result.errors}")
+            if execution_id:
+                await self._record_error(
+                    execution_id,
+                    "VALIDATION_FAILED",
+                    f"Workflow validation failed: {validation_result.errors}",
+                    "ValidationError",
+                )
+                await self.execution_repository.update(
+                    execution_id,
+                    {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
+                )
             return {
                 "status": "failed",
                 "error": "Workflow validation failed",
                 "validation_errors": validation_result.errors,
             }
 
-        # 3. Create WorkflowExecution (PENDING)
-        execution_in = WorkflowExecutionCreate(workflow_id=workflow.id)
-        execution = await self.execution_repository.create(execution_in)
+        # 3. Create or Get WorkflowExecution
+        if execution_id:
+            execution = await self.execution_repository.get_by_id(execution_id)
+            if not execution:
+                return {"status": "failed", "error": f"Execution {execution_id} not found"}
+        else:
+            # 3. Create WorkflowExecution (PENDING)
+            execution_in = WorkflowExecutionCreate(workflow_id=workflow.id)
+            execution = await self.execution_repository.create(execution_in)
 
         # 4. Update Execution to RUNNING
         from_status = str(execution.status)
@@ -189,7 +207,7 @@ class WorkflowRuntime:
                 success_count += 1
 
             except Exception as e:
-                logger.error(f"Step {step.id} failed: {e!s}")
+                logger.exception(f"Step {step.id} failed in execution {execution.id}")
                 failure_count += 1
 
                 # Integrated failure flow:
@@ -201,6 +219,10 @@ class WorkflowRuntime:
                     error_type=type(e).__name__,
                     step_id=step.id,
                 )
+
+                # Update Job to FAILED if it was created
+                if "job" in locals() and job:
+                    await self.job_repository.update(job.id, {"status": JobStatus.FAILED})
 
                 # B. Update Step Status
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
