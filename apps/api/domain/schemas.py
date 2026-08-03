@@ -181,3 +181,19 @@ class WorkflowExecutionErrorResponse(WorkflowExecutionErrorBase):
 
     id: UUID
     created_at: datetime
+
+class WorkflowExecutionMetricBase(BaseModel):
+    workflow_execution_id: UUID
+    metric_type: str = Field(..., min_length=1, max_length=100)
+    metric_value: float
+
+
+class WorkflowExecutionMetricCreate(WorkflowExecutionMetricBase):
+    pass
+
+
+class WorkflowExecutionMetricResponse(WorkflowExecutionMetricBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    created_at: datetime

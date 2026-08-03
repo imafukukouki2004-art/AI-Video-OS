@@ -11,6 +11,7 @@ from apps.api.dependencies import (
     VideoServiceDependency,
     WorkflowExecutionErrorServiceDependency,
     WorkflowExecutionHistoryServiceDependency,
+    WorkflowExecutionMetricServiceDependency,
     WorkflowExecutionServiceDependency,
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
@@ -29,6 +30,7 @@ from apps.api.domain.schemas import (
     WorkflowCreate,
     WorkflowExecutionErrorResponse,
     WorkflowExecutionHistoryResponse,
+    WorkflowExecutionMetricResponse,
     WorkflowExecutionResponse,
     WorkflowResponse,
     WorkflowStepResponse,
@@ -199,6 +201,18 @@ async def list_execution_errors(
     """Retrieve all errors for a specific execution."""
     errors = await service.list_by_execution(execution_id)
     return [WorkflowExecutionErrorResponse.model_validate(e) for e in errors]
+
+
+@router.get(
+    "/workflow-executions/{execution_id}/metrics",
+    response_model=list[WorkflowExecutionMetricResponse],
+)
+async def list_execution_metrics(
+    execution_id: UUID, service: WorkflowExecutionMetricServiceDependency
+) -> list[WorkflowExecutionMetricResponse]:
+    """Retrieve all metrics for a specific execution."""
+    metrics = await service.list_by_execution(execution_id)
+    return [WorkflowExecutionMetricResponse.model_validate(m) for m in metrics]
 
 
 # --- Jobs ---

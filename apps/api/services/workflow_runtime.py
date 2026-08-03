@@ -10,6 +10,7 @@ from apps.api.repositories import (
     JobRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
+    WorkflowExecutionMetricRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -28,6 +29,7 @@ class WorkflowRuntimeService:
         step_repository: WorkflowStepRepository,
         history_repository: WorkflowExecutionHistoryRepository,
         error_repository: WorkflowExecutionErrorRepository,
+        metric_repository: WorkflowExecutionMetricRepository,
     ) -> None:
         self.workflow_repository = workflow_repository
         self.runtime = WorkflowRuntime(
@@ -36,6 +38,7 @@ class WorkflowRuntimeService:
             step_repository,
             history_repository,
             error_repository,
+            metric_repository,
         )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:

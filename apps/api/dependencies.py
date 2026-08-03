@@ -15,6 +15,7 @@ from apps.api.repositories import (
     VideoRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
+    WorkflowExecutionMetricRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -25,6 +26,7 @@ from apps.api.services import (
     VideoService,
     WorkflowExecutionErrorService,
     WorkflowExecutionHistoryService,
+    WorkflowExecutionMetricService,
     WorkflowExecutionService,
     WorkflowRuntimeService,
     WorkflowService,
@@ -147,6 +149,17 @@ WorkflowExecutionErrorRepositoryDependency = Annotated[
 ]
 
 
+def get_workflow_execution_metric_repository(
+    session: DatabaseSessionDependency,
+) -> WorkflowExecutionMetricRepository:
+    return WorkflowExecutionMetricRepository(session)
+
+
+WorkflowExecutionMetricRepositoryDependency = Annotated[
+    WorkflowExecutionMetricRepository, Depends(get_workflow_execution_metric_repository)
+]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -217,6 +230,17 @@ WorkflowExecutionErrorServiceDependency = Annotated[
 ]
 
 
+def get_workflow_execution_metric_service(
+    repo: WorkflowExecutionMetricRepositoryDependency,
+) -> WorkflowExecutionMetricService:
+    return WorkflowExecutionMetricService(repo)
+
+
+WorkflowExecutionMetricServiceDependency = Annotated[
+    WorkflowExecutionMetricService, Depends(get_workflow_execution_metric_service)
+]
+
+
 def get_workflow_validation_service(
     workflow_repo: WorkflowRepositoryDependency,
     step_repo: WorkflowStepRepositoryDependency,
@@ -236,9 +260,10 @@ def get_workflow_runtime_service(
     step_repo: WorkflowStepRepositoryDependency,
     history_repo: WorkflowExecutionHistoryRepositoryDependency,
     error_repo: WorkflowExecutionErrorRepositoryDependency,
+    metric_repo: WorkflowExecutionMetricRepositoryDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
-        workflow_repo, job_repo, execution_repo, step_repo, history_repo, error_repo
+        workflow_repo, job_repo, execution_repo, step_repo, history_repo, error_repo, metric_repo
     )
 
 

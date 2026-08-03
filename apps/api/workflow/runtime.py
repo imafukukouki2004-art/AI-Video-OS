@@ -1,6 +1,7 @@
 """Workflow runtime for orchestrating job execution with state tracking."""
 
 import logging
+import time
 from datetime import UTC, datetime
 from typing import Any
 
@@ -15,11 +16,13 @@ from apps.api.domain.schemas import (
     WorkflowExecutionCreate,
     WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
+    WorkflowExecutionMetricCreate,
 )
 from apps.api.repositories import (
     JobRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
+    WorkflowExecutionMetricRepository,
     WorkflowExecutionRepository,
     WorkflowStepRepository,
 )
@@ -29,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class WorkflowRuntime:
-    """Synchronous workflow runtime with execution state tracking and history."""
+    """Synchronous workflow runtime with execution state tracking, history, and metrics."""
 
     def __init__(
         self,
@@ -38,12 +41,14 @@ class WorkflowRuntime:
         step_repository: WorkflowStepRepository,
         history_repository: WorkflowExecutionHistoryRepository,
         error_repository: WorkflowExecutionErrorRepository,
+        metric_repository: WorkflowExecutionMetricRepository,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
         self.step_repository = step_repository
         self.history_repository = history_repository
         self.error_repository = error_repository
+        self.metric_repository = metric_repository
         self.validator = WorkflowValidator()
 
     async def _record_history(
@@ -80,11 +85,18 @@ class WorkflowRuntime:
         )
         await self.error_repository.create(error_in)
 
+    async def _record_metric(self, execution_id: Any, metric_type: str, value: float) -> None:
+        metric_in = WorkflowExecutionMetricCreate(
+            workflow_execution_id=execution_id, metric_type=metric_type, metric_value=value
+        )
+        await self.metric_repository.create(metric_in)
+
     async def run(self, workflow: Workflow) -> dict[str, Any]:
         """
-        Execute a workflow synchronously and track its state and history.
+        Execute a workflow synchronously and track its state, history, and metrics.
         """
         logger.info(f"Starting workflow runtime for workflow: {workflow.id}")
+        start_time = time.perf_counter()
 
         # 1. Retrieve Steps from Repository
         steps = await self.step_repository.list_by_workflow(workflow.id)
@@ -118,6 +130,8 @@ class WorkflowRuntime:
         )
 
         executed_jobs = []
+        success_count = 0
+        failure_count = 0
 
         for step in steps:
             logger.info(f"Executing step: {step.name} (ID: {step.id}) in execution {execution.id}")
@@ -172,9 +186,11 @@ class WorkflowRuntime:
                     message=f"Step {step.name} completed",
                 )
                 executed_jobs.append(job)
+                success_count += 1
 
             except Exception as e:
                 logger.error(f"Step {step.id} failed: {e!s}")
+                failure_count += 1
 
                 # Integrated failure flow:
                 # A. Create Error Record
@@ -208,6 +224,14 @@ class WorkflowRuntime:
                     execution.id, from_exec_status, "failed", message=f"Execution failed: {e!s}"
                 )
 
+                # E. Record Metrics even on failure
+                end_time = time.perf_counter()
+                duration_ms = (end_time - start_time) * 1000
+                await self._record_metric(execution.id, "duration_ms", duration_ms)
+                await self._record_metric(execution.id, "step_count", float(len(steps)))
+                await self._record_metric(execution.id, "success_count", float(success_count))
+                await self._record_metric(execution.id, "failure_count", float(failure_count))
+
                 return {
                     "status": "failed",
                     "error": str(e),
@@ -225,6 +249,14 @@ class WorkflowRuntime:
         await self._record_history(
             execution.id, from_exec_status, "completed", message="Execution completed successfully"
         )
+
+        # 11. Record Metrics
+        end_time = time.perf_counter()
+        duration_ms = (end_time - start_time) * 1000
+        await self._record_metric(execution.id, "duration_ms", duration_ms)
+        await self._record_metric(execution.id, "step_count", float(len(steps)))
+        await self._record_metric(execution.id, "success_count", float(success_count))
+        await self._record_metric(execution.id, "failure_count", float(failure_count))
 
         return {
             "status": "completed",
