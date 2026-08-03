@@ -13,6 +13,7 @@ from apps.api.services.domain import (
 )
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.services.workflow_validation import WorkflowValidationService
+from apps.api.services.workflow_queue import WorkflowQueueService
 
 __all__ = [
     "JobService",
@@ -26,4 +27,5 @@ __all__ = [
     "WorkflowStepService",
     "WorkflowRuntimeService",
     "WorkflowValidationService",
+    "WorkflowQueueService",
 ]

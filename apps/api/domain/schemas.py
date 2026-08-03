@@ -75,6 +75,7 @@ class JobBase(BaseModel):
     status: JobStatus = JobStatus.PENDING
     input_data: dict[str, Any] = Field(default_factory=dict)
     output_data: dict[str, Any] = Field(default_factory=dict)
+    task_id: str | None = Field(None, max_length=255)
 
 
 class JobCreate(JobBase):
@@ -101,6 +102,7 @@ class JobStatusResponse(BaseModel):
 class WorkflowExecutionBase(BaseModel):
     workflow_id: UUID
     status: WorkflowExecutionStatus = WorkflowExecutionStatus.PENDING
+    task_id: str | None = Field(None, max_length=255)
 
 
 class WorkflowExecutionCreate(WorkflowExecutionBase):
@@ -197,3 +199,9 @@ class WorkflowExecutionMetricResponse(WorkflowExecutionMetricBase):
 
     id: UUID
     created_at: datetime
+
+
+class WorkflowEnqueueResponse(BaseModel):
+    execution_id: UUID
+    task_id: str
+    status: str
