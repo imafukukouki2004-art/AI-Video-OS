@@ -3,6 +3,7 @@
 from typing import Any
 
 from openai import AsyncOpenAI
+from openai.types.chat import ChatCompletionMessageParam
 
 from apps.api.ai_providers.base import AIImageResponse, AIProvider, AIResponse
 
@@ -17,10 +18,16 @@ class OpenAIProvider(AIProvider):
     async def generate_text(self, prompt: str, **kwargs: Any) -> AIResponse:
         """Generate text using OpenAI Chat Completion."""
         model = kwargs.get("model", self.model)
-        
+        system_prompt = kwargs.pop("system_prompt", None)
+
+        messages: list[ChatCompletionMessageParam] = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
         response = await self.client.chat.completions.create(
             model=model,
-            messages=[{"role": "user", "content": prompt}],
+            messages=messages,
             **{k: v for k, v in kwargs.items() if k not in ["model", "provider"]}
         )
         

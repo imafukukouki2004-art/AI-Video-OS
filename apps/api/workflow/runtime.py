@@ -186,19 +186,37 @@ class WorkflowRuntime:
 
                 # 8. AI Provider Execution
                 logger.info(f"Executing AI Provider for job {job.id} (Step: {step.name})")
-                
-                # Determine provider from step config or default to mock
+
+                # Determine provider and operation from step config
                 provider_name = step.config.get("provider", "mock")
+                operation = step.config.get("operation", "text_generation")
                 provider = AIProviderFactory.create(provider_name)
-                
-                # Simulate text generation for now as a foundation test
-                ai_res = await provider.generate_text(prompt=step.name, **step.config)
-                
-                # 9. Update Job and Step to COMPLETED
-                result_data = {
-                    "result": ai_res.content,
-                    "metadata": ai_res.metadata
-                }
+
+                if operation == "text_generation":
+                    # Input Mapping: Map prompt and system_prompt from step config
+                    # Default to step name if prompt is missing
+                    prompt = step.config.get("prompt", step.name)
+                    system_prompt = step.config.get("system_prompt")
+
+                    # Prepare call arguments
+                    exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
+                    call_kwargs = {
+                        k: v for k, v in step.config.items() if k not in exclude_keys
+                    }
+                    if system_prompt:
+                        call_kwargs["system_prompt"] = system_prompt
+
+                    # AI Execution
+                    ai_res = await provider.generate_text(prompt=prompt, **call_kwargs)
+
+                    # 9. Update Job and Step to COMPLETED
+                    result_data = {
+                        "result": ai_res.content,
+                        "metadata": ai_res.metadata,
+                    }
+                else:
+                    logger.error(f"Unsupported operation: {operation}")
+                    raise ValueError(f"Unsupported AI operation: {operation}")
                 updated_job = await self.job_repository.update(
                     job.id,
                     {"status": JobStatus.COMPLETED, "output_data": result_data},

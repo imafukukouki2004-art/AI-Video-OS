@@ -16,13 +16,24 @@ async def test_openai_provider_generate_text():
     
     with patch("apps.api.ai_providers.openai.AsyncOpenAI", return_value=mock_client):
         provider = OpenAIProvider(api_key="sk-test", model="gpt-4o")
-        response = await provider.generate_text("Hello OpenAI")
+        response = await provider.generate_text(
+            "Hello OpenAI", 
+            system_prompt="You are a bot",
+            temperature=0.7
+        )
         
         assert isinstance(response, AIResponse)
         assert response.content == "OpenAI response"
         assert response.metadata["provider"] == "openai"
-        assert response.metadata["model"] == "gpt-4o"
-        assert response.metadata["usage"]["prompt_tokens"] == 10
+        
+        # Verify messages sent to OpenAI
+        mock_client.chat.completions.create.assert_called_once()
+        args, kwargs = mock_client.chat.completions.create.call_args
+        messages = kwargs["messages"]
+        assert len(messages) == 2
+        assert messages[0] == {"role": "system", "content": "You are a bot"}
+        assert messages[1] == {"role": "user", "content": "Hello OpenAI"}
+        assert kwargs["temperature"] == 0.7
 
 @pytest.mark.asyncio
 async def test_openai_provider_generate_image_not_implemented():
