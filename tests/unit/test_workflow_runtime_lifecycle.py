@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_run_with_existing_execution_id(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -42,7 +44,19 @@ async def test_run_with_existing_execution_id(repositories):
     repositories["execution"].update.return_value = mock_execution
     repositories["step"].list_by_workflow.return_value = []
 
-    with patch.object(runtime.validator, "validate") as mock_validate:
+    # Mock AI Provider
+    mock_provider = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.content = "Test Output"
+    mock_res.metadata = {}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
+
+    with (
+        patch.object(runtime.validator, "validate") as mock_validate,
+        patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider),
+    ):
         mock_validate.return_value = MagicMock(valid=True)
 
         result = await runtime.run(workflow, execution_id=execution_id)
@@ -61,6 +75,7 @@ async def test_run_validation_failure_with_execution_id(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -99,6 +114,7 @@ async def test_run_step_failure_persistence(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -134,7 +150,19 @@ async def test_run_step_failure_persistence(repositories):
 
     repositories["job"].update.side_effect = [mock_job, Exception("Execution failed"), mock_job]
 
-    with patch.object(runtime.validator, "validate") as mock_validate:
+    # Mock AI Provider
+    mock_provider = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.content = "Test Output"
+    mock_res.metadata = {}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
+
+    with (
+        patch.object(runtime.validator, "validate") as mock_validate,
+        patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider),
+    ):
         mock_validate.return_value = MagicMock(valid=True)
 
         result = await runtime.run(workflow)

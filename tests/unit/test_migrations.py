@@ -11,5 +11,5 @@ def test_asset_metadata_revision_is_current_head() -> None:
     config = Config(root / "alembic.ini")
     script = ScriptDirectory.from_config(config)
 
-    assert script.get_heads() == ["20260803_0011"]
+    assert script.get_heads() == ["20260803_0012"]
     assert script.get_base() == "20260802_0001"

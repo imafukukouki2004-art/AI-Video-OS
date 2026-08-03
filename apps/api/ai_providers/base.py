@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
+from uuid import UUID
 
 
 @dataclass
@@ -12,6 +13,8 @@ class AIResponse:
     content: str
     raw_response: Any = None
     metadata: dict[str, Any] = field(default_factory=dict)
+    artifact_type: str | None = None
+    asset_id: UUID | None = None
 
 
 @dataclass

@@ -9,6 +9,7 @@ from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from apps.api.assets.models import Asset
 from apps.api.database import Base
 
 
@@ -215,6 +216,9 @@ class WorkflowExecution(Base):
     metrics: Mapped[list["WorkflowExecutionMetric"]] = relationship(
         back_populates="execution", cascade="all, delete-orphan"
     )
+    artifacts: Mapped[list["WorkflowArtifact"]] = relationship(
+        back_populates="execution", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowExecutionHistory(Base):
@@ -279,3 +283,27 @@ class WorkflowExecutionMetric(Base):
     )
 
     execution: Mapped["WorkflowExecution"] = relationship(back_populates="metrics")
+
+
+class WorkflowArtifact(Base):
+    """Unified reference for artifacts generated or used within a workflow."""
+
+    __tablename__ = "workflow_artifacts"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_execution_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=False
+    )
+    workflow_step_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_steps.id"), nullable=True
+    )
+    artifact_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    asset_id: Mapped[UUID | None] = mapped_column(ForeignKey("assets.id"), nullable=True)
+    metadata_data: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+
+    execution: Mapped["WorkflowExecution"] = relationship(back_populates="artifacts")
+    step: Mapped["WorkflowStep | None"] = relationship()
+    asset: Mapped["Asset | None"] = relationship()

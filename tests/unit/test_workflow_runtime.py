@@ -1,6 +1,6 @@
 """Unit tests for the synchronous workflow runtime with history and metrics tracking."""
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -14,6 +14,7 @@ from apps.api.domain.models import (
 )
 from apps.api.repositories import (
     JobRepository,
+    WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionMetricRepository,
@@ -53,6 +54,11 @@ def metric_repository():
     return AsyncMock(spec=WorkflowExecutionMetricRepository)
 
 
+@pytest.fixture
+def artifact_repository():
+    return AsyncMock(spec=WorkflowArtifactRepository)
+
+
 @pytest.mark.asyncio
 async def test_workflow_runtime_run_success_with_metrics(
     job_repository: AsyncMock,
@@ -61,6 +67,7 @@ async def test_workflow_runtime_run_success_with_metrics(
     history_repository: AsyncMock,
     error_repository: AsyncMock,
     metric_repository: AsyncMock,
+    artifact_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
         job_repository,
@@ -69,6 +76,7 @@ async def test_workflow_runtime_run_success_with_metrics(
         history_repository,
         error_repository,
         metric_repository,
+        artifact_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -96,7 +104,17 @@ async def test_workflow_runtime_run_success_with_metrics(
     job_repository.create.return_value = AsyncMock(id=uuid4())
     job_repository.update.return_value = AsyncMock(id=uuid4())
 
-    result = await runtime.run(workflow)
+    # Mock AI Provider
+    mock_provider = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.content = "Test Output"
+    mock_res.metadata = {}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
+
+    with patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider):
+        result = await runtime.run(workflow)
 
     assert result["status"] == "completed"
     assert metric_repository.create.called
@@ -118,6 +136,7 @@ async def test_workflow_runtime_failure_records_metrics(
     history_repository: AsyncMock,
     error_repository: AsyncMock,
     metric_repository: AsyncMock,
+    artifact_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
         job_repository,
@@ -126,6 +145,7 @@ async def test_workflow_runtime_failure_records_metrics(
         history_repository,
         error_repository,
         metric_repository,
+        artifact_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -145,7 +165,17 @@ async def test_workflow_runtime_failure_records_metrics(
     # First call fails, second (failure update) succeeds
     job_repository.update.side_effect = [Exception("Simulated failure"), AsyncMock(id=uuid4())]
 
-    result = await runtime.run(workflow)
+    # Mock AI Provider
+    mock_provider = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.content = "Test Output"
+    mock_res.metadata = {}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
+
+    with patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider):
+        result = await runtime.run(workflow)
 
     assert result["status"] == "failed"
     assert metric_repository.create.called

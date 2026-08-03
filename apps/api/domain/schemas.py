@@ -211,3 +211,22 @@ class WorkflowEnqueueResponse(BaseModel):
     execution_id: UUID
     task_id: str
     status: str
+
+
+class WorkflowArtifactBase(BaseModel):
+    workflow_execution_id: UUID
+    workflow_step_id: UUID | None = None
+    artifact_type: str = Field(..., min_length=1, max_length=100)
+    asset_id: UUID | None = None
+    metadata_data: dict[str, Any] = Field(default_factory=dict)
+
+
+class WorkflowArtifactCreate(WorkflowArtifactBase):
+    pass
+
+
+class WorkflowArtifactResponse(WorkflowArtifactBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    created_at: datetime

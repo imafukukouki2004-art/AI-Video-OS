@@ -11,6 +11,7 @@ from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.repositories import (
     JobRepository,
+    WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionMetricRepository,
@@ -73,6 +74,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         history_repo = WorkflowExecutionHistoryRepository(session)
         error_repo = WorkflowExecutionErrorRepository(session)
         metric_repo = WorkflowExecutionMetricRepository(session)
+        artifact_repo = WorkflowArtifactRepository(session)
 
         # Initialize runtime
         runtime = WorkflowRuntime(
@@ -82,6 +84,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             history_repo,
             error_repo,
             metric_repo,
+            artifact_repo,
         )
 
         # Get the execution record

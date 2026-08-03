@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -82,11 +84,16 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
         # Let's mock provider.generate_text to return different things.
 
         # Step 1 execution
-        mock_provider.generate_text.side_effect = [
-            MagicMock(content=["a", "b"], metadata={"provider": "mock"}),  # Step 1 (Loop Source)
-            MagicMock(content="Result A", metadata={"provider": "mock"}),  # Step 2 Iteration 1
-            MagicMock(content="Result B", metadata={"provider": "mock"}),  # Step 2 Iteration 2
-        ]
+        mock_res1 = MagicMock(content=["a", "b"], metadata={"provider": "mock"})
+        mock_res1.artifact_type = None
+        mock_res1.asset_id = None
+        mock_res2 = MagicMock(content="Result A", metadata={"provider": "mock"})
+        mock_res2.artifact_type = None
+        mock_res2.asset_id = None
+        mock_res3 = MagicMock(content="Result B", metadata={"provider": "mock"})
+        mock_res3.artifact_type = None
+        mock_res3.asset_id = None
+        mock_provider.generate_text.side_effect = [mock_res1, mock_res2, mock_res3]
 
         result = await runtime.run(workflow)
 
@@ -109,6 +116,7 @@ async def test_workflow_runtime_loop_invalid_source_error(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()

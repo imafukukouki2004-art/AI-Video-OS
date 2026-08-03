@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -68,10 +70,13 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
     # Mock AI Provider
     mock_provider = AsyncMock()
     # Step 1 returns "Output 1"
-    mock_provider.generate_text.side_effect = [
-        MagicMock(content="Output 1", metadata={"provider": "mock"}),
-        MagicMock(content="Output 2", metadata={"provider": "mock"}),
-    ]
+    mock_res1 = MagicMock(content="Output 1", metadata={"provider": "mock"})
+    mock_res1.artifact_type = None
+    mock_res1.asset_id = None
+    mock_res2 = MagicMock(content="Output 2", metadata={"provider": "mock"})
+    mock_res2.artifact_type = None
+    mock_res2.asset_id = None
+    mock_provider.generate_text.side_effect = [mock_res1, mock_res2]
 
     with (
         patch.object(runtime.validator, "validate") as mock_validate,
@@ -100,6 +105,7 @@ async def test_workflow_runtime_unresolved_variable_error_persistence(repositori
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
