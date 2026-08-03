@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from apps.api.workflow.runtime import WorkflowRuntime
+
+import pytest
+
 from apps.api.domain.models import WorkflowStepStatus
+from apps.api.workflow.runtime import WorkflowRuntime
+
 
 @pytest.fixture
 def repositories():
@@ -195,7 +198,9 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
     repositories["job"].update = AsyncMock()
     
     mock_provider = AsyncMock()
-    mock_provider.generate_text.return_value = MagicMock(content="yes", metadata={"provider": "mock"})
+    mock_provider.generate_text.return_value = MagicMock(
+        content="yes", metadata={"provider": "mock"}
+    )
 
     with patch.object(runtime.validator, "validate") as mock_validate, \
          patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider):

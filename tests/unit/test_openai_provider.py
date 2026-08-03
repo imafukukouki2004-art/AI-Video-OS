@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from apps.api.ai_providers.openai import OpenAIProvider
+
+import pytest
+
 from apps.api.ai_providers.base import AIResponse
+from apps.api.ai_providers.openai import OpenAIProvider
+
 
 @pytest.mark.asyncio
 async def test_openai_provider_generate_text():
@@ -43,9 +46,10 @@ async def test_openai_provider_generate_image_not_implemented():
             await provider.generate_image("A cat")
 
 def test_openai_provider_factory_integration():
+    from pydantic import SecretStr
+
     from apps.api.ai_providers.factory import AIProviderFactory
     from apps.api.ai_providers.openai import OpenAIProvider
-    from pydantic import SecretStr
     
     mock_settings = MagicMock()
     mock_settings.openai_api_key = SecretStr("sk-factory-test")

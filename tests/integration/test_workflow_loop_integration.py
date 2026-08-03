@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+
+import pytest
+
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.domain.models import WorkflowStepStatus
+
 
 @pytest.fixture
 def repositories():
@@ -15,7 +18,6 @@ def repositories():
         "metric": AsyncMock(),
     }
 
-from apps.api.domain.models import WorkflowStep
 
 @pytest.mark.asyncio
 async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
@@ -65,7 +67,7 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
     
     # Mock AI Provider
     mock_provider = AsyncMock()
-    # Step 1 returns a LIST (simulated as a string that we'll force into context as a list for the test)
+    # Step 1 returns a LIST (simulated as a string forced into context as a list)
     # Actually, let's make Step 1 return a list directly in our mocked runtime flow.
     # Wait, the runtime expects provider.generate_text to return AIResponse.content as string.
     # For TICKET-028, loop_source must be an array.

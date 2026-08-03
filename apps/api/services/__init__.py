@@ -11,9 +11,9 @@ from apps.api.services.domain import (
     WorkflowService,
     WorkflowStepService,
 )
+from apps.api.services.workflow_queue import WorkflowQueueService
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.services.workflow_validation import WorkflowValidationService
-from apps.api.services.workflow_queue import WorkflowQueueService
 
 __all__ = [
     "JobService",
@@ -23,9 +23,9 @@ __all__ = [
     "WorkflowExecutionHistoryService",
     "WorkflowExecutionMetricService",
     "WorkflowExecutionService",
+    "WorkflowQueueService",
+    "WorkflowRuntimeService",
     "WorkflowService",
     "WorkflowStepService",
-    "WorkflowRuntimeService",
     "WorkflowValidationService",
-    "WorkflowQueueService",
 ]

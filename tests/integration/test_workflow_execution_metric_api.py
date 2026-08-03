@@ -1,17 +1,19 @@
+from collections.abc import AsyncIterator
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from uuid import uuid4
-from unittest.mock import AsyncMock, Mock
-from datetime import UTC, datetime
 from fastapi import FastAPI
-from collections.abc import AsyncIterator
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.application import create_app
 from apps.api.config import Settings
 from apps.api.dependencies import get_database_session
 from apps.api.domain.models import WorkflowExecutionMetric
+
 
 @pytest.fixture
 def session() -> AsyncSession:

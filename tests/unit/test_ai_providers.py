@@ -1,5 +1,7 @@
 import pytest
-from apps.api.ai_providers import AIProviderFactory, MockAIProvider, AIResponse, AIImageResponse
+
+from apps.api.ai_providers import AIImageResponse, AIProviderFactory, AIResponse, MockAIProvider
+
 
 @pytest.mark.asyncio
 async def test_mock_ai_provider_generate_text():

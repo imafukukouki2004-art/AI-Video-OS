@@ -1,10 +1,13 @@
-import pytest
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from apps.api.domain.models import WorkflowExecutionMetric
-from apps.api.repositories.sqlalchemy import WorkflowExecutionMetricRepository
 from apps.api.domain.schemas import WorkflowExecutionMetricCreate
+from apps.api.repositories.sqlalchemy import WorkflowExecutionMetricRepository
+
 
 @pytest.fixture
 def session():
@@ -50,8 +53,12 @@ async def test_workflow_execution_metric_repository_list(session: AsyncMock):
     repo = WorkflowExecutionMetricRepository(session)
     execution_id = uuid4()
     mock_metrics = [
-        WorkflowExecutionMetric(workflow_execution_id=execution_id, metric_type="m1", metric_value=1.0),
-        WorkflowExecutionMetric(workflow_execution_id=execution_id, metric_type="m2", metric_value=2.0)
+        WorkflowExecutionMetric(
+            workflow_execution_id=execution_id, metric_type="m1", metric_value=1.0
+        ),
+        WorkflowExecutionMetric(
+            workflow_execution_id=execution_id, metric_type="m2", metric_value=2.0
+        ),
     ]
     
     result = Mock()

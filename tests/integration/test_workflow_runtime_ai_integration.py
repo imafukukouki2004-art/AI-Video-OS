@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+
+import pytest
+
+from apps.api.domain.models import WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.domain.models import WorkflowStepStatus, JobStatus
+
 
 @pytest.fixture
 def repositories():
@@ -57,7 +60,8 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
         # Verify job was updated with AI output
         args, kwargs = repositories["job"].update.call_args_list[-1]
         # Repository update is called with (id, data_dict) or (id, schema=data_dict)
-        # Based on runtime.py: await self.job_repository.update(job.id, {"status": JobStatus.COMPLETED, "output_data": result_data})
+        # Based on runtime.py: await self.job_repository.update(job.id, 
+        # {"status": JobStatus.COMPLETED, "output_data": result_data})
         # The data is in args[1]
         update_data = args[1]
         assert "output_data" in update_data

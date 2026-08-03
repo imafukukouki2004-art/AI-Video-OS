@@ -1,17 +1,19 @@
+from collections.abc import AsyncIterator
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock, patch
+from uuid import uuid4
+
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from uuid import uuid4
-from unittest.mock import AsyncMock, Mock, patch
-from datetime import UTC, datetime
 from fastapi import FastAPI
-from collections.abc import AsyncIterator
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.application import create_app
 from apps.api.config import Settings
 from apps.api.dependencies import get_database_session
-from apps.api.domain.models import WorkflowExecution, Workflow
+from apps.api.domain.models import Workflow, WorkflowExecution
+
 
 @pytest.fixture
 def session() -> AsyncSession:
@@ -48,7 +50,6 @@ async def client(app: FastAPI) -> AsyncIterator[AsyncClient]:
 @pytest.mark.asyncio
 async def test_enqueue_workflow_lifecycle_api(client: AsyncClient, session: AsyncMock):
     workflow_id = uuid4()
-    execution_id = uuid4()
     
     # Mock WorkflowRepository.get_by_id
     mock_workflow = Workflow(id=workflow_id, project_id=uuid4(), workflow_type="test")
@@ -81,8 +82,8 @@ async def test_enqueue_workflow_lifecycle_api(client: AsyncClient, session: Asyn
 
 @pytest.mark.asyncio
 async def test_worker_task_lifecycle_execution(session: AsyncMock):
+    from apps.api.domain.models import Workflow
     from apps.worker.tasks import _execute_workflow_execution_async
-    from apps.api.domain.models import WorkflowExecution, Workflow
     
     execution_id = uuid4()
     workflow_id = uuid4()
@@ -115,7 +116,9 @@ async def test_worker_task_lifecycle_execution(session: AsyncMock):
         # Mock runtime to avoid full validation/execution logic complexity in integration test
         with patch("apps.worker.tasks.WorkflowRuntime") as mock_runtime_class:
             mock_runtime = mock_runtime_class.return_value
-            mock_runtime.run = AsyncMock(return_value={"status": "completed", "execution_id": execution_id})
+            mock_runtime.run = AsyncMock(
+                return_value={"status": "completed", "execution_id": execution_id}
+            )
             
             mock_db_instance.dispose = AsyncMock()
             

@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+
+import pytest
+
+from apps.api.domain.models import WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.domain.models import WorkflowStepStatus, JobStatus
+
 
 @pytest.fixture
 def repositories():
@@ -63,8 +66,9 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         MagicMock(content="Output 2", metadata={"provider": "mock"})
     ]
 
-    with patch.object(runtime.validator, "validate") as mock_validate, \
-         patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider) as mock_factory_create:
+    with patch.object(runtime.validator, "validate") as mock_validate, patch(
+        "apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider
+    ):
         
         mock_validate.return_value = MagicMock(valid=True)
         

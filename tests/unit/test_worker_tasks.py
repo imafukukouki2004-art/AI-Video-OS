@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
+
+import pytest
+
 from apps.worker.tasks import _execute_workflow_execution_async
+
 
 @pytest.mark.asyncio
 async def test_execute_workflow_execution_async_success():

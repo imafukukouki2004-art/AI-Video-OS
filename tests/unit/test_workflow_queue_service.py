@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from apps.api.services.workflow_queue import WorkflowQueueService
+
+import pytest
+
 from apps.api.repositories import WorkflowExecutionRepository
+from apps.api.services.workflow_queue import WorkflowQueueService
+
 
 @pytest.fixture
 def execution_repository():
@@ -17,7 +20,9 @@ async def test_enqueue_execution(execution_repository):
     mock_task = MagicMock()
     mock_task.id = "test-task-id"
     
-    with patch("apps.api.services.workflow_queue.celery_app.send_task", return_value=mock_task) as mock_send:
+    with patch(
+        "apps.api.services.workflow_queue.celery_app.send_task", return_value=mock_task
+    ) as mock_send:
         task_id = await service.enqueue_execution(execution_id)
         
         assert task_id == "test-task-id"

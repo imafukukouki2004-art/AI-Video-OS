@@ -1,5 +1,7 @@
 import pytest
-from apps.api.workflow.context import WorkflowContext, VariableResolver
+
+from apps.api.workflow.context import VariableResolver, WorkflowContext
+
 
 def test_workflow_context_set_get():
     context = WorkflowContext()

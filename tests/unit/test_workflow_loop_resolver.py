@@ -1,5 +1,7 @@
 import pytest
-from apps.api.workflow.context import WorkflowContext, VariableResolver
+
+from apps.api.workflow.context import VariableResolver, WorkflowContext
+
 
 def test_variable_resolver_resolve_to_any_list():
     context = WorkflowContext()

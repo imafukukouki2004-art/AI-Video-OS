@@ -1,9 +1,11 @@
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from datetime import UTC, datetime
+
+import pytest
+
+from apps.api.domain.models import WorkflowExecutionStatus, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.domain.models import WorkflowExecutionStatus, WorkflowStepStatus, JobStatus
+
 
 @pytest.fixture
 def repositories():
@@ -75,8 +77,14 @@ async def test_run_validation_failure_with_execution_id(repositories):
         repositories["execution"].update.assert_called()
         # Verify that the execution was marked as FAILED
         # The update might be called multiple times (initial running, then failed)
-        failed_update = next((call for call in repositories["execution"].update.call_args_list 
-                             if call.args[1].get("status") == WorkflowExecutionStatus.FAILED), None)
+        failed_update = next(
+            (
+                call
+                for call in repositories["execution"].update.call_args_list
+                if call.args[1].get("status") == WorkflowExecutionStatus.FAILED
+            ),
+            None,
+        )
         assert failed_update is not None
 
 @pytest.mark.asyncio
@@ -131,6 +139,12 @@ async def test_run_step_failure_persistence(repositories):
         # Check if job was updated to FAILED (this is the 3rd call in side_effect)
         assert repositories["job"].update.call_count >= 3
         # Check if execution was updated to FAILED
-        failed_exec_update = next((call for call in repositories["execution"].update.call_args_list 
-                                 if call.args[1].get("status") == WorkflowExecutionStatus.FAILED), None)
+        failed_exec_update = next(
+            (
+                call
+                for call in repositories["execution"].update.call_args_list
+                if call.args[1].get("status") == WorkflowExecutionStatus.FAILED
+            ),
+            None,
+        )
         assert failed_exec_update is not None
