@@ -17,6 +17,7 @@ from apps.api.repositories import (
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
+    WorkflowArtifactRepository,
 )
 from apps.api.workflow.runtime import WorkflowRuntime
 from apps.worker.celery_app import celery_app
@@ -73,6 +74,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         history_repo = WorkflowExecutionHistoryRepository(session)
         error_repo = WorkflowExecutionErrorRepository(session)
         metric_repo = WorkflowExecutionMetricRepository(session)
+        artifact_repo = WorkflowArtifactRepository(session)
 
         # Initialize runtime
         runtime = WorkflowRuntime(
@@ -82,6 +84,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             history_repo,
             error_repo,
             metric_repo,
+            artifact_repo,
         )
 
         # Get the execution record
