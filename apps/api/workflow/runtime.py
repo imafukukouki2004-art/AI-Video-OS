@@ -5,6 +5,7 @@ import time
 from datetime import UTC, datetime
 from typing import Any
 
+from apps.api.ai_providers import AIProviderFactory
 from apps.api.domain.models import (
     JobStatus,
     Workflow,
@@ -183,11 +184,21 @@ class WorkflowRuntime:
                 if updated_job:
                     job = updated_job
 
-                # 8. Simulate Execution
-                logger.info(f"Simulating execution for job {job.id}")
-
+                # 8. AI Provider Execution
+                logger.info(f"Executing AI Provider for job {job.id} (Step: {step.name})")
+                
+                # Determine provider from step config or default to mock
+                provider_name = step.config.get("provider", "mock")
+                provider = AIProviderFactory.create(provider_name)
+                
+                # Simulate text generation for now as a foundation test
+                ai_res = await provider.generate_text(prompt=step.name, **step.config)
+                
                 # 9. Update Job and Step to COMPLETED
-                result_data = {"result": f"Simulated output for {step.name}"}
+                result_data = {
+                    "result": ai_res.content,
+                    "metadata": ai_res.metadata
+                }
                 updated_job = await self.job_repository.update(
                     job.id,
                     {"status": JobStatus.COMPLETED, "output_data": result_data},
