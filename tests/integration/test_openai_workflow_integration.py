@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -66,6 +68,8 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
     mock_res = MagicMock()
     mock_res.content = "OpenAI response with custom mapping"
     mock_res.metadata = {"provider": "openai"}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
     mock_provider.generate_text.return_value = mock_res
 
     with (
@@ -103,6 +107,7 @@ async def test_workflow_runtime_unsupported_operation_error(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -153,6 +158,7 @@ async def test_mock_provider_compatibility(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()

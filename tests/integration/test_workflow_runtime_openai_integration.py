@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -60,6 +62,8 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
     mock_res = MagicMock()
     mock_res.content = "OpenAI Generated Content"
     mock_res.metadata = {"provider": "openai"}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
     mock_provider.generate_text.return_value = mock_res
 
     with (

@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -55,7 +57,19 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
     repositories["job"].create.return_value = mock_job
     repositories["job"].update.return_value = mock_job
 
-    with patch.object(runtime.validator, "validate") as mock_validate:
+    # Mock AI Provider
+    mock_provider = AsyncMock()
+    mock_res = MagicMock()
+    mock_res.content = "Mock AI output"
+    mock_res.metadata = {"provider": "mock"}
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
+
+    with (
+        patch.object(runtime.validator, "validate") as mock_validate,
+        patch("apps.api.workflow.runtime.AIProviderFactory.create", return_value=mock_provider),
+    ):
         mock_validate.return_value = MagicMock(valid=True)
 
         result = await runtime.run(workflow)

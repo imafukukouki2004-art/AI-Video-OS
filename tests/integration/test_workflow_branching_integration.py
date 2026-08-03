@@ -16,6 +16,7 @@ def repositories():
         "history": AsyncMock(),
         "error": AsyncMock(),
         "metric": AsyncMock(),
+        "artifact": AsyncMock(),
     }
 
 
@@ -28,6 +29,7 @@ async def test_workflow_runtime_branching_true_path(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -78,10 +80,13 @@ async def test_workflow_runtime_branching_true_path(repositories):
 
     # Mock AI Provider
     mock_provider = AsyncMock()
-    mock_provider.generate_text.side_effect = [
-        MagicMock(content="yes", metadata={"provider": "mock"}),  # Step 1
-        MagicMock(content="done", metadata={"provider": "mock"}),  # Step True
-    ]
+    mock_res1 = MagicMock(content="yes", metadata={"provider": "mock"})
+    mock_res1.artifact_type = None
+    mock_res1.asset_id = None
+    mock_res2 = MagicMock(content="done", metadata={"provider": "mock"})
+    mock_res2.artifact_type = None
+    mock_res2.asset_id = None
+    mock_provider.generate_text.side_effect = [mock_res1, mock_res2]
 
     with (
         patch.object(runtime.validator, "validate") as mock_validate,
@@ -114,6 +119,7 @@ async def test_workflow_runtime_branching_false_path(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -164,10 +170,13 @@ async def test_workflow_runtime_branching_false_path(repositories):
 
     # Mock AI Provider
     mock_provider = AsyncMock()
-    mock_provider.generate_text.side_effect = [
-        MagicMock(content="no", metadata={"provider": "mock"}),  # Step 1
-        MagicMock(content="done", metadata={"provider": "mock"}),  # Step False
-    ]
+    mock_res1 = MagicMock(content="no", metadata={"provider": "mock"})
+    mock_res1.artifact_type = None
+    mock_res1.asset_id = None
+    mock_res2 = MagicMock(content="done", metadata={"provider": "mock"})
+    mock_res2.artifact_type = None
+    mock_res2.asset_id = None
+    mock_provider.generate_text.side_effect = [mock_res1, mock_res2]
 
     with (
         patch.object(runtime.validator, "validate") as mock_validate,
@@ -197,6 +206,7 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
         repositories["history"],
         repositories["error"],
         repositories["metric"],
+        repositories["artifact"],
     )
 
     workflow = MagicMock()
@@ -221,9 +231,10 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
     repositories["job"].update = AsyncMock()
 
     mock_provider = AsyncMock()
-    mock_provider.generate_text.return_value = MagicMock(
-        content="yes", metadata={"provider": "mock"}
-    )
+    mock_res = MagicMock(content="yes", metadata={"provider": "mock"})
+    mock_res.artifact_type = None
+    mock_res.asset_id = None
+    mock_provider.generate_text.return_value = mock_res
 
     with (
         patch.object(runtime.validator, "validate") as mock_validate,
