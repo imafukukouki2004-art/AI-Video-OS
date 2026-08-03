@@ -10,9 +10,13 @@ class MockAIProvider(AIProvider):
 
     async def generate_text(self, prompt: str, **kwargs: Any) -> AIResponse:
         """Return a static text response."""
+        metadata = {"provider": "mock", "model": "mock-text-v1"}
+        if "system_prompt" in kwargs:
+            metadata["system_prompt"] = kwargs["system_prompt"]
+
         return AIResponse(
             content=f"Mock response for: {prompt}",
-            metadata={"provider": "mock", "model": "mock-text-v1"},
+            metadata=metadata,
         )
 
     async def generate_image(self, prompt: str, **kwargs: Any) -> AIImageResponse:
