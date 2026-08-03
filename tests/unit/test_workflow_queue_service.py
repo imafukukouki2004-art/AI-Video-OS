@@ -22,7 +22,7 @@ async def test_enqueue_execution(execution_repository):
         
         assert task_id == "test-task-id"
         mock_send.assert_called_once_with(
-            "apps.worker.tasks.execute_workflow",
+            "apps.worker.tasks.execute_workflow_execution",
             args=[str(execution_id)],
             queue="ai-video-os"
         )

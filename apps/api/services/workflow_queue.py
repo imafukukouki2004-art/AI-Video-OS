@@ -19,16 +19,11 @@ class WorkflowQueueService:
         """Dispatch a workflow execution to the Celery worker."""
         logger.info(f"Dispatching execution {execution_id} to queue")
 
-        # In a real implementation, we would dispatch a specific task.
-        # For this foundation ticket, we use the foundation_test task or a placeholder.
-        # We'll define a new task name for workflow execution later, but for now, 
-        # we just demonstrate the dispatch mechanism.
-        
-        # Dispatch the task
+        # Dispatch the workflow execution task to the worker
         task = celery_app.send_task(
-            "apps.worker.tasks.execute_workflow",
+            "apps.worker.tasks.execute_workflow_execution",
             args=[str(execution_id)],
-            queue="ai-video-os"
+            queue="ai-video-os",
         )
         
         # Save the task ID to the execution record
