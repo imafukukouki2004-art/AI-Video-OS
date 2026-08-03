@@ -125,6 +125,9 @@ class WorkflowStepBase(BaseModel):
     step_type: str = Field(..., min_length=1, max_length=100)
     order: int = Field(..., ge=0)
     config: dict[str, Any] = Field(default_factory=dict)
+    condition: str | None = Field(None, max_length=500)
+    next_step_on_true: UUID | None = None
+    next_step_on_false: UUID | None = None
     status: WorkflowStepStatus = WorkflowStepStatus.PENDING
 
 

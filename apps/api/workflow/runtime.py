@@ -28,6 +28,7 @@ from apps.api.repositories import (
     WorkflowStepRepository,
 )
 from apps.api.workflow.context import VariableResolver, WorkflowContext
+from apps.api.workflow.evaluator import ConditionEvaluator
 from apps.api.workflow.validator import WorkflowValidator
 
 logger = logging.getLogger(__name__)
@@ -157,7 +158,13 @@ class WorkflowRuntime:
         success_count = 0
         failure_count = 0
 
-        for step in steps:
+        # Create a map for quick lookup and keep a sorted list for sequential fallback
+        steps_list = list(steps)
+        steps_map = {step.id: step for step in steps_list}
+        current_step = steps_list[0] if steps_list else None
+
+        while current_step:
+            step = current_step
             logger.info(f"Executing step: {step.name} (ID: {step.id}) in execution {execution.id}")
 
             try:
@@ -255,6 +262,40 @@ class WorkflowRuntime:
                 executed_jobs.append(job)
                 success_count += 1
 
+                # Determine next step
+                next_step = None
+                if step.condition:
+                    evaluator = ConditionEvaluator(resolver)
+                    try:
+                        condition_result = evaluator.evaluate(step.condition)
+                        logger.info(
+                            f"Condition evaluation result for step {step.name}: {condition_result}"
+                        )
+
+                        next_step_id = (
+                            step.next_step_on_true if condition_result else step.next_step_on_false
+                        )
+                        if next_step_id:
+                            next_step = steps_map.get(next_step_id)
+                            if not next_step:
+                                raise ValueError(
+                                    f"Target step {next_step_id} not found in workflow"
+                                )
+                    except ValueError as e:
+                        logger.error(f"Condition evaluation failed for step {step.id}: {e!s}")
+                        raise ValueError(f"Condition evaluation failed: {e!s}") from e
+
+                # Sequential fallback
+                if not next_step:
+                    try:
+                        current_index = steps_list.index(step)
+                        if current_index + 1 < len(steps_list):
+                            next_step = steps_list[current_index + 1]
+                    except ValueError:
+                        pass
+
+                current_step = next_step
+
             except Exception as e:
                 logger.exception(f"Step {step.id} failed in execution {execution.id}")
                 failure_count += 1
@@ -264,7 +305,7 @@ class WorkflowRuntime:
                 await self._record_error(
                     execution.id,
                     error_code="STEP_EXECUTION_FAILED",
-                    message=str(e),
+                    message=str(e) or "Unknown error occurred during step execution",
                     error_type=type(e).__name__,
                     step_id=step.id,
                 )

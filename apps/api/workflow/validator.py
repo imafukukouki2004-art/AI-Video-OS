@@ -1,5 +1,7 @@
 """Validator for ensuring workflow definitions are structurally sound."""
 
+import re
+
 from apps.api.domain.models import Workflow, WorkflowStep
 from apps.api.domain.schemas import WorkflowValidationResult
 
@@ -33,7 +35,25 @@ class WorkflowValidator:
         if len(set(orders)) != len(orders):
             errors.append("Workflow contains duplicate step order indices.")
 
-        # 4. Required fields check for each step
+        # 4. Conditional branching validation
+        step_ids = {s.id for s in steps}
+        condition_pattern = re.compile(r"^(.*?)\s*(==|!=)\s*\"(.*?)\"$")
+
+        for step in steps:
+            if step.condition:
+                # Syntax check
+                if not condition_pattern.match(step.condition.strip()):
+                    errors.append(
+                        f"Step '{step.name}' has invalid condition syntax: {step.condition}"
+                    )
+
+                # Reference check
+                if step.next_step_on_true and step.next_step_on_true not in step_ids:
+                    errors.append(f"Step '{step.name}' has invalid next_step_on_true reference.")
+                if step.next_step_on_false and step.next_step_on_false not in step_ids:
+                    errors.append(f"Step '{step.name}' has invalid next_step_on_false reference.")
+
+        # 5. Required fields check for each step
         for i, step in enumerate(steps):
             if not step.name:
                 errors.append(f"Step at index {i} is missing a name.")
