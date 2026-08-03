@@ -26,11 +26,31 @@ class WorkflowContext:
 class VariableResolver:
     """Resolves variables in strings using the workflow context."""
 
-    # Pattern: {{identifier.output}}
-    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+)\.output\s*\}\}")
+    # Pattern: {{identifier.output}} or {{variable}}
+    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.output)?\s*\}\}")
 
     def __init__(self, context: WorkflowContext) -> None:
         self.context = context
+
+    def resolve_to_any(self, text: str) -> Any:
+        """
+        Resolve a single variable to its original type (e.g., list, dict).
+        Useful for evaluating loop sources.
+        """
+        if not text:
+            return text
+
+        # If it's a single variable like "{{step1.output}}", return the actual value
+        match = self.VARIABLE_PATTERN.fullmatch(text.strip())
+        if match:
+            identifier = match.group(1)
+            value = self.context.get_step_output(identifier)
+            if value is None:
+                raise ValueError(f"Unresolved variable: {text}")
+            return value
+
+        # Otherwise, resolve as string interpolation
+        return self.resolve(text)
 
     def resolve(self, text: str) -> str:
         """
@@ -43,10 +63,10 @@ class VariableResolver:
         def replace_match(match: re.Match[str]) -> str:
             identifier = match.group(1)
             value = self.context.get_step_output(identifier)
-            
+
             if value is None:
                 raise ValueError(f"Unresolved variable: {match.group(0)}")
-            
+
             return str(value)
 
         try:

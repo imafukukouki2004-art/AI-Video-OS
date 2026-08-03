@@ -53,6 +53,16 @@ class WorkflowValidator:
                 if step.next_step_on_false and step.next_step_on_false not in step_ids:
                     errors.append(f"Step '{step.name}' has invalid next_step_on_false reference.")
 
+            if step.loop_source:
+                if not step.loop_variable:
+                    errors.append(
+                        f"Step '{step.name}' has loop_source but is missing loop_variable."
+                    )
+                if not re.search(r"\{\{.*?\}\}", step.loop_source):
+                    errors.append(
+                        f"Step '{step.name}' has invalid loop_source (must be a variable)."
+                    )
+
         # 5. Required fields check for each step
         for i, step in enumerate(steps):
             if not step.name:

@@ -128,6 +128,8 @@ class WorkflowStepBase(BaseModel):
     condition: str | None = Field(None, max_length=500)
     next_step_on_true: UUID | None = None
     next_step_on_false: UUID | None = None
+    loop_source: str | None = Field(None, max_length=500)
+    loop_variable: str | None = Field(None, max_length=100)
     status: WorkflowStepStatus = WorkflowStepStatus.PENDING
 
 
@@ -186,6 +188,7 @@ class WorkflowExecutionErrorResponse(WorkflowExecutionErrorBase):
 
     id: UUID
     created_at: datetime
+
 
 class WorkflowExecutionMetricBase(BaseModel):
     workflow_execution_id: UUID

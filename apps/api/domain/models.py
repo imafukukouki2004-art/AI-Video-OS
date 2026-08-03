@@ -123,6 +123,8 @@ class WorkflowStep(Base):
     next_step_on_false: Mapped[UUID | None] = mapped_column(
         ForeignKey("workflow_steps.id"), nullable=True
     )
+    loop_source: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    loop_variable: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[WorkflowStepStatus] = mapped_column(
         Enum(WorkflowStepStatus), default=WorkflowStepStatus.PENDING, nullable=False
     )

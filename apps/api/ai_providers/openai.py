@@ -28,11 +28,11 @@ class OpenAIProvider(AIProvider):
         response = await self.client.chat.completions.create(
             model=model,
             messages=messages,
-            **{k: v for k, v in kwargs.items() if k not in ["model", "provider"]}
+            **{k: v for k, v in kwargs.items() if k not in ["model", "provider"]},
         )
-        
+
         content = response.choices[0].message.content or ""
-        
+
         return AIResponse(
             content=content,
             raw_response=response,
