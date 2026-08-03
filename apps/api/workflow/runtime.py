@@ -27,6 +27,7 @@ from apps.api.repositories import (
     WorkflowExecutionRepository,
     WorkflowStepRepository,
 )
+from apps.api.workflow.context import VariableResolver, WorkflowContext
 from apps.api.workflow.validator import WorkflowValidator
 
 logger = logging.getLogger(__name__)
@@ -99,6 +100,10 @@ class WorkflowRuntime:
         """
         logger.info(f"Starting workflow runtime for workflow: {workflow.id}")
         start_time = time.perf_counter()
+
+        # Initialize Workflow Context and Variable Resolver
+        context = WorkflowContext()
+        resolver = VariableResolver(context)
 
         # 1. Retrieve Steps from Repository
         steps = await self.step_repository.list_by_workflow(workflow.id)
@@ -195,8 +200,18 @@ class WorkflowRuntime:
                 if operation == "text_generation":
                     # Input Mapping: Map prompt and system_prompt from step config
                     # Default to step name if prompt is missing
-                    prompt = step.config.get("prompt", step.name)
-                    system_prompt = step.config.get("system_prompt")
+                    prompt_raw = step.config.get("prompt", step.name)
+                    system_prompt_raw = step.config.get("system_prompt")
+
+                    # Variable Resolution
+                    try:
+                        prompt = resolver.resolve(prompt_raw)
+                        system_prompt = (
+                            resolver.resolve(system_prompt_raw) if system_prompt_raw else None
+                        )
+                    except ValueError as e:
+                        logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
+                        raise ValueError(f"Variable resolution failed: {e!s}") from e
 
                     # Prepare call arguments
                     exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
@@ -214,6 +229,11 @@ class WorkflowRuntime:
                         "result": ai_res.content,
                         "metadata": ai_res.metadata,
                     }
+
+                    # Register output in context for subsequent steps
+                    # Register by both ID and Name to support flexible variable resolution
+                    context.set_step_output(str(step.id), ai_res.content)
+                    context.set_step_output(step.name, ai_res.content)
                 else:
                     logger.error(f"Unsupported operation: {operation}")
                     raise ValueError(f"Unsupported AI operation: {operation}")
