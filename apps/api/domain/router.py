@@ -13,6 +13,7 @@ from apps.api.dependencies import (
     WorkflowExecutionHistoryServiceDependency,
     WorkflowExecutionMetricServiceDependency,
     WorkflowExecutionServiceDependency,
+    WorkflowQueueServiceDependency,
     WorkflowRuntimeServiceDependency,
     WorkflowServiceDependency,
     WorkflowStepServiceDependency,
@@ -28,6 +29,7 @@ from apps.api.domain.schemas import (
     VideoCreate,
     VideoResponse,
     WorkflowCreate,
+    WorkflowEnqueueResponse,
     WorkflowExecutionErrorResponse,
     WorkflowExecutionHistoryResponse,
     WorkflowExecutionMetricResponse,
@@ -213,6 +215,23 @@ async def list_execution_metrics(
     """Retrieve all metrics for a specific execution."""
     metrics = await service.list_by_execution(execution_id)
     return [WorkflowExecutionMetricResponse.model_validate(m) for m in metrics]
+
+
+@router.post(
+    "/workflow-executions/{execution_id}/enqueue",
+    response_model=WorkflowEnqueueResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def enqueue_workflow_execution(
+    execution_id: UUID, service: WorkflowQueueServiceDependency
+) -> WorkflowEnqueueResponse:
+    """Dispatch a workflow execution to the async queue."""
+    task_id = await service.enqueue_execution(execution_id)
+    return WorkflowEnqueueResponse(
+        execution_id=execution_id,
+        task_id=task_id,
+        status="QUEUED",
+    )
 
 
 # --- Jobs ---

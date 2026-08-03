@@ -28,6 +28,7 @@ from apps.api.services import (
     WorkflowExecutionHistoryService,
     WorkflowExecutionMetricService,
     WorkflowExecutionService,
+    WorkflowQueueService,
     WorkflowRuntimeService,
     WorkflowService,
     WorkflowStepService,
@@ -238,6 +239,17 @@ def get_workflow_execution_metric_service(
 
 WorkflowExecutionMetricServiceDependency = Annotated[
     WorkflowExecutionMetricService, Depends(get_workflow_execution_metric_service)
+]
+
+
+def get_workflow_queue_service(
+    repo: WorkflowExecutionRepositoryDependency,
+) -> WorkflowQueueService:
+    return WorkflowQueueService(repo)
+
+
+WorkflowQueueServiceDependency = Annotated[
+    WorkflowQueueService, Depends(get_workflow_queue_service)
 ]
 
 
