@@ -8,11 +8,10 @@ import pytest
 from apps.api.ai_providers.base import AIResponse
 from apps.api.domain.models import (
     Workflow,
+    WorkflowArtifact,
     WorkflowExecution,
     WorkflowExecutionStatus,
     WorkflowStep,
-    WorkflowStepStatus,
-    WorkflowArtifact,
 )
 from apps.api.workflow.runtime import WorkflowRuntime
 
@@ -61,7 +60,9 @@ async def test_workflow_runtime_records_artifact(runtime, mock_repos):
         config={"provider": "mock", "operation": "text_generation", "prompt": "test"}
     )
     
-    execution = WorkflowExecution(id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING)
+    execution = WorkflowExecution(
+        id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING
+    )
     
     mock_repos["step"].list_by_workflow.return_value = [step]
     mock_repos["execution"].get_by_id.return_value = execution
@@ -124,7 +125,9 @@ async def test_workflow_runtime_artifact_reference(runtime, mock_repos):
         }
     )
     
-    execution = WorkflowExecution(id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING)
+    execution = WorkflowExecution(
+        id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING
+    )
     
     mock_repos["step"].list_by_workflow.return_value = [step1, step2]
     mock_repos["execution"].get_by_id.return_value = execution
@@ -172,7 +175,9 @@ async def test_workflow_runtime_invalid_artifact_reference(runtime, mock_repos):
         }
     )
     
-    execution = WorkflowExecution(id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING)
+    execution = WorkflowExecution(
+        id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING
+    )
     
     mock_repos["step"].list_by_workflow.return_value = [step]
     mock_repos["execution"].get_by_id.return_value = execution
