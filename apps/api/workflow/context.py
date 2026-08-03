@@ -63,10 +63,10 @@ class VariableResolver:
         def replace_match(match: re.Match[str]) -> str:
             identifier = match.group(1)
             value = self.context.get_step_output(identifier)
-            
+
             if value is None:
                 raise ValueError(f"Unresolved variable: {match.group(0)}")
-            
+
             return str(value)
 
         try:

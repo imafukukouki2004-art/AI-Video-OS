@@ -21,6 +21,7 @@ class WorkflowQueueService:
 
         # 1. Create WorkflowExecution in PENDING state
         from apps.api.domain.schemas import WorkflowExecutionCreate
+
         execution_in = WorkflowExecutionCreate(workflow_id=workflow_id)
         execution = await self.execution_repository.create(execution_in)
 

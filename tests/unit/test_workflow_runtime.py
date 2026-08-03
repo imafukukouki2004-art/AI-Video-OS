@@ -149,10 +149,11 @@ async def test_workflow_runtime_failure_records_metrics(
     assert result["status"] == "failed"
     assert metric_repository.create.called
     assert metric_repository.create.call_count == 4
-    
+
     # Check failure_count is recorded correctly
     failure_metric = next(
-        call.args[0] for call in metric_repository.create.call_args_list 
+        call.args[0]
+        for call in metric_repository.create.call_args_list
         if call.args[0].metric_type == "failure_count"
     )
     assert failure_metric.metric_value == 1.0

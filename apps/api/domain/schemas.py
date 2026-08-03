@@ -189,6 +189,7 @@ class WorkflowExecutionErrorResponse(WorkflowExecutionErrorBase):
     id: UUID
     created_at: datetime
 
+
 class WorkflowExecutionMetricBase(BaseModel):
     workflow_execution_id: UUID
     metric_type: str = Field(..., min_length=1, max_length=100)
