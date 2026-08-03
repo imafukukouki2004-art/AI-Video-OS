@@ -179,77 +179,102 @@ class WorkflowRuntime:
                     message=f"Step {step.name} started",
                 )
 
-                # 6. Create Job (PENDING) linked to execution and step
-                job_in = JobCreate(
-                    workflow_id=workflow.id,
-                    step_id=step.id,
-                    execution_id=execution.id,
-                    name=step.name,
-                    input_data=step.config,
-                )
-                job = await self.job_repository.create(job_in)
-
-                # 7. Update Job to RUNNING
-                updated_job = await self.job_repository.update(
-                    job.id, {"status": JobStatus.RUNNING}
-                )
-                if updated_job:
-                    job = updated_job
-
-                # 8. AI Provider Execution
-                logger.info(f"Executing AI Provider for job {job.id} (Step: {step.name})")
-
-                # Determine provider and operation from step config
-                provider_name = step.config.get("provider", "mock")
-                operation = step.config.get("operation", "text_generation")
-                provider = AIProviderFactory.create(provider_name)
-
-                if operation == "text_generation":
-                    # Input Mapping: Map prompt and system_prompt from step config
-                    # Default to step name if prompt is missing
-                    prompt_raw = step.config.get("prompt", step.name)
-                    system_prompt_raw = step.config.get("system_prompt")
-
-                    # Variable Resolution
+                # Loop Handling
+                items = [None]  # Default to single execution
+                loop_var = None
+                if step.loop_source:
                     try:
-                        prompt = resolver.resolve(prompt_raw)
-                        system_prompt = (
-                            resolver.resolve(system_prompt_raw) if system_prompt_raw else None
-                        )
+                        source_data = resolver.resolve_to_any(step.loop_source)
+                        if not isinstance(source_data, list):
+                            raise ValueError(f"Loop source must be a list, got {type(source_data)}")
+                        items = source_data
+                        loop_var = step.loop_variable or "item"
+                        logger.info(f"Starting loop for step {step.name} with {len(items)} items")
                     except ValueError as e:
-                        logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
-                        raise ValueError(f"Variable resolution failed: {e!s}") from e
+                        logger.error(f"Loop source resolution failed for step {step.id}: {e!s}")
+                        raise ValueError(f"Loop resolution failed: {e!s}") from e
 
-                    # Prepare call arguments
-                    exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
-                    call_kwargs = {
-                        k: v for k, v in step.config.items() if k not in exclude_keys
-                    }
-                    if system_prompt:
-                        call_kwargs["system_prompt"] = system_prompt
+                iteration_results = []
+                for item in items:
+                    if loop_var:
+                        context.set_step_output(loop_var, item)
 
-                    # AI Execution
-                    ai_res = await provider.generate_text(prompt=prompt, **call_kwargs)
+                    # 6. Create Job (PENDING) linked to execution and step
+                    job_in = JobCreate(
+                        workflow_id=workflow.id,
+                        step_id=step.id,
+                        execution_id=execution.id,
+                        name=f"{step.name} (Iteration)" if loop_var else step.name,
+                        input_data={**step.config, "loop_item": item} if loop_var else step.config,
+                    )
+                    job = await self.job_repository.create(job_in)
 
-                    # 9. Update Job and Step to COMPLETED
-                    result_data = {
-                        "result": ai_res.content,
-                        "metadata": ai_res.metadata,
-                    }
+                    # 7. Update Job to RUNNING
+                    updated_job = await self.job_repository.update(
+                        job.id, {"status": JobStatus.RUNNING}
+                    )
+                    if updated_job:
+                        job = updated_job
 
-                    # Register output in context for subsequent steps
-                    # Register by both ID and Name to support flexible variable resolution
-                    context.set_step_output(str(step.id), ai_res.content)
-                    context.set_step_output(step.name, ai_res.content)
-                else:
-                    logger.error(f"Unsupported operation: {operation}")
-                    raise ValueError(f"Unsupported AI operation: {operation}")
-                updated_job = await self.job_repository.update(
-                    job.id,
-                    {"status": JobStatus.COMPLETED, "output_data": result_data},
-                )
-                if updated_job:
-                    job = updated_job
+                    # 8. AI Provider Execution
+                    logger.info(f"Executing AI Provider for job {job.id} (Step: {step.name})")
+
+                    # Determine provider and operation from step config
+                    provider_name = step.config.get("provider", "mock")
+                    operation = step.config.get("operation", "text_generation")
+                    provider = AIProviderFactory.create(provider_name)
+
+                    if operation == "text_generation":
+                        # Input Mapping: Map prompt and system_prompt from step config
+                        # Default to step name if prompt is missing
+                        prompt_raw = step.config.get("prompt", step.name)
+                        system_prompt_raw = step.config.get("system_prompt")
+
+                        # Variable Resolution
+                        try:
+                            prompt = resolver.resolve(prompt_raw)
+                            system_prompt = (
+                                resolver.resolve(system_prompt_raw) if system_prompt_raw else None
+                            )
+                        except ValueError as e:
+                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
+                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+
+                        # Prepare call arguments
+                        exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
+                        call_kwargs = {
+                            k: v for k, v in step.config.items() if k not in exclude_keys
+                        }
+                        if system_prompt:
+                            call_kwargs["system_prompt"] = system_prompt
+
+                        # AI Execution
+                        ai_res = await provider.generate_text(prompt=prompt, **call_kwargs)
+
+                        # 9. Update Job to COMPLETED
+                        result_data = {
+                            "result": ai_res.content,
+                            "metadata": ai_res.metadata,
+                        }
+                        iteration_results.append(ai_res.content)
+                    else:
+                        logger.error(f"Unsupported operation: {operation}")
+                        raise ValueError(f"Unsupported AI operation: {operation}")
+
+                    updated_job = await self.job_repository.update(
+                        job.id,
+                        {"status": JobStatus.COMPLETED, "output_data": result_data},
+                    )
+                    if updated_job:
+                        job = updated_job
+                    executed_jobs.append(job)
+                    success_count += 1
+
+                # Register final output in context
+                # If it was a loop, the output is a list of results
+                final_output = iteration_results if step.loop_source else iteration_results[0]
+                context.set_step_output(str(step.id), final_output)
+                context.set_step_output(step.name, final_output)
 
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.COMPLETED})
                 await self._record_history(
@@ -259,8 +284,6 @@ class WorkflowRuntime:
                     step_id=step.id,
                     message=f"Step {step.name} completed",
                 )
-                executed_jobs.append(job)
-                success_count += 1
 
                 # Determine next step
                 next_step = None
