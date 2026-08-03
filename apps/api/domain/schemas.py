@@ -212,6 +212,7 @@ class WorkflowEnqueueResponse(BaseModel):
     task_id: str
     status: str
 
+
 class WorkflowArtifactBase(BaseModel):
     workflow_execution_id: UUID
     workflow_step_id: UUID | None = None
