@@ -13,6 +13,7 @@ from apps.api.repositories import (
     JobRepository,
     ProjectRepository,
     VideoRepository,
+    WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionMetricRepository,
@@ -24,6 +25,7 @@ from apps.api.services import (
     JobService,
     ProjectService,
     VideoService,
+    WorkflowArtifactService,
     WorkflowExecutionErrorService,
     WorkflowExecutionHistoryService,
     WorkflowExecutionMetricService,
@@ -161,6 +163,17 @@ WorkflowExecutionMetricRepositoryDependency = Annotated[
 ]
 
 
+def get_workflow_artifact_repository(
+    session: DatabaseSessionDependency,
+) -> WorkflowArtifactRepository:
+    return WorkflowArtifactRepository(session)
+
+
+WorkflowArtifactRepositoryDependency = Annotated[
+    WorkflowArtifactRepository, Depends(get_workflow_artifact_repository)
+]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -242,6 +255,17 @@ WorkflowExecutionMetricServiceDependency = Annotated[
 ]
 
 
+def get_workflow_artifact_service(
+    repo: WorkflowArtifactRepositoryDependency,
+) -> WorkflowArtifactService:
+    return WorkflowArtifactService(repo)
+
+
+WorkflowArtifactServiceDependency = Annotated[
+    WorkflowArtifactService, Depends(get_workflow_artifact_service)
+]
+
+
 def get_workflow_queue_service(
     repo: WorkflowExecutionRepositoryDependency,
 ) -> WorkflowQueueService:
@@ -273,9 +297,17 @@ def get_workflow_runtime_service(
     history_repo: WorkflowExecutionHistoryRepositoryDependency,
     error_repo: WorkflowExecutionErrorRepositoryDependency,
     metric_repo: WorkflowExecutionMetricRepositoryDependency,
+    artifact_repo: WorkflowArtifactRepositoryDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
-        workflow_repo, job_repo, execution_repo, step_repo, history_repo, error_repo, metric_repo
+        workflow_repo,
+        job_repo,
+        execution_repo,
+        step_repo,
+        history_repo,
+        error_repo,
+        metric_repo,
+        artifact_repo,
     )
 
 

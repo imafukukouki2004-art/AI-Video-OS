@@ -12,6 +12,7 @@ from apps.api.domain.models import (
     Project,
     Video,
     Workflow,
+    WorkflowArtifact,
     WorkflowExecution,
     WorkflowExecutionError,
     WorkflowExecutionHistory,
@@ -23,6 +24,7 @@ from apps.api.domain.schemas import (
     ProjectCreate,
     ProjectUpdate,
     VideoCreate,
+    WorkflowArtifactCreate,
     WorkflowCreate,
     WorkflowExecutionCreate,
     WorkflowExecutionErrorCreate,
@@ -202,6 +204,29 @@ class WorkflowExecutionMetricRepository(
             select(self.model)
             .where(self.model.workflow_execution_id == execution_id)
             .where(self.model.metric_type == metric_type)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
+
+class WorkflowArtifactRepository(
+    SQLAlchemyRepository[WorkflowArtifact, WorkflowArtifactCreate, Any]
+):
+    def __init__(self, session: AsyncSession) -> None:
+        super().__init__(session, WorkflowArtifact)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowArtifact]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_execution_id == execution_id)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
+    async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowArtifact]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_step_id == step_id)
             .order_by(self.model.created_at)
         )
         return result.scalars().all()

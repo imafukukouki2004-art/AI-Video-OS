@@ -14,6 +14,7 @@ from apps.api.domain.models import (
 )
 from apps.api.domain.schemas import (
     JobCreate,
+    WorkflowArtifactCreate,
     WorkflowExecutionCreate,
     WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
@@ -21,6 +22,7 @@ from apps.api.domain.schemas import (
 )
 from apps.api.repositories import (
     JobRepository,
+    WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionMetricRepository,
@@ -45,6 +47,7 @@ class WorkflowRuntime:
         history_repository: WorkflowExecutionHistoryRepository,
         error_repository: WorkflowExecutionErrorRepository,
         metric_repository: WorkflowExecutionMetricRepository,
+        artifact_repository: WorkflowArtifactRepository,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -52,6 +55,7 @@ class WorkflowRuntime:
         self.history_repository = history_repository
         self.error_repository = error_repository
         self.metric_repository = metric_repository
+        self.artifact_repository = artifact_repository
         self.validator = WorkflowValidator()
 
     async def _record_history(
@@ -93,6 +97,23 @@ class WorkflowRuntime:
             workflow_execution_id=execution_id, metric_type=metric_type, metric_value=value
         )
         await self.metric_repository.create(metric_in)
+
+    async def _record_artifact(
+        self,
+        execution_id: Any,
+        step_id: Any,
+        artifact_type: str,
+        asset_id: Any | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> Any:
+        artifact_in = WorkflowArtifactCreate(
+            workflow_execution_id=execution_id,
+            workflow_step_id=step_id,
+            artifact_type=artifact_type,
+            asset_id=asset_id,
+            metadata_data=metadata or {},
+        )
+        return await self.artifact_repository.create(artifact_in)
 
     async def run(self, workflow: Workflow, execution_id: Any | None = None) -> dict[str, Any]:
         """
@@ -195,6 +216,7 @@ class WorkflowRuntime:
                         raise ValueError(f"Loop resolution failed: {e!s}") from e
 
                 iteration_results = []
+                job = None
                 for item in items:
                     if loop_var:
                         context.set_step_output(loop_var, item)
@@ -224,9 +246,9 @@ class WorkflowRuntime:
                     operation = step.config.get("operation", "text_generation")
                     provider = AIProviderFactory.create(provider_name)
 
+                    result_data = {}
                     if operation == "text_generation":
-                        # Input Mapping: Map prompt and system_prompt from step config
-                        # Default to step name if prompt is missing
+                        # Input Mapping
                         prompt_raw = step.config.get("prompt", step.name)
                         system_prompt_raw = step.config.get("system_prompt")
 
@@ -257,6 +279,24 @@ class WorkflowRuntime:
                             "metadata": ai_res.metadata,
                         }
                         iteration_results.append(ai_res.content)
+
+                        # Artifact Handling
+                        if ai_res.artifact_type:
+                            artifact = await self._record_artifact(
+                                execution_id=execution.id,
+                                step_id=step.id,
+                                artifact_type=ai_res.artifact_type,
+                                asset_id=ai_res.asset_id,
+                                metadata=ai_res.metadata,
+                            )
+                            # Register in context
+                            context.set_step_artifact(str(step.id), artifact.id)
+                            context.set_step_artifact(step.name, artifact.id)
+
+                        if ai_res.asset_id:
+                            context.set_step_asset(str(step.id), ai_res.asset_id)
+                            context.set_step_asset(step.name, ai_res.asset_id)
+
                     else:
                         logger.error(f"Unsupported operation: {operation}")
                         raise ValueError(f"Unsupported AI operation: {operation}")
@@ -271,7 +311,6 @@ class WorkflowRuntime:
                     success_count += 1
 
                 # Register final output in context
-                # If it was a loop, the output is a list of results
                 final_output = iteration_results if step.loop_source else iteration_results[0]
                 context.set_step_output(str(step.id), final_output)
                 context.set_step_output(step.name, final_output)
@@ -323,8 +362,7 @@ class WorkflowRuntime:
                 logger.exception(f"Step {step.id} failed in execution {execution.id}")
                 failure_count += 1
 
-                # Integrated failure flow:
-                # A. Create Error Record
+                # Integrated failure flow
                 await self._record_error(
                     execution.id,
                     error_code="STEP_EXECUTION_FAILED",
@@ -337,17 +375,17 @@ class WorkflowRuntime:
                 if "job" in locals() and job:
                     await self.job_repository.update(job.id, {"status": JobStatus.FAILED})
 
-                # B. Update Step Status
+                # Update Step Status
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
 
-                # C. Update Execution Status to FAILED
+                # Update Execution Status to FAILED
                 from_exec_status = str(execution.status)
                 await self.execution_repository.update(
                     execution.id,
                     {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
                 )
 
-                # D. Record History
+                # Record History
                 await self._record_history(
                     execution.id,
                     "running",
@@ -359,7 +397,7 @@ class WorkflowRuntime:
                     execution.id, from_exec_status, "failed", message=f"Execution failed: {e!s}"
                 )
 
-                # E. Record Metrics even on failure
+                # Record Metrics even on failure
                 end_time = time.perf_counter()
                 duration_ms = (end_time - start_time) * 1000
                 await self._record_metric(execution.id, "duration_ms", duration_ms)
