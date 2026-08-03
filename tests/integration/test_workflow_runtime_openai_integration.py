@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from apps.api.domain.models import WorkflowStepStatus
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -33,11 +33,14 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "OpenAI Step"
-    step.config = {"provider": "openai", "temperature": 0.7}
-    step.status = WorkflowStepStatus.PENDING
+    step = WorkflowStep(
+        id=uuid4(),
+        name="OpenAI Step",
+        step_type="ai",
+        order=1,
+        config={"provider": "openai", "temperature": 0.7},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
 

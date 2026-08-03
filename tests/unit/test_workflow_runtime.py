@@ -142,7 +142,8 @@ async def test_workflow_runtime_failure_records_metrics(
 
     # Force failure during job update
     job_repository.create.return_value = AsyncMock(id=uuid4())
-    job_repository.update.side_effect = Exception("Simulated failure")
+    # First call fails, second (failure update) succeeds
+    job_repository.update.side_effect = [Exception("Simulated failure"), AsyncMock(id=uuid4())]
 
     result = await runtime.run(workflow)
 

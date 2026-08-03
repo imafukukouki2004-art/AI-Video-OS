@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from apps.api.domain.models import WorkflowStepStatus
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -33,17 +33,20 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "AI Text Step"
-    step.config = {
-        "provider": "openai",
-        "operation": "text_generation",
-        "prompt": "Custom Prompt",
-        "system_prompt": "You are a helpful assistant",
-        "temperature": 0.5,
-    }
-    step.status = WorkflowStepStatus.PENDING
+    step = WorkflowStep(
+        id=uuid4(),
+        name="AI Text Step",
+        step_type="ai",
+        order=1,
+        config={
+            "provider": "openai",
+            "operation": "text_generation",
+            "prompt": "Custom Prompt",
+            "system_prompt": "You are a helpful assistant",
+            "temperature": 0.5,
+        },
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
 
@@ -105,11 +108,14 @@ async def test_workflow_runtime_unsupported_operation_error(repositories):
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "Invalid Step"
-    step.config = {"operation": "unsupported_op"}
-    step.status = WorkflowStepStatus.PENDING
+    step = WorkflowStep(
+        id=uuid4(),
+        name="Invalid Step",
+        step_type="ai",
+        order=1,
+        config={"operation": "unsupported_op"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
 
@@ -152,15 +158,19 @@ async def test_mock_provider_compatibility(repositories):
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "Mock Step"
-    step.config = {
-        "provider": "mock",
-        "operation": "text_generation",
-        "prompt": "Mock Prompt",
-        "system_prompt": "Mock System",
-    }
+    step = WorkflowStep(
+        id=uuid4(),
+        name="Mock Step",
+        step_type="ai",
+        order=1,
+        config={
+            "provider": "mock",
+            "operation": "text_generation",
+            "prompt": "Mock Prompt",
+            "system_prompt": "Mock System",
+        },
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
     repositories["execution"].create.return_value = MagicMock(id=uuid4(), status="pending")

@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from apps.api.domain.models import WorkflowStepStatus
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -34,22 +34,28 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
     workflow.id = uuid4()
 
     # Step 1: Generates text
-    step1 = MagicMock()
-    step1.id = uuid4()
-    step1.name = "Step1"
-    step1.config = {"provider": "mock", "operation": "text_generation", "prompt": "Prompt 1"}
-    step1.status = WorkflowStepStatus.PENDING
+    step1 = WorkflowStep(
+        id=uuid4(),
+        name="Step1",
+        step_type="ai",
+        order=1,
+        config={"provider": "mock", "operation": "text_generation", "prompt": "Prompt 1"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Step 2: Uses Step 1's output
-    step2 = MagicMock()
-    step2.id = uuid4()
-    step2.name = "Step2"
-    step2.config = {
-        "provider": "mock",
-        "operation": "text_generation",
-        "prompt": "Summarize this: {{Step1.output}}",
-    }
-    step2.status = WorkflowStepStatus.PENDING
+    step2 = WorkflowStep(
+        id=uuid4(),
+        name="Step2",
+        step_type="ai",
+        order=2,
+        config={
+            "provider": "mock",
+            "operation": "text_generation",
+            "prompt": "Summarize this: {{Step1.output}}",
+        },
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step1, step2]
 
@@ -99,10 +105,14 @@ async def test_workflow_runtime_unresolved_variable_error_persistence(repositori
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "ErrorStep"
-    step.config = {"prompt": "Use missing: {{missing.output}}"}
+    step = WorkflowStep(
+        id=uuid4(),
+        name="ErrorStep",
+        step_type="ai",
+        order=1,
+        config={"prompt": "Use missing: {{missing.output}}"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
     repositories["execution"].create.return_value = MagicMock(id=uuid4(), status="pending")

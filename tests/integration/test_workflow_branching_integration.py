@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from apps.api.domain.models import WorkflowStepStatus
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -37,30 +37,37 @@ async def test_workflow_runtime_branching_true_path(repositories):
     step_false_id = uuid4()
 
     # Step 1: Generates "yes"
-    step1 = MagicMock()
-    step1.id = uuid4()
-    step1.name = "Step1"
-    step1.config = {"provider": "mock", "operation": "text_generation"}
-    step1.condition = '{{Step1.output}} == "yes"'
-    step1.next_step_on_true = step_true_id
-    step1.next_step_on_false = step_false_id
-    step1.status = WorkflowStepStatus.PENDING
+    step1 = WorkflowStep(
+        id=uuid4(),
+        name="Step1",
+        step_type="ai",
+        order=1,
+        config={"provider": "mock", "operation": "text_generation"},
+        condition='{{Step1.output}} == "yes"',
+        next_step_on_true=step_true_id,
+        next_step_on_false=step_false_id,
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Step True: Should be executed
-    step_true = MagicMock()
-    step_true.id = step_true_id
-    step_true.name = "StepTrue"
-    step_true.config = {"provider": "mock"}
-    step_true.condition = None
-    step_true.status = WorkflowStepStatus.PENDING
+    step_true = WorkflowStep(
+        id=step_true_id,
+        name="StepTrue",
+        step_type="ai",
+        order=3,
+        config={"provider": "mock"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Step False: Should NOT be executed
-    step_false = MagicMock()
-    step_false.id = step_false_id
-    step_false.name = "StepFalse"
-    step_false.config = {"provider": "mock"}
-    step_false.condition = None
-    step_false.status = WorkflowStepStatus.PENDING
+    step_false = WorkflowStep(
+        id=step_false_id,
+        name="StepFalse",
+        step_type="ai",
+        order=2,
+        config={"provider": "mock"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Order: 1, False, True. Branching from 1 to True will skip False.
     repositories["step"].list_by_workflow.return_value = [step1, step_false, step_true]
@@ -116,30 +123,37 @@ async def test_workflow_runtime_branching_false_path(repositories):
     step_false_id = uuid4()
 
     # Step 1: Generates "no"
-    step1 = MagicMock()
-    step1.id = uuid4()
-    step1.name = "Step1"
-    step1.config = {"provider": "mock", "operation": "text_generation"}
-    step1.condition = '{{Step1.output}} == "yes"'
-    step1.next_step_on_true = step_true_id
-    step1.next_step_on_false = step_false_id
-    step1.status = WorkflowStepStatus.PENDING
+    step1 = WorkflowStep(
+        id=uuid4(),
+        name="Step1",
+        step_type="ai",
+        order=1,
+        config={"provider": "mock", "operation": "text_generation"},
+        condition='{{Step1.output}} == "yes"',
+        next_step_on_true=step_true_id,
+        next_step_on_false=step_false_id,
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Step True: Should NOT be executed
-    step_true = MagicMock()
-    step_true.id = step_true_id
-    step_true.name = "StepTrue"
-    step_true.config = {"provider": "mock"}
-    step_true.condition = None
-    step_true.status = WorkflowStepStatus.PENDING
+    step_true = WorkflowStep(
+        id=step_true_id,
+        name="StepTrue",
+        step_type="ai",
+        order=2,
+        config={"provider": "mock"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Step False: Should be executed
-    step_false = MagicMock()
-    step_false.id = step_false_id
-    step_false.name = "StepFalse"
-    step_false.config = {"provider": "mock"}
-    step_false.condition = None
-    step_false.status = WorkflowStepStatus.PENDING
+    step_false = WorkflowStep(
+        id=step_false_id,
+        name="StepFalse",
+        step_type="ai",
+        order=3,
+        config={"provider": "mock"},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     # Order: 1, True, False. Branching from 1 to False will skip True.
     repositories["step"].list_by_workflow.return_value = [step1, step_true, step_false]
@@ -189,12 +203,16 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
     workflow.id = uuid4()
 
     # Step 1: Points to non-existent target
-    step1 = MagicMock()
-    step1.id = uuid4()
-    step1.name = "Step1"
-    step1.config = {"provider": "mock"}
-    step1.condition = '{{Step1.output}} == "yes"'
-    step1.next_step_on_true = uuid4()  # Missing
+    step1 = WorkflowStep(
+        id=uuid4(),
+        name="Step1",
+        step_type="ai",
+        order=1,
+        config={"provider": "mock"},
+        condition='{{Step1.output}} == "yes"',
+        next_step_on_true=uuid4(),  # Missing
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step1]
     repositories["execution"].create.return_value = MagicMock(id=uuid4(), status="pending")

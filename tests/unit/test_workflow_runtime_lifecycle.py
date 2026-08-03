@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from apps.api.domain.models import WorkflowExecutionStatus, WorkflowStepStatus
+from apps.api.domain.models import WorkflowExecutionStatus, WorkflowStep, WorkflowStepStatus
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -104,11 +104,14 @@ async def test_run_step_failure_persistence(repositories):
     workflow = MagicMock()
     workflow.id = uuid4()
 
-    step = MagicMock()
-    step.id = uuid4()
-    step.name = "Test Step"
-    step.config = {}
-    step.status = WorkflowStepStatus.PENDING
+    step = WorkflowStep(
+        id=uuid4(),
+        name="Test Step",
+        step_type="ai",
+        order=1,
+        config={},
+        status=WorkflowStepStatus.PENDING,
+    )
 
     repositories["step"].list_by_workflow.return_value = [step]
 
