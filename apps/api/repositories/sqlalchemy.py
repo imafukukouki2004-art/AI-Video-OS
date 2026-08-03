@@ -15,6 +15,7 @@ from apps.api.domain.models import (
     WorkflowExecution,
     WorkflowExecutionError,
     WorkflowExecutionHistory,
+    WorkflowExecutionMetric,
     WorkflowStep,
 )
 from apps.api.domain.schemas import (
@@ -26,6 +27,7 @@ from apps.api.domain.schemas import (
     WorkflowExecutionCreate,
     WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
+    WorkflowExecutionMetricCreate,
     WorkflowStepCreate,
 )
 
@@ -174,6 +176,32 @@ class WorkflowExecutionErrorRepository(
         result = await self.session.execute(
             select(self.model)
             .where(self.model.workflow_step_id == step_id)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
+
+class WorkflowExecutionMetricRepository(
+    SQLAlchemyRepository[WorkflowExecutionMetric, WorkflowExecutionMetricCreate, Any]
+):
+    def __init__(self, session: AsyncSession) -> None:
+        super().__init__(session, WorkflowExecutionMetric)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowExecutionMetric]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_execution_id == execution_id)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
+    async def list_by_type(
+        self, execution_id: UUID, metric_type: str
+    ) -> Sequence[WorkflowExecutionMetric]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_execution_id == execution_id)
+            .where(self.model.metric_type == metric_type)
             .order_by(self.model.created_at)
         )
         return result.scalars().all()

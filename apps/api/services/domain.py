@@ -12,6 +12,7 @@ from apps.api.domain.models import (
     WorkflowExecution,
     WorkflowExecutionError,
     WorkflowExecutionHistory,
+    WorkflowExecutionMetric,
     WorkflowStep,
 )
 from apps.api.domain.schemas import (
@@ -23,6 +24,7 @@ from apps.api.domain.schemas import (
     WorkflowExecutionCreate,
     WorkflowExecutionErrorCreate,
     WorkflowExecutionHistoryCreate,
+    WorkflowExecutionMetricCreate,
     WorkflowStepCreate,
 )
 from apps.api.repositories import (
@@ -31,6 +33,7 @@ from apps.api.repositories import (
     VideoRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
+    WorkflowExecutionMetricRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -127,3 +130,22 @@ class WorkflowExecutionErrorService(
     async def list_by_step(self, step_id: UUID) -> Sequence[WorkflowExecutionError]:
         repo = cast(WorkflowExecutionErrorRepository, self.repository)
         return await repo.list_by_step(step_id)
+
+
+class WorkflowExecutionMetricService(
+    BaseService[WorkflowExecutionMetric, WorkflowExecutionMetricCreate, Any]
+):
+    """Service for workflow execution metric management."""
+
+    def __init__(self, repository: WorkflowExecutionMetricRepository) -> None:
+        super().__init__(repository)
+
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[WorkflowExecutionMetric]:
+        repo = cast(WorkflowExecutionMetricRepository, self.repository)
+        return await repo.list_by_execution(execution_id)
+
+    async def list_by_type(
+        self, execution_id: UUID, metric_type: str
+    ) -> Sequence[WorkflowExecutionMetric]:
+        repo = cast(WorkflowExecutionMetricRepository, self.repository)
+        return await repo.list_by_type(execution_id, metric_type)

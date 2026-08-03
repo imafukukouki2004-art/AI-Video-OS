@@ -201,6 +201,9 @@ class WorkflowExecution(Base):
     errors: Mapped[list["WorkflowExecutionError"]] = relationship(
         back_populates="execution", cascade="all, delete-orphan"
     )
+    metrics: Mapped[list["WorkflowExecutionMetric"]] = relationship(
+        back_populates="execution", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowExecutionHistory(Base):
@@ -247,3 +250,21 @@ class WorkflowExecutionError(Base):
 
     execution: Mapped["WorkflowExecution"] = relationship(back_populates="errors")
     step: Mapped["WorkflowStep | None"] = relationship()
+
+
+class WorkflowExecutionMetric(Base):
+    """Quantitative metric for a workflow execution."""
+
+    __tablename__ = "workflow_execution_metrics"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    workflow_execution_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=False
+    )
+    metric_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    metric_value: Mapped[float] = mapped_column(nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+
+    execution: Mapped["WorkflowExecution"] = relationship(back_populates="metrics")
