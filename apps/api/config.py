@@ -56,6 +56,8 @@ class Settings(BaseSettings):
     storage_presigned_expiry_seconds: int = Field(default=900, ge=60, le=604_800)
     storage_connect_timeout_seconds: int = Field(default=3, ge=1, le=30)
     storage_read_timeout_seconds: int = Field(default=10, ge=1, le=120)
+    openai_api_key: SecretStr = Field(default_factory=lambda: SecretStr("sk-dummy"))
+    openai_model: str = "gpt-4o"
 
 
 @lru_cache
