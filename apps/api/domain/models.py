@@ -116,6 +116,13 @@ class WorkflowStep(Base):
     step_type: Mapped[str] = mapped_column(String(100), nullable=False)
     order: Mapped[int] = mapped_column(Integer, nullable=False)
     config: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
+    condition: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    next_step_on_true: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_steps.id"), nullable=True
+    )
+    next_step_on_false: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_steps.id"), nullable=True
+    )
     status: Mapped[WorkflowStepStatus] = mapped_column(
         Enum(WorkflowStepStatus), default=WorkflowStepStatus.PENDING, nullable=False
     )
