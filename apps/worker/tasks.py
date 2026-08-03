@@ -11,13 +11,13 @@ from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.repositories import (
     JobRepository,
+    WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
     WorkflowExecutionHistoryRepository,
     WorkflowExecutionMetricRepository,
     WorkflowExecutionRepository,
     WorkflowRepository,
     WorkflowStepRepository,
-    WorkflowArtifactRepository,
 )
 from apps.api.workflow.runtime import WorkflowRuntime
 from apps.worker.celery_app import celery_app
