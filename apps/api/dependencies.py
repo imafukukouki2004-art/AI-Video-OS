@@ -307,6 +307,7 @@ def get_workflow_runtime_service(
     metric_repo: WorkflowExecutionMetricRepositoryDependency,
     artifact_repo: WorkflowArtifactRepositoryDependency,
     asset_repo: AssetRepositoryDependency,
+    storage: StorageDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -318,6 +319,7 @@ def get_workflow_runtime_service(
         metric_repo,
         artifact_repo,
         asset_repo,
+        storage,
     )
 
 

@@ -20,6 +20,7 @@ from apps.api.repositories import (
     WorkflowRepository,
     WorkflowStepRepository,
 )
+from apps.api.storage.adapter import S3ObjectStorage
 from apps.api.workflow.runtime import WorkflowRuntime
 from apps.worker.celery_app import celery_app
 
@@ -66,6 +67,9 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
     settings = get_settings()
     db = Database(settings)
 
+    # Initialize storage
+    storage = S3ObjectStorage(settings)
+
     async with db.session_factory() as session:
         # Initialize repositories
         workflow_repo = WorkflowRepository(session)
@@ -88,6 +92,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             metric_repo,
             artifact_repo,
             asset_repo,
+            storage,
         )
 
         # Get the execution record
@@ -119,5 +124,6 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             )
             return {"status": "failed", "error": str(e)}
         finally:
-            # Worker cleanup - Dispose database engine
+            # Worker cleanup - Dispose database engine and close storage
+            await storage.close()
             await db.dispose()

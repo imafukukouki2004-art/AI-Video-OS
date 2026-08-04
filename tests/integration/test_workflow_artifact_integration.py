@@ -1,6 +1,6 @@
 """Integration tests for Workflow Artifact registration and reference."""
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
 import pytest
@@ -41,6 +41,7 @@ def runtime(mock_repos):
         mock_repos["metric"],
         mock_repos["artifact"],
         mock_repos["asset"],
+        MagicMock(),
     )
 
 

@@ -17,6 +17,7 @@ from apps.api.repositories import (
     WorkflowRepository,
     WorkflowStepRepository,
 )
+from apps.api.storage import ObjectStorage
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -34,6 +35,7 @@ class WorkflowRuntimeService:
         metric_repository: WorkflowExecutionMetricRepository,
         artifact_repository: WorkflowArtifactRepository,
         asset_repository: AssetRepository,
+        storage: ObjectStorage,
     ) -> None:
         self.workflow_repository = workflow_repository
         self.runtime = WorkflowRuntime(
@@ -45,6 +47,7 @@ class WorkflowRuntimeService:
             metric_repository,
             artifact_repository,
             asset_repository,
+            storage,
         )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:

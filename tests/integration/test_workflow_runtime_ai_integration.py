@@ -32,7 +32,8 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-    )
+            MagicMock(),
+        )
 
     workflow = MagicMock()
     workflow.id = uuid4()

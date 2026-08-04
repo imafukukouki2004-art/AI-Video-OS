@@ -32,7 +32,8 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-    )
+            MagicMock(),
+        )
 
     workflow = MagicMock()
     workflow.id = uuid4()
@@ -111,7 +112,8 @@ async def test_workflow_runtime_unsupported_operation_error(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-    )
+            MagicMock(),
+        )
 
     workflow = MagicMock()
     workflow.id = uuid4()
@@ -163,7 +165,8 @@ async def test_mock_provider_compatibility(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-    )
+            MagicMock(),
+        )
 
     workflow = MagicMock()
     workflow.id = uuid4()

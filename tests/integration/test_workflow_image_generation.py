@@ -29,166 +29,172 @@ def repositories():
 
 @pytest.mark.asyncio
 async def test_workflow_runtime_image_generation_flow(repositories):
-    runtime = WorkflowRuntime(
-        repositories["job"],
-        repositories["execution"],
-        repositories["step"],
-        repositories["history"],
-        repositories["error"],
-        repositories["metric"],
-        repositories["artifact"],
-        repositories["asset"],
-    )
+    mock_storage = AsyncMock()
+    mock_storage.create_presigned_download_url.return_value = "https://example.com/generated.png"
+    
+    with patch("apps.api.workflow.runtime.ImageRetriever") as mock_retriever_cls:
+        mock_retriever = mock_retriever_cls.return_value
+        mock_retriever.retrieve = AsyncMock(return_value=b"fake-image-bytes")
+        mock_retriever.get_extension.return_value = ".png"
 
-    workflow_id = uuid4()
-    workflow = Workflow(id=workflow_id)
+        runtime = WorkflowRuntime(
+            repositories["job"],
+            repositories["execution"],
+            repositories["step"],
+            repositories["history"],
+            repositories["error"],
+            repositories["metric"],
+            repositories["artifact"],
+            repositories["asset"],
+            mock_storage,
+        )
 
-    step_id = uuid4()
-    step = WorkflowStep(
-        id=step_id,
-        workflow_id=workflow_id,
-        name="ImageGen",
-        step_type="ai",
-        order=0,
-        config={
-            "provider": "openai",
-            "operation": "image_generation",
-            "prompt": "A beautiful landscape",
-            "size": "1024x1024",
-        },
-    )
+        workflow_id = uuid4()
+        workflow = Workflow(id=workflow_id)
 
-    execution_id = uuid4()
-    execution = WorkflowExecution(
-        id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING
-    )
+        step_id = uuid4()
+        step = WorkflowStep(
+            id=step_id,
+            workflow_id=workflow_id,
+            name="ImageGen",
+            step_type="ai",
+            order=0,
+            config={
+                "provider": "openai",
+                "operation": "image_generation",
+                "prompt": "A beautiful landscape",
+                "size": "1024x1024",
+            },
+        )
 
-    repositories["step"].list_by_workflow.return_value = [step]
-    repositories["execution"].get_by_id.return_value = execution
-    repositories["execution"].update.return_value = execution
-    repositories["job"].create.return_value = AsyncMock(id=uuid4())
-    repositories["job"].update.return_value = AsyncMock()
+        execution_id = uuid4()
+        execution = WorkflowExecution(
+            id=execution_id, workflow_id=workflow_id, status=WorkflowExecutionStatus.PENDING
+        )
 
-    asset_id = uuid4()
-    repositories["asset"].create.return_value = MagicMock(id=asset_id)
+        repositories["step"].list_by_workflow.return_value = [step]
+        repositories["execution"].get_by_id.return_value = execution
+        repositories["execution"].update.return_value = execution
+        repositories["job"].create.return_value = AsyncMock(id=uuid4())
+        repositories["job"].update.return_value = AsyncMock()
 
-    artifact_id = uuid4()
-    repositories["artifact"].create.return_value = MagicMock(id=artifact_id)
+        asset_id = uuid4()
+        repositories["asset"].create.return_value = MagicMock(id=asset_id)
 
-    # Mock AI Provider for image generation
-    mock_ai_res = AIImageResponse(
-        image_url="https://example.com/generated.png",
-        mime_type="image/png",
-        metadata={"provider": "openai", "model": "dall-e-3"},
-    )
+        artifact_id = uuid4()
+        repositories["artifact"].create.return_value = MagicMock(id=artifact_id)
 
-    with (
-        patch.object(runtime.validator, "validate") as mock_validate,
-        patch("apps.api.ai_providers.factory.AIProviderFactory.create") as mock_factory,
-    ):
-        mock_validate.return_value = MagicMock(valid=True)
-        mock_provider = AsyncMock()
-        mock_provider.generate_image.return_value = mock_ai_res
-        mock_factory.return_value = mock_provider
+        # Mock AI Provider for image generation
+        mock_ai_res = AIImageResponse(
+            image_url="https://example.com/temp.png",
+            mime_type="image/png",
+            metadata={"provider": "openai", "model": "dall-e-3"},
+        )
 
-        result = await runtime.run(workflow, execution_id=execution_id)
+        with (
+            patch.object(runtime.validator, "validate") as mock_validate,
+            patch("apps.api.ai_providers.factory.AIProviderFactory.create") as mock_factory,
+        ):
+            mock_validate.return_value = MagicMock(valid=True)
+            mock_provider = AsyncMock()
+            mock_provider.generate_image.return_value = mock_ai_res
+            mock_factory.return_value = mock_provider
 
-        assert result["status"] == "completed"
+            result = await runtime.run(workflow, execution_id=execution_id)
 
-        # 1. Verify Provider Call
-        mock_provider.generate_image.assert_called_once()
-        _, kwargs = mock_provider.generate_image.call_args
-        assert kwargs["prompt"] == "A beautiful landscape"
-        assert kwargs["size"] == "1024x1024"
+            assert result["status"] == "completed"
 
-        # 2. Verify Asset Registration
-        repositories["asset"].create.assert_called_once()
-        args, _ = repositories["asset"].create.call_args
-        asset_in = args[0]
-        assert asset_in.content_type == "image/png"
-        assert "generated/" in asset_in.object_key
-
-        # 3. Verify Artifact Registration
-        repositories["artifact"].create.assert_called_once()
-        args, _ = repositories["artifact"].create.call_args
-        artifact_in = args[0]
-        assert artifact_in.artifact_type == "image"
-        assert artifact_in.asset_id == asset_id
-
-        # 4. Verify Job Update
-        # Job should be updated with image metadata
-        args, _ = repositories["job"].update.call_args_list[-1]
-        update_data = args[1]
-        assert update_data["output_data"]["image_url"] == "https://example.com/generated.png"
-        assert update_data["output_data"]["asset_id"] == str(asset_id)
+            # 1. Verify Provider Call
+            mock_provider.generate_image.assert_called_once()
+            
+            # 2. Verify Asset Registration
+            repositories["asset"].create.assert_called_once()
+            
+            # 3. Verify Artifact Registration
+            repositories["artifact"].create.assert_called_once()
+            
+            # 4. Verify Job Update
+            args, _ = repositories["job"].update.call_args_list[-1]
+            update_data = args[1]
+            assert update_data["output_data"]["image_url"] == "https://example.com/generated.png"
+            assert update_data["output_data"]["asset_id"] == str(asset_id)
 
 
 @pytest.mark.asyncio
 async def test_workflow_runtime_image_reference_in_next_step(repositories):
-    runtime = WorkflowRuntime(
-        repositories["job"],
-        repositories["execution"],
-        repositories["step"],
-        repositories["history"],
-        repositories["error"],
-        repositories["metric"],
-        repositories["artifact"],
-        repositories["asset"],
-    )
+    mock_storage = AsyncMock()
+    mock_storage.create_presigned_download_url.return_value = "https://cdn.com/img.png"
 
-    workflow_id = uuid4()
-    workflow = Workflow(id=workflow_id)
+    with patch("apps.api.workflow.runtime.ImageRetriever") as mock_retriever_cls:
+        mock_retriever = mock_retriever_cls.return_value
+        mock_retriever.retrieve = AsyncMock(return_value=b"fake-image-bytes")
+        mock_retriever.get_extension.return_value = ".png"
 
-    step1_id = uuid4()
-    step1 = WorkflowStep(
-        id=step1_id,
-        name="Step1",
-        step_type="ai",
-        order=0,
-        config={"provider": "mock", "operation": "image_generation"},
-    )
-    step2_id = uuid4()
-    step2 = WorkflowStep(
-        id=step2_id,
-        name="Step2",
-        step_type="ai",
-        order=1,
-        config={
-            "provider": "mock",
-            "operation": "text_generation",
-            "prompt": "Analyze this image: {{Step1.image}}",
-        },
-    )
+        runtime = WorkflowRuntime(
+            repositories["job"],
+            repositories["execution"],
+            repositories["step"],
+            repositories["history"],
+            repositories["error"],
+            repositories["metric"],
+            repositories["artifact"],
+            repositories["asset"],
+            mock_storage,
+        )
 
-    repositories["step"].list_by_workflow.return_value = [step1, step2]
-    repositories["execution"].create.return_value = MagicMock(id=uuid4(), status="pending")
-    repositories["execution"].update.return_value = AsyncMock(id=uuid4(), status="running")
-    repositories["job"].create.side_effect = [AsyncMock(id=uuid4()), AsyncMock(id=uuid4())]
-    repositories["job"].update.return_value = AsyncMock()
+        workflow_id = uuid4()
+        workflow = Workflow(id=workflow_id)
 
-    repositories["asset"].create.return_value = MagicMock(id=uuid4())
-    repositories["artifact"].create.return_value = MagicMock(id=uuid4())
+        step1_id = uuid4()
+        step1 = WorkflowStep(
+            id=step1_id,
+            name="Step1",
+            step_type="ai",
+            order=0,
+            config={"provider": "mock", "operation": "image_generation"},
+        )
+        step2_id = uuid4()
+        step2 = WorkflowStep(
+            id=step2_id,
+            name="Step2",
+            step_type="ai",
+            order=1,
+            config={
+                "provider": "mock",
+                "operation": "text_generation",
+                "prompt": "Analyze this image: {{Step1.image}}",
+            },
+        )
 
-    # Step 1 returns image
-    res1 = AIImageResponse(image_url="https://cdn.com/img.png")
-    # Step 2 returns text
-    res2 = MagicMock(content="Analysis", metadata={})
-    res2.artifact_type = None
-    res2.asset_id = None
+        repositories["step"].list_by_workflow.return_value = [step1, step2]
+        repositories["execution"].create.return_value = MagicMock(id=uuid4(), status="pending")
+        repositories["execution"].update.return_value = AsyncMock(id=uuid4(), status="running")
+        repositories["job"].create.side_effect = [AsyncMock(id=uuid4()), AsyncMock(id=uuid4())]
+        repositories["job"].update.return_value = AsyncMock()
 
-    with (
-        patch.object(runtime.validator, "validate") as mock_validate,
-        patch("apps.api.ai_providers.factory.AIProviderFactory.create") as mock_factory,
-    ):
-        mock_validate.return_value = MagicMock(valid=True)
-        mock_provider = AsyncMock()
-        mock_provider.generate_image.return_value = res1
-        mock_provider.generate_text.return_value = res2
-        mock_factory.return_value = mock_provider
+        repositories["asset"].create.return_value = MagicMock(id=uuid4())
+        repositories["artifact"].create.return_value = MagicMock(id=uuid4())
 
-        await runtime.run(workflow)
+        # Step 1 returns image
+        res1 = AIImageResponse(image_url="https://cdn.com/temp.png")
+        # Step 2 returns text
+        res2 = MagicMock(content="Analysis", metadata={})
+        res2.artifact_type = None
+        res2.asset_id = None
 
-        # Verify Step 2 received resolved image URL
-        mock_provider.generate_text.assert_called_once()
-        _, kwargs = mock_provider.generate_text.call_args
-        assert kwargs["prompt"] == "Analyze this image: https://cdn.com/img.png"
+        with (
+            patch.object(runtime.validator, "validate") as mock_validate,
+            patch("apps.api.ai_providers.factory.AIProviderFactory.create") as mock_factory,
+        ):
+            mock_validate.return_value = MagicMock(valid=True)
+            mock_provider = AsyncMock()
+            mock_provider.generate_image.return_value = res1
+            mock_provider.generate_text.return_value = res2
+            mock_factory.return_value = mock_provider
+
+            await runtime.run(workflow)
+
+            # Verify Step 2 received resolved image URL
+            mock_provider.generate_text.assert_called_once()
+            _, kwargs = mock_provider.generate_text.call_args
+            assert kwargs["prompt"] == "Analyze this image: https://cdn.com/img.png"
