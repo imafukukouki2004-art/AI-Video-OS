@@ -26,6 +26,7 @@ def mock_repos():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -39,6 +40,7 @@ def runtime(mock_repos):
         mock_repos["error"],
         mock_repos["metric"],
         mock_repos["artifact"],
+        mock_repos["asset"],
     )
 
 

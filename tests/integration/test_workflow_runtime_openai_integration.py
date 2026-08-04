@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -81,11 +83,11 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
         mock_factory_create.assert_called_once_with("openai")
         # Verify provider was called with correct prompt and config
         mock_provider.generate_text.assert_called_once()
-        args, kwargs = mock_provider.generate_text.call_args
+        _, kwargs = mock_provider.generate_text.call_args
         assert kwargs["prompt"] == "OpenAI Step"
         assert kwargs["temperature"] == 0.7
 
         # Verify job was updated with OpenAI output
-        args, kwargs = repositories["job"].update.call_args_list[-1]
+        args, _ = repositories["job"].update.call_args_list[-1]
         update_data = args[1]
         assert update_data["output_data"]["result"] == "OpenAI Generated Content"

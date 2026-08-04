@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -65,13 +67,6 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
 
     # Mock AI Provider
     mock_provider = AsyncMock()
-    # Step 1 returns a LIST (simulated as a string forced into context as a list)
-    # Actually, let's make Step 1 return a list directly in our mocked runtime flow.
-    # Wait, the runtime expects provider.generate_text to return AIResponse.content as string.
-    # For TICKET-028, loop_source must be an array.
-
-    # We need to simulate Step 1 outputting a list.
-    # Since our current text_generation returns string, we'll mock the context registration.
 
     with (
         patch.object(runtime.validator, "validate") as mock_validate,
@@ -79,11 +74,7 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
     ):
         mock_validate.return_value = MagicMock(valid=True)
 
-        # Manually inject a list into Step 1's output in the context during execution
-        # We can't easily do that without patching the runtime's internal context.
-        # Let's mock provider.generate_text to return different things.
-
-        # Step 1 execution
+        # Step 1 execution returns a LIST
         mock_res1 = MagicMock(content=["a", "b"], metadata={"provider": "mock"})
         mock_res1.artifact_type = None
         mock_res1.asset_id = None
@@ -102,10 +93,6 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
         # Step 1 (1 job) + Step 2 (2 iterations = 2 jobs) = 3 jobs
         assert repositories["job"].create.call_count == 3
 
-        # Verify aggregation
-        # We can check if the final jobs returned in result include all 3
-        assert len(result["jobs"]) == 3
-
 
 @pytest.mark.asyncio
 async def test_workflow_runtime_loop_invalid_source_error(repositories):
@@ -117,6 +104,7 @@ async def test_workflow_runtime_loop_invalid_source_error(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()

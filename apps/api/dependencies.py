@@ -10,6 +10,7 @@ from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
 from apps.api.repositories import (
+    AssetRepository,
     JobRepository,
     ProjectRepository,
     VideoRepository,
@@ -174,6 +175,13 @@ WorkflowArtifactRepositoryDependency = Annotated[
 ]
 
 
+def get_asset_repository(session: DatabaseSessionDependency) -> AssetRepository:
+    return AssetRepository(session)
+
+
+AssetRepositoryDependency = Annotated[AssetRepository, Depends(get_asset_repository)]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -298,6 +306,7 @@ def get_workflow_runtime_service(
     error_repo: WorkflowExecutionErrorRepositoryDependency,
     metric_repo: WorkflowExecutionMetricRepositoryDependency,
     artifact_repo: WorkflowArtifactRepositoryDependency,
+    asset_repo: AssetRepositoryDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -308,6 +317,7 @@ def get_workflow_runtime_service(
         error_repo,
         metric_repo,
         artifact_repo,
+        asset_repo,
     )
 
 

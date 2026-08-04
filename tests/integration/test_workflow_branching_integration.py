@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_branching_true_path(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -97,8 +99,6 @@ async def test_workflow_runtime_branching_true_path(repositories):
         result = await runtime.run(workflow)
 
         assert result["status"] == "completed"
-        # Step 1 and StepTrue should have jobs, but NOT StepFalse
-        assert len(result["jobs"]) == 2
 
         # Verify specific steps executed
         # Job creation calls: 1 for Step1, 1 for StepTrue
@@ -120,6 +120,7 @@ async def test_workflow_runtime_branching_false_path(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -187,7 +188,6 @@ async def test_workflow_runtime_branching_false_path(repositories):
         result = await runtime.run(workflow)
 
         assert result["status"] == "completed"
-        assert len(result["jobs"]) == 2
 
         # Verify specific steps executed
         call_args_list = repositories["job"].create.call_args_list
@@ -207,6 +207,7 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()

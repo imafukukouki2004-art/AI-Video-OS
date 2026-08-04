@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -92,7 +94,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         assert mock_provider.generate_text.call_count == 2
 
         # Verify Step 2 received the resolved prompt
-        args, kwargs = mock_provider.generate_text.call_args_list[1]
+        _, kwargs = mock_provider.generate_text.call_args_list[1]
         assert kwargs["prompt"] == "Summarize this: Output 1"
 
 
@@ -106,6 +108,7 @@ async def test_workflow_runtime_unresolved_variable_error_persistence(repositori
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -135,6 +138,6 @@ async def test_workflow_runtime_unresolved_variable_error_persistence(repositori
 
         # Verify error persistence
         repositories["error"].create.assert_called_once()
-        args, kwargs = repositories["error"].create.call_args
+        args, _ = repositories["error"].create.call_args
         error_in = args[0]
         assert "Unresolved variable" in error_in.error_message

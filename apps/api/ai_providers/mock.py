@@ -23,5 +23,11 @@ class MockAIProvider(AIProvider):
         """Return a static image response."""
         return AIImageResponse(
             image_url="https://example.com/mock-image.png",
-            metadata={"provider": "mock", "model": "mock-image-v1"},
+            mime_type="image/png",
+            metadata={
+                "provider": "mock",
+                "model": "mock-image-v1",
+                "prompt": prompt,
+                "size": kwargs.get("size", "1024x1024"),
+            },
         )

@@ -10,6 +10,12 @@ from apps.api.domain.schemas import WorkflowValidationResult
 class WorkflowValidator:
     """Validator for structural and logical consistency of workflows."""
 
+    # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
+    # {{identifier.image}} or {{variable}}
+    VARIABLE_PATTERN = re.compile(
+        r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}"
+    )
+
     async def validate(
         self, workflow: Workflow, steps: list[WorkflowStep]
     ) -> WorkflowValidationResult:
@@ -42,7 +48,6 @@ class WorkflowValidator:
         all_identifiers = step_ids | step_names
 
         condition_pattern = re.compile(r"^(.*?)\s*(==|!=)\s*\"(.*?)\"$")
-        variable_pattern = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset))?\s*\}\}")
 
         for step in steps:
             # Conditional branching validation
@@ -54,7 +59,7 @@ class WorkflowValidator:
                     )
 
                 # Variable reference check in condition
-                for var_match in variable_pattern.finditer(step.condition):
+                for var_match in self.VARIABLE_PATTERN.finditer(step.condition):
                     identifier = var_match.group(1)
                     if identifier not in all_identifiers and identifier != "item":
                         errors.append(
@@ -73,12 +78,12 @@ class WorkflowValidator:
                     errors.append(
                         f"Step '{step.name}' has loop_source but is missing loop_variable."
                     )
-                if not variable_pattern.search(step.loop_source):
+                if not self.VARIABLE_PATTERN.search(step.loop_source):
                     errors.append(
                         f"Step '{step.name}' has invalid loop_source (must be a variable)."
                     )
                 else:
-                    for var_match in variable_pattern.finditer(step.loop_source):
+                    for var_match in self.VARIABLE_PATTERN.finditer(step.loop_source):
                         identifier = var_match.group(1)
                         if identifier not in all_identifiers:
                             errors.append(
@@ -104,11 +109,9 @@ class WorkflowValidator:
     def _validate_config_variables(
         self, step_name: str, config: dict[str, Any], all_identifiers: set[str], errors: list[str]
     ) -> None:
-        variable_pattern = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset))?\s*\}\}")
-
         def check_val(val: Any) -> None:
             if isinstance(val, str):
-                for var_match in variable_pattern.finditer(val):
+                for var_match in self.VARIABLE_PATTERN.finditer(val):
                     identifier = var_match.group(1)
                     if identifier not in all_identifiers and identifier != "item":
                         errors.append(f"Step '{step_name}' references unknown step: {identifier}")

@@ -6,9 +6,9 @@
 | --- | --- |
 | Current version | AI Video OS Version 2.0 |
 | Current phase | Implementation Execution Phase C |
-| Current milestone | M2 — Core Domain & Workflow Foundation |
-| Current task | Awaiting TICKET-030 CEO Approval |
-| Progress | Approximately 100% (M2 Foundation Complete) |
+| Current milestone | M3 — Runtime Features |
+| Current task | TICKET-030: AI Image Generation Provider Foundation (In Review) |
+| Progress | Approximately 100% (M2 Foundation Complete, M3 Started) |
 | Next technology review | TR-02 after Milestone M4 — AI Content Pipeline Complete |
 
 ## Roadmap & Milestone State
@@ -48,6 +48,10 @@
 - [x] TICKET-028: Workflow Loop & Iteration Foundation
 - [x] TICKET-029: Workflow Artifact & Asset Reference Foundation
 
+### M3: Runtime Features (Ongoing)
+
+- [ ] TICKET-030: AI Image Generation Provider Foundation (In Review)
+
 ## Technology Decisions (TR-01)
 
 | ID | Technology | Status | Decision |
@@ -63,6 +67,7 @@
 
 ## Recent Activities
 
+- [2026-08-04] TICKET-030: AI Image Generation Provider Foundation (In Review)
 - [2026-08-03] TICKET-029: Workflow Artifact & Asset Reference Foundation Completed.
 - [2026-08-03] TICKET-028: Workflow Loop & Iteration Foundation Completed.
 - [2026-08-03] TICKET-027: Workflow Conditional Branch Foundation Completed.

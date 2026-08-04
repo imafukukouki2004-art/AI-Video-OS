@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from apps.api.ai_providers import AIProviderFactory
+from apps.api.assets.schemas import AssetCreate
 from apps.api.domain.models import (
     JobStatus,
     Workflow,
@@ -21,6 +22,7 @@ from apps.api.domain.schemas import (
     WorkflowExecutionMetricCreate,
 )
 from apps.api.repositories import (
+    AssetRepository,
     JobRepository,
     WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
@@ -48,6 +50,7 @@ class WorkflowRuntime:
         error_repository: WorkflowExecutionErrorRepository,
         metric_repository: WorkflowExecutionMetricRepository,
         artifact_repository: WorkflowArtifactRepository,
+        asset_repository: AssetRepository,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -56,6 +59,7 @@ class WorkflowRuntime:
         self.error_repository = error_repository
         self.metric_repository = metric_repository
         self.artifact_repository = artifact_repository
+        self.asset_repository = asset_repository
         self.validator = WorkflowValidator()
 
     async def _record_history(
@@ -188,6 +192,7 @@ class WorkflowRuntime:
             step = current_step
             logger.info(f"Executing step: {step.name} (ID: {step.id}) in execution {execution.id}")
 
+            job = None
             try:
                 # 5. Update Step to RUNNING
                 from_step_status = str(step.status)
@@ -215,8 +220,7 @@ class WorkflowRuntime:
                         logger.error(f"Loop source resolution failed for step {step.id}: {e!s}")
                         raise ValueError(f"Loop resolution failed: {e!s}") from e
 
-                iteration_results = []
-                job = None
+                iteration_results: list[Any] = []
                 for item in items:
                     if loop_var:
                         context.set_step_output(loop_var, item)
@@ -246,7 +250,7 @@ class WorkflowRuntime:
                     operation = step.config.get("operation", "text_generation")
                     provider = AIProviderFactory.create(provider_name)
 
-                    result_data = {}
+                    result_data: dict[str, Any] = {}
                     if operation == "text_generation":
                         # Input Mapping
                         prompt_raw = step.config.get("prompt", step.name)
@@ -297,6 +301,62 @@ class WorkflowRuntime:
                             context.set_step_asset(str(step.id), ai_res.asset_id)
                             context.set_step_asset(step.name, ai_res.asset_id)
 
+                    elif operation == "image_generation":
+                        # 1. Image Generation
+                        prompt_raw = step.config.get("prompt", step.name)
+                        try:
+                            prompt = resolver.resolve(prompt_raw)
+                        except ValueError as e:
+                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
+                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+
+                        # Prepare call arguments
+                        exclude_keys = ["provider", "operation", "prompt"]
+                        call_kwargs = {
+                            k: v for k, v in step.config.items() if k not in exclude_keys
+                        }
+
+                        # AI Execution
+                        ai_res_img = await provider.generate_image(prompt=prompt, **call_kwargs)
+
+                        # 2. Response Validation
+                        if not ai_res_img.image_url and not ai_res_img.image_bytes:
+                            raise ValueError("AI Provider returned empty image response")
+
+                        # 3. Asset Registration (No real file storage for now)
+                        asset_in = AssetCreate(
+                            filename=f"generated_{int(time.time())}.png",
+                            content_type=ai_res_img.mime_type or "image/png",
+                            size_bytes=0,  # Unknown size for URL-based assets
+                            object_key=f"generated/{execution.id}/{step.id}_{int(time.time())}.png",
+                        )
+                        asset = await self.asset_repository.create(asset_in)
+
+                        # 4. WorkflowArtifact Registration
+                        artifact = await self._record_artifact(
+                            execution_id=execution.id,
+                            step_id=step.id,
+                            artifact_type="image",
+                            asset_id=asset.id,
+                            metadata=ai_res_img.metadata,
+                        )
+
+                        # 5. Context Registration (Post-Artifact Completion)
+                        context.set_step_image(str(step.id), ai_res_img.image_url or "")
+                        context.set_step_image(step.name, ai_res_img.image_url or "")
+                        context.set_step_artifact(str(step.id), artifact.id)
+                        context.set_step_artifact(step.name, artifact.id)
+                        context.set_step_asset(str(step.id), asset.id)
+                        context.set_step_asset(step.name, asset.id)
+
+                        result_data = {
+                            "image_url": ai_res_img.image_url,
+                            "asset_id": str(asset.id),
+                            "artifact_id": str(artifact.id),
+                            "metadata": ai_res_img.metadata,
+                        }
+                        iteration_results.append(result_data)
+
                     else:
                         logger.error(f"Unsupported operation: {operation}")
                         raise ValueError(f"Unsupported AI operation: {operation}")
@@ -315,6 +375,7 @@ class WorkflowRuntime:
                 context.set_step_output(str(step.id), final_output)
                 context.set_step_output(step.name, final_output)
 
+                # 6. Step Completion
                 await self.step_repository.update(step.id, {"status": WorkflowStepStatus.COMPLETED})
                 await self._record_history(
                     execution.id,
@@ -359,80 +420,70 @@ class WorkflowRuntime:
                 current_step = next_step
 
             except Exception as e:
-                logger.exception(f"Step {step.id} failed in execution {execution.id}")
                 failure_count += 1
+                logger.exception(f"Step {step.id} failed in execution {execution.id}")
 
-                # Integrated failure flow
+                # Update Step to FAILED
+                await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
+
+                # Record Error
+                error_message = str(e) or "Unknown error occurred during step execution"
                 await self._record_error(
                     execution.id,
-                    error_code="STEP_EXECUTION_FAILED",
-                    message=str(e) or "Unknown error occurred during step execution",
-                    error_type=type(e).__name__,
+                    "STEP_EXECUTION_FAILED",
+                    error_message,
+                    type(e).__name__,
                     step_id=step.id,
                 )
 
-                # Update Job to FAILED if it was created
-                if "job" in locals() and job:
+                # Update current Job to FAILED if it exists and is still running
+                if job:
                     await self.job_repository.update(job.id, {"status": JobStatus.FAILED})
 
-                # Update Step Status
-                await self.step_repository.update(step.id, {"status": WorkflowStepStatus.FAILED})
-
-                # Update Execution Status to FAILED
-                from_exec_status = str(execution.status)
+                # Terminate workflow execution on failure
                 await self.execution_repository.update(
                     execution.id,
                     {"status": WorkflowExecutionStatus.FAILED, "failed_at": datetime.now(UTC)},
                 )
-
-                # Record History
                 await self._record_history(
                     execution.id,
-                    "running",
+                    str(execution.status),
                     "failed",
                     step_id=step.id,
                     message=f"Step {step.name} failed: {e!s}",
                 )
-                await self._record_history(
-                    execution.id, from_exec_status, "failed", message=f"Execution failed: {e!s}"
-                )
 
-                # Record Metrics even on failure
-                end_time = time.perf_counter()
-                duration_ms = (end_time - start_time) * 1000
+                # Record metrics before returning
+                duration_ms = (time.perf_counter() - start_time) * 1000
                 await self._record_metric(execution.id, "duration_ms", duration_ms)
-                await self._record_metric(execution.id, "step_count", float(len(steps)))
-                await self._record_metric(execution.id, "success_count", float(success_count))
-                await self._record_metric(execution.id, "failure_count", float(failure_count))
+                await self._record_metric(execution.id, "step_count", len(executed_jobs))
+                await self._record_metric(execution.id, "success_count", success_count)
+                await self._record_metric(execution.id, "failure_count", failure_count)
 
                 return {
                     "status": "failed",
                     "error": str(e),
                     "execution_id": execution.id,
-                    "completed_jobs": [j.id for j in executed_jobs],
                 }
 
         # 10. Update Execution to COMPLETED
-        logger.info(f"Workflow {workflow.id} completed successfully (Execution: {execution.id})")
-        from_exec_status = str(execution.status)
         await self.execution_repository.update(
             execution.id,
             {"status": WorkflowExecutionStatus.COMPLETED, "completed_at": datetime.now(UTC)},
         )
         await self._record_history(
-            execution.id, from_exec_status, "completed", message="Execution completed successfully"
+            execution.id, str(execution.status), "completed", message="Execution completed"
         )
 
         # 11. Record Metrics
-        end_time = time.perf_counter()
-        duration_ms = (end_time - start_time) * 1000
+        duration_ms = (time.perf_counter() - start_time) * 1000
         await self._record_metric(execution.id, "duration_ms", duration_ms)
-        await self._record_metric(execution.id, "step_count", float(len(steps)))
-        await self._record_metric(execution.id, "success_count", float(success_count))
-        await self._record_metric(execution.id, "failure_count", float(failure_count))
+        await self._record_metric(execution.id, "step_count", len(executed_jobs))
+        await self._record_metric(execution.id, "success_count", success_count)
+        await self._record_metric(execution.id, "failure_count", failure_count)
 
         return {
             "status": "completed",
             "execution_id": execution.id,
-            "jobs": [j.id for j in executed_jobs],
+            "duration_ms": duration_ms,
         }

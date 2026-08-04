@@ -1,6 +1,7 @@
 """Repository layer exports."""
 
 from apps.api.repositories.sqlalchemy import (
+    AssetRepository,
     JobRepository,
     ProjectRepository,
     VideoRepository,
@@ -14,6 +15,7 @@ from apps.api.repositories.sqlalchemy import (
 )
 
 __all__ = [
+    "AssetRepository",
     "JobRepository",
     "ProjectRepository",
     "VideoRepository",

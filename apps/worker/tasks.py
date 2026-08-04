@@ -10,6 +10,7 @@ from apps.api.config import get_settings
 from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.repositories import (
+    AssetRepository,
     JobRepository,
     WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
@@ -75,6 +76,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         error_repo = WorkflowExecutionErrorRepository(session)
         metric_repo = WorkflowExecutionMetricRepository(session)
         artifact_repo = WorkflowArtifactRepository(session)
+        asset_repo = AssetRepository(session)
 
         # Initialize runtime
         runtime = WorkflowRuntime(
@@ -85,6 +87,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             error_repo,
             metric_repo,
             artifact_repo,
+            asset_repo,
         )
 
         # Get the execution record
