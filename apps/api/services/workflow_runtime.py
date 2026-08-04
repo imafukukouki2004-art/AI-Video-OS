@@ -19,6 +19,7 @@ from apps.api.repositories import (
 )
 from apps.api.storage import ObjectStorage
 from apps.api.workflow.runtime import WorkflowRuntime
+from apps.api.services.prompt_builder import PromptBuilder
 
 
 class WorkflowRuntimeService:
@@ -36,6 +37,7 @@ class WorkflowRuntimeService:
         artifact_repository: WorkflowArtifactRepository,
         asset_repository: AssetRepository,
         storage: ObjectStorage,
+        prompt_builder: PromptBuilder,
     ) -> None:
         self.workflow_repository = workflow_repository
         self.runtime = WorkflowRuntime(
@@ -48,6 +50,7 @@ class WorkflowRuntimeService:
             artifact_repository,
             asset_repository,
             storage,
+            prompt_builder,
         )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:

@@ -24,6 +24,7 @@ from apps.api.repositories import (
 )
 from apps.api.services import (
     JobService,
+    PromptBuilder,
     ProjectService,
     VideoService,
     WorkflowArtifactService,
@@ -36,6 +37,7 @@ from apps.api.services import (
     WorkflowService,
     WorkflowStepService,
     WorkflowValidationService,
+    PromptBuilder,
 )
 from apps.api.storage import ObjectStorage
 
@@ -308,6 +310,7 @@ def get_workflow_runtime_service(
     artifact_repo: WorkflowArtifactRepositoryDependency,
     asset_repo: AssetRepositoryDependency,
     storage: StorageDependency,
+    prompt_builder: PromptBuilder,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -320,6 +323,7 @@ def get_workflow_runtime_service(
         artifact_repo,
         asset_repo,
         storage,
+        prompt_builder,
     )
 
 

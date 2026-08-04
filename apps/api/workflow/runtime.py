@@ -35,6 +35,7 @@ from apps.api.storage import ObjectStorage
 from apps.api.workflow.context import VariableResolver, WorkflowContext
 from apps.api.workflow.evaluator import ConditionEvaluator
 from apps.api.workflow.retriever import ImageRetriever
+from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.workflow.validator import WorkflowValidator
 
 logger = logging.getLogger(__name__)
@@ -54,6 +55,7 @@ class WorkflowRuntime:
         artifact_repository: WorkflowArtifactRepository,
         asset_repository: AssetRepository,
         storage: ObjectStorage,
+        prompt_builder: PromptBuilder,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -64,6 +66,7 @@ class WorkflowRuntime:
         self.artifact_repository = artifact_repository
         self.asset_repository = asset_repository
         self.storage = storage
+        self.prompt_builder = prompt_builder
         self.validator = WorkflowValidator()
         self.retriever = ImageRetriever()
 
@@ -258,29 +261,34 @@ class WorkflowRuntime:
                     result_data: dict[str, Any] = {}
                     if operation == "text_generation":
                         # Input Mapping
-                        prompt_raw = step.config.get("prompt", step.name)
-                        system_prompt_raw = step.config.get("system_prompt")
+                        # Prompt Composition
+                        system_prompt_template_id = step.config.get("system_prompt_template_id")
+                        user_prompt_template_id = step.config.get("user_prompt_template_id")
 
-                        # Variable Resolution
-                        try:
-                            prompt = resolver.resolve(prompt_raw)
-                            system_prompt = (
-                                resolver.resolve(system_prompt_raw) if system_prompt_raw else None
-                            )
-                        except ValueError as e:
-                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
-                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+                        if not system_prompt_template_id or not user_prompt_template_id:
+                            raise ValueError("System and user prompt template IDs are required for text_generation.")
+
+                        system_prompt_template = await self.prompt_builder.load_template(system_prompt_template_id)
+                        user_prompt_template = await self.prompt_builder.load_template(user_prompt_template_id)
+
+                        composed_prompts = await self.prompt_builder.build_prompt(
+                            workflow_context=context,
+                            system_prompt_template=system_prompt_template,
+                            user_prompt_template=user_prompt_template,
+                        )
 
                         # Prepare call arguments
-                        exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
+                        exclude_keys = ["provider", "operation", "system_prompt_template_id", "user_prompt_template_id"]
                         call_kwargs = {
                             k: v for k, v in step.config.items() if k not in exclude_keys
                         }
-                        if system_prompt:
-                            call_kwargs["system_prompt"] = system_prompt
 
                         # AI Execution
-                        ai_res = await provider.generate_text(prompt=prompt, **call_kwargs)
+                        ai_res = await provider.generate_text(
+                            prompt=composed_prompts["user_prompt"],
+                            system_prompt=composed_prompts["system_prompt"],
+                            **call_kwargs,
+                        )
 
                         # 9. Update Job to COMPLETED
                         result_data = {
@@ -308,21 +316,34 @@ class WorkflowRuntime:
 
                     elif operation == "image_generation":
                         # 1. Image Generation
-                        prompt_raw = step.config.get("prompt", step.name)
-                        try:
-                            prompt = resolver.resolve(prompt_raw)
-                        except ValueError as e:
-                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
-                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+                        # Prompt Composition
+                        system_prompt_template_id = step.config.get("system_prompt_template_id")
+                        user_prompt_template_id = step.config.get("user_prompt_template_id")
+
+                        if not system_prompt_template_id or not user_prompt_template_id:
+                            raise ValueError("System and user prompt template IDs are required for image_generation.")
+
+                        system_prompt_template = await self.prompt_builder.load_template(system_prompt_template_id)
+                        user_prompt_template = await self.prompt_builder.load_template(user_prompt_template_id)
+
+                        composed_prompts = await self.prompt_builder.build_prompt(
+                            workflow_context=context,
+                            variable_resolver=resolver,
+                            system_prompt_template=system_prompt_template,
+                            user_prompt_template=user_prompt_template,
+                        )
 
                         # Prepare call arguments
-                        exclude_keys = ["provider", "operation", "prompt"]
+                        exclude_keys = ["provider", "operation", "system_prompt_template_id", "user_prompt_template_id"]
                         call_kwargs = {
                             k: v for k, v in step.config.items() if k not in exclude_keys
                         }
 
                         # AI Execution
-                        ai_res_img = await provider.generate_image(prompt=prompt, **call_kwargs)
+                        ai_res_img = await provider.generate_image(
+                            prompt=composed_prompts["user_prompt"],
+                            **call_kwargs,
+                        )
 
                         # 2. Response Validation
                         if not ai_res_img.image_url and not ai_res_img.image_bytes:

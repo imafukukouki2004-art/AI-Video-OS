@@ -12,6 +12,7 @@ class WorkflowContext:
         self._artifacts: dict[str, Any] = {}
         self._assets: dict[str, Any] = {}
         self._images: dict[str, Any] = {}
+        self._variables: dict[str, Any] = {}
 
     def set_step_output(self, step_identifier: str, output: Any) -> None:
         """Store the output of a step, indexed by its identifier (ID or Name)."""
@@ -45,6 +46,14 @@ class WorkflowContext:
         """Retrieve the generated image URL of a step."""
         return self._images.get(step_identifier)
 
+    def set_variable(self, key: str, value: Any) -> None:
+        """Store a generic variable in the context."""
+        self._variables[key] = value
+
+    def get_variable(self, key: str) -> Any:
+        """Retrieve a generic variable from the context."""
+        return self._variables.get(key)
+
     def get_all_outputs(self) -> dict[str, Any]:
         """Return all stored outputs."""
         return self._outputs.copy()
@@ -72,7 +81,7 @@ class VariableResolver:
         match = self.VARIABLE_PATTERN.fullmatch(text.strip())
         if match:
             identifier = match.group(1)
-            suffix = match.group(2) or "output"
+            suffix = match.group(2)
 
             if suffix == "artifact":
                 value = self.context.get_step_artifact(identifier)
@@ -80,8 +89,10 @@ class VariableResolver:
                 value = self.context.get_step_asset(identifier)
             elif suffix == "image":
                 value = self.context.get_step_image(identifier)
-            else:
+            elif suffix == "output":
                 value = self.context.get_step_output(identifier)
+            else: # Generic variable like {{item}}
+                value = self.context.get_variable(identifier)
 
             if value is None:
                 raise ValueError(f"Unresolved variable: {text}")
@@ -100,7 +111,7 @@ class VariableResolver:
 
         def replace_match(match: re.Match[str]) -> str:
             identifier = match.group(1)
-            suffix = match.group(2) or "output"
+            suffix = match.group(2)
 
             if suffix == "artifact":
                 value = self.context.get_step_artifact(identifier)
@@ -108,8 +119,10 @@ class VariableResolver:
                 value = self.context.get_step_asset(identifier)
             elif suffix == "image":
                 value = self.context.get_step_image(identifier)
-            else:
+            elif suffix == "output":
                 value = self.context.get_step_output(identifier)
+            else: # Generic variable like {{item}}
+                value = self.context.get_variable(identifier)
 
             if value is None:
                 raise ValueError(f"Unresolved variable: {match.group(0)}")
