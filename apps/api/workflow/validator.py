@@ -12,9 +12,7 @@ class WorkflowValidator:
 
     # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
     # {{identifier.image}} or {{variable}}
-    VARIABLE_PATTERN = re.compile(
-        r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}"
-    )
+    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}")
 
     async def validate(
         self, workflow: Workflow, steps: list[WorkflowStep]

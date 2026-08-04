@@ -68,10 +68,10 @@ async def test_workflow_runtime_image_generation_flow(repositories):
     repositories["execution"].update.return_value = execution
     repositories["job"].create.return_value = AsyncMock(id=uuid4())
     repositories["job"].update.return_value = AsyncMock()
-    
+
     asset_id = uuid4()
     repositories["asset"].create.return_value = MagicMock(id=asset_id)
-    
+
     artifact_id = uuid4()
     repositories["artifact"].create.return_value = MagicMock(id=artifact_id)
 
@@ -165,7 +165,7 @@ async def test_workflow_runtime_image_reference_in_next_step(repositories):
     repositories["execution"].update.return_value = AsyncMock(id=uuid4(), status="running")
     repositories["job"].create.side_effect = [AsyncMock(id=uuid4()), AsyncMock(id=uuid4())]
     repositories["job"].update.return_value = AsyncMock()
-    
+
     repositories["asset"].create.return_value = MagicMock(id=uuid4())
     repositories["artifact"].create.return_value = MagicMock(id=uuid4())
 

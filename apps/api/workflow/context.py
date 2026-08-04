@@ -55,9 +55,7 @@ class VariableResolver:
 
     # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
     # {{identifier.image}} or {{variable}}
-    VARIABLE_PATTERN = re.compile(
-        r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}"
-    )
+    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}")
 
     def __init__(self, context: WorkflowContext) -> None:
         self.context = context
