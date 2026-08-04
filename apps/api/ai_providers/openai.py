@@ -44,8 +44,54 @@ class OpenAIProvider(AIProvider):
         )
 
     async def generate_image(self, prompt: str, **kwargs: Any) -> AIImageResponse:
-        """
-        Generate an image using OpenAI DALL-E.
-        Note: This is out of scope for TICKET-024 but implemented for interface compliance.
-        """
-        raise NotImplementedError("Image generation is not supported in TICKET-024")
+        """Generate an image using OpenAI DALL-E."""
+        model = kwargs.get("model", "dall-e-3")
+        size = kwargs.get("size", "1024x1024")
+        quality = kwargs.get("quality", "standard")
+        response_format = kwargs.get("response_format", "url")
+        background = kwargs.get("background")
+
+        # If background is provided, append it to the prompt
+        if background:
+            prompt = f"{prompt}. Background: {background}"
+
+        response = await self.client.images.generate(
+            model=model,
+            prompt=prompt,
+            size=size,
+            quality=quality,
+            response_format=response_format,
+            n=1,
+            **{
+                k: v
+                for k, v in kwargs.items()
+                if k
+                not in [
+                    "model",
+                    "provider",
+                    "size",
+                    "quality",
+                    "response_format",
+                    "background",
+                ]
+            },
+        )
+
+        image_data = response.data[0]
+        image_url = image_data.url if response_format == "url" else None
+        image_bytes = None
+        if response_format == "b64_json" and image_data.b64_json:
+            import base64
+
+            image_bytes = base64.b64decode(image_data.b64_json)
+
+        return AIImageResponse(
+            image_url=image_url,
+            image_bytes=image_bytes,
+            raw_response=response,
+            metadata={
+                "provider": "openai",
+                "model": model,
+                "revised_prompt": image_data.revised_prompt,
+            },
+        )

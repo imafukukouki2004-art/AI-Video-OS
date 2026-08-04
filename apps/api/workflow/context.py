@@ -11,6 +11,7 @@ class WorkflowContext:
         self._outputs: dict[str, Any] = {}
         self._artifacts: dict[str, Any] = {}
         self._assets: dict[str, Any] = {}
+        self._images: dict[str, Any] = {}
 
     def set_step_output(self, step_identifier: str, output: Any) -> None:
         """Store the output of a step, indexed by its identifier (ID or Name)."""
@@ -36,6 +37,14 @@ class WorkflowContext:
         """Retrieve the asset reference of a step."""
         return self._assets.get(step_identifier)
 
+    def set_step_image(self, step_identifier: str, image_url: str) -> None:
+        """Store the generated image URL of a step."""
+        self._images[step_identifier] = image_url
+
+    def get_step_image(self, step_identifier: str) -> Any:
+        """Retrieve the generated image URL of a step."""
+        return self._images.get(step_identifier)
+
     def get_all_outputs(self) -> dict[str, Any]:
         """Return all stored outputs."""
         return self._outputs.copy()
@@ -44,8 +53,9 @@ class WorkflowContext:
 class VariableResolver:
     """Resolves variables in strings using the workflow context."""
 
-    # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}} or {{variable}}
-    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset))?\s*\}\}")
+    # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
+    # {{identifier.image}} or {{variable}}
+    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}")
 
     def __init__(self, context: WorkflowContext) -> None:
         self.context = context
@@ -68,6 +78,8 @@ class VariableResolver:
                 value = self.context.get_step_artifact(identifier)
             elif suffix == "asset":
                 value = self.context.get_step_asset(identifier)
+            elif suffix == "image":
+                value = self.context.get_step_image(identifier)
             else:
                 value = self.context.get_step_output(identifier)
 
@@ -94,6 +106,8 @@ class VariableResolver:
                 value = self.context.get_step_artifact(identifier)
             elif suffix == "asset":
                 value = self.context.get_step_asset(identifier)
+            elif suffix == "image":
+                value = self.context.get_step_image(identifier)
             else:
                 value = self.context.get_step_output(identifier)
 

@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -76,11 +78,7 @@ async def test_workflow_runtime_ai_provider_integration(repositories):
 
         assert result["status"] == "completed"
         # Verify job was updated with AI output
-        args, kwargs = repositories["job"].update.call_args_list[-1]
-        # Repository update is called with (id, data_dict) or (id, schema=data_dict)
-        # Based on runtime.py: await self.job_repository.update(job.id,
-        # {"status": JobStatus.COMPLETED, "output_data": result_data})
-        # The data is in args[1]
+        args, _ = repositories["job"].update.call_args_list[-1]
         update_data = args[1]
         assert "output_data" in update_data
         assert "mock" in update_data["output_data"]["result"].lower()

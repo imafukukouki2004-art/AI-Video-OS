@@ -13,6 +13,7 @@ from apps.api.domain.models import (
     WorkflowStepStatus,
 )
 from apps.api.repositories import (
+    AssetRepository,
     JobRepository,
     WorkflowArtifactRepository,
     WorkflowExecutionErrorRepository,
@@ -59,6 +60,11 @@ def artifact_repository():
     return AsyncMock(spec=WorkflowArtifactRepository)
 
 
+@pytest.fixture
+def asset_repository():
+    return AsyncMock(spec=AssetRepository)
+
+
 @pytest.mark.asyncio
 async def test_workflow_runtime_run_success_with_metrics(
     job_repository: AsyncMock,
@@ -68,6 +74,7 @@ async def test_workflow_runtime_run_success_with_metrics(
     error_repository: AsyncMock,
     metric_repository: AsyncMock,
     artifact_repository: AsyncMock,
+    asset_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
         job_repository,
@@ -77,6 +84,7 @@ async def test_workflow_runtime_run_success_with_metrics(
         error_repository,
         metric_repository,
         artifact_repository,
+        asset_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -137,6 +145,7 @@ async def test_workflow_runtime_failure_records_metrics(
     error_repository: AsyncMock,
     metric_repository: AsyncMock,
     artifact_repository: AsyncMock,
+    asset_repository: AsyncMock,
 ):
     runtime = WorkflowRuntime(
         job_repository,
@@ -146,6 +155,7 @@ async def test_workflow_runtime_failure_records_metrics(
         error_repository,
         metric_repository,
         artifact_repository,
+        asset_repository,
     )
     workflow = Workflow(id=uuid4(), config={})
 

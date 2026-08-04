@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_run_with_existing_execution_id(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -76,6 +78,7 @@ async def test_run_validation_failure_with_execution_id(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -115,6 +118,7 @@ async def test_run_step_failure_persistence(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()

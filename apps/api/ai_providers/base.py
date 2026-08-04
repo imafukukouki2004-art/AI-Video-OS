@@ -21,7 +21,9 @@ class AIResponse:
 class AIImageResponse:
     """Unified response model for AI image generation operations."""
 
-    image_url: str
+    image_url: str | None = None
+    image_bytes: bytes | None = None
+    mime_type: str | None = "image/png"
     raw_response: Any = None
     metadata: dict[str, Any] = field(default_factory=dict)
 

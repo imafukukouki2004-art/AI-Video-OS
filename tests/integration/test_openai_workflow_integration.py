@@ -17,6 +17,7 @@ def repositories():
         "error": AsyncMock(),
         "metric": AsyncMock(),
         "artifact": AsyncMock(),
+        "asset": AsyncMock(),
     }
 
 
@@ -30,6 +31,7 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -84,7 +86,7 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
 
         # Verify Input Mapping
         mock_provider.generate_text.assert_called_once()
-        args, kwargs = mock_provider.generate_text.call_args
+        _, kwargs = mock_provider.generate_text.call_args
         assert kwargs["prompt"] == "Custom Prompt"
         assert kwargs["system_prompt"] == "You are a helpful assistant"
         assert kwargs["temperature"] == 0.5
@@ -93,7 +95,7 @@ async def test_workflow_runtime_openai_text_generation_mapping(repositories):
         assert "operation" not in kwargs
 
         # Verify Output Persistence
-        args, kwargs = repositories["job"].update.call_args_list[-1]
+        args, _ = repositories["job"].update.call_args_list[-1]
         update_data = args[1]
         assert update_data["output_data"]["result"] == "OpenAI response with custom mapping"
 
@@ -108,6 +110,7 @@ async def test_workflow_runtime_unsupported_operation_error(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -143,7 +146,7 @@ async def test_workflow_runtime_unsupported_operation_error(repositories):
 
         # Verify Error Persistence
         repositories["error"].create.assert_called_once()
-        args, kwargs = repositories["error"].create.call_args
+        args, _ = repositories["error"].create.call_args
         error_in = args[0]
         assert error_in.error_code == "STEP_EXECUTION_FAILED"
         assert "Unsupported AI operation" in error_in.error_message
@@ -159,6 +162,7 @@ async def test_mock_provider_compatibility(repositories):
         repositories["error"],
         repositories["metric"],
         repositories["artifact"],
+        repositories["asset"],
     )
 
     workflow = MagicMock()
@@ -190,7 +194,7 @@ async def test_mock_provider_compatibility(repositories):
 
         assert result["status"] == "completed"
         # Verify output from Mock Provider
-        args, kwargs = repositories["job"].update.call_args_list[-1]
+        args, _ = repositories["job"].update.call_args_list[-1]
         update_data = args[1]
         assert "Mock response for: Mock Prompt" in update_data["output_data"]["result"]
         assert update_data["output_data"]["metadata"]["system_prompt"] == "Mock System"

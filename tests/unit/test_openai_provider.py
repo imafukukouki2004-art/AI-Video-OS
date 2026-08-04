@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from apps.api.ai_providers.base import AIResponse
+from apps.api.ai_providers.base import AIImageResponse, AIResponse
 from apps.api.ai_providers.openai import OpenAIProvider
 
 
@@ -29,7 +29,7 @@ async def test_openai_provider_generate_text():
 
         # Verify messages sent to OpenAI
         mock_client.chat.completions.create.assert_called_once()
-        args, kwargs = mock_client.chat.completions.create.call_args
+        _, kwargs = mock_client.chat.completions.create.call_args
         messages = kwargs["messages"]
         assert len(messages) == 2
         assert messages[0] == {"role": "system", "content": "You are a bot"}
@@ -38,11 +38,31 @@ async def test_openai_provider_generate_text():
 
 
 @pytest.mark.asyncio
-async def test_openai_provider_generate_image_not_implemented():
-    with patch("apps.api.ai_providers.openai.AsyncOpenAI"):
+async def test_openai_provider_generate_image():
+    mock_client = MagicMock()
+    mock_image_data = MagicMock()
+    mock_image_data.url = "https://example.com/image.png"
+    mock_image_data.revised_prompt = "A cute cat"
+    mock_response = MagicMock()
+    mock_response.data = [mock_image_data]
+
+    mock_client.images.generate = AsyncMock(return_value=mock_response)
+
+    with patch("apps.api.ai_providers.openai.AsyncOpenAI", return_value=mock_client):
         provider = OpenAIProvider(api_key="sk-test")
-        with pytest.raises(NotImplementedError):
-            await provider.generate_image("A cat")
+        response = await provider.generate_image("A cat", size="512x512", quality="hd")
+
+        assert isinstance(response, AIImageResponse)
+        assert response.image_url == "https://example.com/image.png"
+        assert response.metadata["provider"] == "openai"
+        assert response.metadata["revised_prompt"] == "A cute cat"
+
+        # Verify arguments sent to OpenAI
+        mock_client.images.generate.assert_called_once()
+        _, kwargs = mock_client.images.generate.call_args
+        assert kwargs["prompt"] == "A cat"
+        assert kwargs["size"] == "512x512"
+        assert kwargs["quality"] == "hd"
 
 
 def test_openai_provider_factory_integration():
