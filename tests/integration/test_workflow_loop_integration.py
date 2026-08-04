@@ -32,8 +32,8 @@ async def test_workflow_runtime_loop_execution_and_aggregation(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-            MagicMock(),
-        )
+        MagicMock(),
+    )
 
     workflow = MagicMock()
     workflow.id = uuid4()
@@ -106,8 +106,8 @@ async def test_workflow_runtime_loop_invalid_source_error(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-            MagicMock(),
-        )
+        MagicMock(),
+    )
 
     workflow = MagicMock()
     workflow.id = uuid4()

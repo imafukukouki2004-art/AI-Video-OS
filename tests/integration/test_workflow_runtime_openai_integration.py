@@ -32,8 +32,8 @@ async def test_workflow_runtime_openai_provider_selection(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
-            MagicMock(),
-        )
+        MagicMock(),
+    )
 
     workflow = MagicMock()
     workflow.id = uuid4()

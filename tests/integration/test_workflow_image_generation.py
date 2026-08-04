@@ -31,7 +31,7 @@ def repositories():
 async def test_workflow_runtime_image_generation_flow(repositories):
     mock_storage = AsyncMock()
     mock_storage.create_presigned_download_url.return_value = "https://example.com/generated.png"
-    
+
     with patch("apps.api.workflow.runtime.ImageRetriever") as mock_retriever_cls:
         mock_retriever = mock_retriever_cls.return_value
         mock_retriever.retrieve = AsyncMock(return_value=b"fake-image-bytes")
@@ -106,13 +106,13 @@ async def test_workflow_runtime_image_generation_flow(repositories):
 
             # 1. Verify Provider Call
             mock_provider.generate_image.assert_called_once()
-            
+
             # 2. Verify Asset Registration
             repositories["asset"].create.assert_called_once()
-            
+
             # 3. Verify Artifact Registration
             repositories["artifact"].create.assert_called_once()
-            
+
             # 4. Verify Job Update
             args, _ = repositories["job"].update.call_args_list[-1]
             update_data = args[1]

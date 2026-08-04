@@ -1,6 +1,6 @@
 """Integration tests for Workflow Generated Asset Storage."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
@@ -40,7 +40,7 @@ def runtime(mock_repos, mock_storage):
         mock_retriever = mock_retriever_cls.return_value
         mock_retriever.retrieve = AsyncMock(return_value=b"fake-image-bytes")
         mock_retriever.get_extension.return_value = ".png"
-        
+
         rt = WorkflowRuntime(
             mock_repos["job"],
             mock_repos["execution"],
