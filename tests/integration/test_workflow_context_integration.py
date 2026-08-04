@@ -32,6 +32,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
@@ -109,6 +110,7 @@ async def test_workflow_runtime_unresolved_variable_error_persistence(repositori
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()

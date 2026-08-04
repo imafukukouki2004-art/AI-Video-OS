@@ -32,6 +32,7 @@ async def test_run_with_existing_execution_id(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
@@ -79,6 +80,7 @@ async def test_run_validation_failure_with_execution_id(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
@@ -119,6 +121,7 @@ async def test_run_step_failure_persistence(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()

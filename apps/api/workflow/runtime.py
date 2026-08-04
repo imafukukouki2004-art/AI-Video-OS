@@ -31,8 +31,10 @@ from apps.api.repositories import (
     WorkflowExecutionRepository,
     WorkflowStepRepository,
 )
+from apps.api.storage import ObjectStorage
 from apps.api.workflow.context import VariableResolver, WorkflowContext
 from apps.api.workflow.evaluator import ConditionEvaluator
+from apps.api.workflow.retriever import ImageRetriever
 from apps.api.workflow.validator import WorkflowValidator
 
 logger = logging.getLogger(__name__)
@@ -51,6 +53,7 @@ class WorkflowRuntime:
         metric_repository: WorkflowExecutionMetricRepository,
         artifact_repository: WorkflowArtifactRepository,
         asset_repository: AssetRepository,
+        storage: ObjectStorage,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -60,7 +63,9 @@ class WorkflowRuntime:
         self.metric_repository = metric_repository
         self.artifact_repository = artifact_repository
         self.asset_repository = asset_repository
+        self.storage = storage
         self.validator = WorkflowValidator()
+        self.retriever = ImageRetriever()
 
     async def _record_history(
         self,
@@ -323,16 +328,39 @@ class WorkflowRuntime:
                         if not ai_res_img.image_url and not ai_res_img.image_bytes:
                             raise ValueError("AI Provider returned empty image response")
 
-                        # 3. Asset Registration (No real file storage for now)
+                        # 3. Image Data Retrieval
+                        image_data: bytes
+                        mime_type: str
+                        if ai_res_img.image_bytes:
+                            image_data = ai_res_img.image_bytes
+                            mime_type = ai_res_img.mime_type or "image/png"
+                        elif ai_res_img.image_url:
+                            image_data = await self.retriever.retrieve(ai_res_img.image_url)
+                            # In a real scenario, we might want to check headers,
+                            # but for now we trust the provider or default to png.
+                            mime_type = ai_res_img.mime_type or "image/png"
+                        else:
+                            raise ValueError("AI Provider returned no image data or URL")
+
+                        # 4. Object Storage Upload
+                        import uuid
+
+                        ext = self.retriever.get_extension(mime_type)
+                        object_key = f"generated/{execution.id}/{step.id}/{uuid.uuid4()}{ext}"
+                        await self.storage.upload(
+                            key=object_key, body=image_data, content_type=mime_type
+                        )
+
+                        # 5. Asset Registration
                         asset_in = AssetCreate(
-                            filename=f"generated_{int(time.time())}.png",
-                            content_type=ai_res_img.mime_type or "image/png",
-                            size_bytes=0,  # Unknown size for URL-based assets
-                            object_key=f"generated/{execution.id}/{step.id}_{int(time.time())}.png",
+                            filename=f"generated_{step.name}{ext}",
+                            content_type=mime_type,
+                            size_bytes=len(image_data),
+                            object_key=object_key,
                         )
                         asset = await self.asset_repository.create(asset_in)
 
-                        # 4. WorkflowArtifact Registration
+                        # 6. WorkflowArtifact Registration
                         artifact = await self._record_artifact(
                             execution_id=execution.id,
                             step_id=step.id,
@@ -341,16 +369,22 @@ class WorkflowRuntime:
                             metadata=ai_res_img.metadata,
                         )
 
-                        # 5. Context Registration (Post-Artifact Completion)
-                        context.set_step_image(str(step.id), ai_res_img.image_url or "")
-                        context.set_step_image(step.name, ai_res_img.image_url or "")
+                        # 7. Context Registration (Post-Artifact Completion)
+                        # Use presigned URL for {{step.image}} if possible, or just the storage key
+                        # CEO requested "保存済み画像参照". Presigned URL is best for immediate use.
+                        image_ref = await self.storage.create_presigned_download_url(
+                            object_key, expires_in=3600
+                        )
+
+                        context.set_step_image(str(step.id), image_ref)
+                        context.set_step_image(step.name, image_ref)
                         context.set_step_artifact(str(step.id), artifact.id)
                         context.set_step_artifact(step.name, artifact.id)
                         context.set_step_asset(str(step.id), asset.id)
                         context.set_step_asset(step.name, asset.id)
 
                         result_data = {
-                            "image_url": ai_res_img.image_url,
+                            "image_url": image_ref,
                             "asset_id": str(asset.id),
                             "artifact_id": str(artifact.id),
                             "metadata": ai_res_img.metadata,

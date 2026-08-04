@@ -85,6 +85,7 @@ async def test_workflow_runtime_run_success_with_metrics(
         metric_repository,
         artifact_repository,
         asset_repository,
+        MagicMock(),
     )
     workflow = Workflow(id=uuid4(), config={})
 
@@ -156,6 +157,7 @@ async def test_workflow_runtime_failure_records_metrics(
         metric_repository,
         artifact_repository,
         asset_repository,
+        MagicMock(),
     )
     workflow = Workflow(id=uuid4(), config={})
 

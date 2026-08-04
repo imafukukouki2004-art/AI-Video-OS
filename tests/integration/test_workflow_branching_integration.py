@@ -32,6 +32,7 @@ async def test_workflow_runtime_branching_true_path(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
@@ -121,6 +122,7 @@ async def test_workflow_runtime_branching_false_path(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
@@ -208,6 +210,7 @@ async def test_workflow_runtime_invalid_branch_target_error(repositories):
         repositories["metric"],
         repositories["artifact"],
         repositories["asset"],
+        MagicMock(),
     )
 
     workflow = MagicMock()
