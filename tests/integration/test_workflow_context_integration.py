@@ -58,6 +58,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
             "provider": "mock",
             "operation": "text_generation",
             "prompt": "Summarize this: {{Step1.output}}",
+            "system_prompt": "Use the prior result from {{Step1.output}} accurately.",
         },
         status=WorkflowStepStatus.PENDING,
     )
@@ -97,6 +98,7 @@ async def test_workflow_runtime_variable_resolution_multi_step(repositories):
         # Verify Step 2 received the resolved prompt
         _, kwargs = mock_provider.generate_text.call_args_list[1]
         assert kwargs["prompt"] == "Summarize this: Output 1"
+        assert kwargs["system_prompt"] == "Use the prior result from Output 1 accurately."
 
 
 @pytest.mark.asyncio

@@ -1,9 +1,11 @@
 """Workflow runtime for orchestrating job execution with state tracking."""
 
+from __future__ import annotations
+
 import logging
 import time
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from apps.api.ai_providers import AIProviderFactory
 from apps.api.assets.schemas import AssetCreate
@@ -37,6 +39,9 @@ from apps.api.workflow.evaluator import ConditionEvaluator
 from apps.api.workflow.retriever import ImageRetriever
 from apps.api.workflow.validator import WorkflowValidator
 
+if TYPE_CHECKING:
+    from apps.api.services.prompt_builder import PromptBuilder
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,6 +59,7 @@ class WorkflowRuntime:
         artifact_repository: WorkflowArtifactRepository,
         asset_repository: AssetRepository,
         storage: ObjectStorage,
+        prompt_builder: PromptBuilder | None = None,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -64,6 +70,11 @@ class WorkflowRuntime:
         self.artifact_repository = artifact_repository
         self.asset_repository = asset_repository
         self.storage = storage
+        if prompt_builder is None:
+            from apps.api.services.prompt_builder import PromptBuilder
+
+            prompt_builder = PromptBuilder()
+        self.prompt_builder = prompt_builder
         self.validator = WorkflowValidator()
         self.retriever = ImageRetriever()
 
@@ -229,6 +240,7 @@ class WorkflowRuntime:
                 for item in items:
                     if loop_var:
                         context.set_step_output(loop_var, item)
+                        context.set_variable(loop_var, item)
 
                     # 6. Create Job (PENDING) linked to execution and step
                     job_in = JobCreate(
@@ -257,30 +269,28 @@ class WorkflowRuntime:
 
                     result_data: dict[str, Any] = {}
                     if operation == "text_generation":
-                        # Input Mapping
-                        prompt_raw = step.config.get("prompt", step.name)
-                        system_prompt_raw = step.config.get("system_prompt")
-
-                        # Variable Resolution
                         try:
-                            prompt = resolver.resolve(prompt_raw)
-                            system_prompt = (
-                                resolver.resolve(system_prompt_raw) if system_prompt_raw else None
+                            composed_prompts = self.prompt_builder.build_from_config(
+                                step.config,
+                                resolver,
+                                default_user_prompt=step.name,
                             )
-                        except ValueError as e:
-                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
-                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+                        except ValueError as exc:
+                            raise ValueError(f"Variable resolution failed: {exc!s}") from exc
 
                         # Prepare call arguments
-                        exclude_keys = ["provider", "operation", "prompt", "system_prompt"]
+                        exclude_keys = {"provider", "operation", "prompt", "system_prompt"}
                         call_kwargs = {
                             k: v for k, v in step.config.items() if k not in exclude_keys
                         }
-                        if system_prompt:
-                            call_kwargs["system_prompt"] = system_prompt
+                        if composed_prompts.system_prompt is not None:
+                            call_kwargs["system_prompt"] = composed_prompts.system_prompt
 
                         # AI Execution
-                        ai_res = await provider.generate_text(prompt=prompt, **call_kwargs)
+                        ai_res = await provider.generate_text(
+                            prompt=composed_prompts.user_prompt,
+                            **call_kwargs,
+                        )
 
                         # 9. Update Job to COMPLETED
                         result_data = {
@@ -308,21 +318,26 @@ class WorkflowRuntime:
 
                     elif operation == "image_generation":
                         # 1. Image Generation
-                        prompt_raw = step.config.get("prompt", step.name)
                         try:
-                            prompt = resolver.resolve(prompt_raw)
-                        except ValueError as e:
-                            logger.error(f"Variable resolution failed for step {step.id}: {e!s}")
-                            raise ValueError(f"Variable resolution failed: {e!s}") from e
+                            composed_prompts = self.prompt_builder.build_from_config(
+                                step.config,
+                                resolver,
+                                default_user_prompt=step.name,
+                            )
+                        except ValueError as exc:
+                            raise ValueError(f"Variable resolution failed: {exc!s}") from exc
 
                         # Prepare call arguments
-                        exclude_keys = ["provider", "operation", "prompt"]
+                        exclude_keys = {"provider", "operation", "prompt", "system_prompt"}
                         call_kwargs = {
                             k: v for k, v in step.config.items() if k not in exclude_keys
                         }
 
                         # AI Execution
-                        ai_res_img = await provider.generate_image(prompt=prompt, **call_kwargs)
+                        ai_res_img = await provider.generate_image(
+                            prompt=composed_prompts.user_prompt,
+                            **call_kwargs,
+                        )
 
                         # 2. Response Validation
                         if not ai_res_img.image_url and not ai_res_img.image_bytes:

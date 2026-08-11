@@ -12,6 +12,7 @@ from apps.api.services.domain import (
     WorkflowService,
     WorkflowStepService,
 )
+from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.services.workflow_queue import WorkflowQueueService
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.services.workflow_validation import WorkflowValidationService
@@ -19,6 +20,7 @@ from apps.api.services.workflow_validation import WorkflowValidationService
 __all__ = [
     "JobService",
     "ProjectService",
+    "PromptBuilder",
     "VideoService",
     "WorkflowArtifactService",
     "WorkflowExecutionErrorService",

@@ -25,6 +25,7 @@ from apps.api.repositories import (
 from apps.api.services import (
     JobService,
     ProjectService,
+    PromptBuilder,
     VideoService,
     WorkflowArtifactService,
     WorkflowExecutionErrorService,
@@ -81,6 +82,14 @@ def get_storage(request: Request) -> ObjectStorage:
 
 
 StorageDependency = Annotated[ObjectStorage, Depends(get_storage)]
+
+
+def get_prompt_builder() -> PromptBuilder:
+    """Return the stateless prompt composition service."""
+    return PromptBuilder()
+
+
+PromptBuilderDependency = Annotated[PromptBuilder, Depends(get_prompt_builder)]
 
 
 def get_project_repository(session: DatabaseSessionDependency) -> ProjectRepository:
@@ -308,6 +317,7 @@ def get_workflow_runtime_service(
     artifact_repo: WorkflowArtifactRepositoryDependency,
     asset_repo: AssetRepositoryDependency,
     storage: StorageDependency,
+    prompt_builder: PromptBuilderDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -320,6 +330,7 @@ def get_workflow_runtime_service(
         artifact_repo,
         asset_repo,
         storage,
+        prompt_builder,
     )
 
 
