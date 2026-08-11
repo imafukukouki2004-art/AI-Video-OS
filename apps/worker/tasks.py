@@ -20,9 +20,9 @@ from apps.api.repositories import (
     WorkflowRepository,
     WorkflowStepRepository,
 )
+from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.storage.adapter import S3ObjectStorage
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.services.prompt_builder import PromptBuilder
 from apps.worker.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
@@ -83,22 +83,19 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         artifact_repo = WorkflowArtifactRepository(session)
         asset_repo = AssetRepository(session)
 
-    # Initialize PromptBuilder
-    prompt_builder = PromptBuilder()
-
-    # Initialize runtime
-    runtime = WorkflowRuntime(
-        job_repo,
-        execution_repo,
-        step_repo,
-        history_repo,
-        error_repo,
-        metric_repo,
-        artifact_repo,
-        asset_repo,
-        storage,
-        prompt_builder,
-    )
+        # Initialize runtime dependencies while the database session is active.
+        runtime = WorkflowRuntime(
+            job_repo,
+            execution_repo,
+            step_repo,
+            history_repo,
+            error_repo,
+            metric_repo,
+            artifact_repo,
+            asset_repo,
+            storage,
+            PromptBuilder(),
+        )
 
         # Get the execution record
         execution = await execution_repo.get_by_id(execution_id)

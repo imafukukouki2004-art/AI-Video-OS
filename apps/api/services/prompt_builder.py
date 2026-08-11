@@ -1,50 +1,52 @@
-from typing import Any, Dict, List
+"""Prompt composition service for workflow runtime execution."""
 
-from apps.api.domain.models.prompt import PromptTemplate
-from apps.api.workflow.context import WorkflowContext
-from apps.api.workflow.variable_resolver import VariableResolver
+from collections.abc import Mapping
+from typing import Any
+
+from apps.api.domain.prompt import PromptComposition, PromptTemplate
+from apps.api.workflow.context import VariableResolver
 
 
 class PromptBuilder:
-    def __init__(self):
-        pass
+    """Resolve typed prompt templates against a workflow context."""
 
-    async def build_prompt(
+    def build_prompt(
         self,
-        workflow_context: WorkflowContext,
         variable_resolver: VariableResolver,
-        system_prompt_template: PromptTemplate,
         user_prompt_template: PromptTemplate,
-    ) -> Dict[str, Any]:
-        # Resolve variables in system prompt template
-        resolved_system_prompt = variable_resolver.resolve(
-            system_prompt_template.template
+        system_prompt_template: PromptTemplate | None = None,
+    ) -> PromptComposition:
+        """Compose provider-ready prompts while preserving their roles."""
+        if user_prompt_template.template_type != "user":
+            raise ValueError("User prompt template must have type 'user'")
+        if system_prompt_template and system_prompt_template.template_type != "system":
+            raise ValueError("System prompt template must have type 'system'")
+
+        return PromptComposition(
+            user_prompt=variable_resolver.resolve(user_prompt_template.template),
+            system_prompt=(
+                variable_resolver.resolve(system_prompt_template.template)
+                if system_prompt_template
+                else None
+            ),
         )
 
-        # Resolve variables in user prompt template
-        resolved_user_prompt = variable_resolver.resolve(
-            user_prompt_template.template
+    def build_from_config(
+        self,
+        config: Mapping[str, Any],
+        variable_resolver: VariableResolver,
+        *,
+        default_user_prompt: str,
+    ) -> PromptComposition:
+        """Build prompts from the existing runtime configuration contract."""
+        user_template = PromptTemplate(
+            template=str(config.get("prompt") or default_user_prompt),
+            template_type="user",
         )
-
-        return {
-            "system_prompt": resolved_system_prompt,
-            "user_prompt": resolved_user_prompt,
-        }
-
-    async def load_template(self, template_id: UUID) -> PromptTemplate:
-        # This is a placeholder. In a real implementation, this would load from a database or file system.
-        # For now, we'll return a dummy template.
-        if template_id == UUID("00000000-0000-0000-0000-000000000001"):
-            return PromptTemplate(
-                template="You are a helpful AI assistant.",
-                template_type="system",
-                description="Default system prompt",
-            )
-        elif template_id == UUID("00000000-0000-0000-0000-000000000002"):
-            return PromptTemplate(
-                template="Hello, {{user_name}}! What can I do for you today?",
-                template_type="user",
-                description="Default user prompt",
-            )
-        else:
-            raise ValueError(f"Prompt template with ID {template_id} not found.")
+        system_value = config.get("system_prompt")
+        system_template = (
+            PromptTemplate(template=str(system_value), template_type="system")
+            if system_value is not None
+            else None
+        )
+        return self.build_prompt(variable_resolver, user_template, system_template)

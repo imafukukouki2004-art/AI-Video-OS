@@ -235,6 +235,14 @@ pnpm run build
 
 Playwright configuration is present for later end-to-end scenarios; TICKET-003 does not add product E2E flows or browser binaries.
 
+### Prompt composition
+
+Workflow text and image steps support runtime variable resolution in `prompt`, plus an optional
+`system_prompt` for text generation. Prompt roles are represented by typed value models and are
+composed before the existing provider interface is called. See
+[Prompt Composition Foundation](docs/architecture/PROMPT_COMPOSITION.md) for the configuration
+contract, supported variables, and explicit scope boundaries.
+
 ## Docker
 
 Build from the repository root:
@@ -265,6 +273,7 @@ apps/api/                 FastAPI application, infrastructure adapters, asset AP
 apps/web/                 Next.js application, tests, and container definition
 apps/worker/              Celery application, foundation task, and worker image
 docs/operations/          Current operational project state
+docs/architecture/        Runtime architecture contracts
 migrations/               Alembic environment, baseline, and asset metadata revisions
 tests/unit/               Isolated configuration and logging tests
 tests/integration/        HTTP API and error-contract tests

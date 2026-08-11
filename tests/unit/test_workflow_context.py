@@ -53,3 +53,17 @@ def test_variable_resolver_empty_text():
 
     assert resolver.resolve("") == ""
     assert resolver.resolve(None) is None
+
+
+def test_variable_resolver_resolves_generic_context_variable() -> None:
+    context = WorkflowContext()
+    context.set_variable("topic", "cinematic lighting")
+
+    assert VariableResolver(context).resolve("Explain {{topic}}") == "Explain cinematic lighting"
+
+
+def test_variable_resolver_preserves_loop_output_fallback() -> None:
+    context = WorkflowContext()
+    context.set_step_output("item", {"shot": 1})
+
+    assert VariableResolver(context).resolve_to_any("{{item}}") == {"shot": 1}

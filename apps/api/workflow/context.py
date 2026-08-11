@@ -69,6 +69,23 @@ class VariableResolver:
     def __init__(self, context: WorkflowContext) -> None:
         self.context = context
 
+    def _resolve_value(self, identifier: str, suffix: str | None) -> Any:
+        if suffix == "artifact":
+            return self.context.get_step_artifact(identifier)
+        if suffix == "asset":
+            return self.context.get_step_asset(identifier)
+        if suffix == "image":
+            return self.context.get_step_image(identifier)
+        if suffix == "output":
+            return self.context.get_step_output(identifier)
+
+        value = self.context.get_variable(identifier)
+        if value is None:
+            # Preserve the original loop-variable contract, which stored loop
+            # values in the step-output namespace.
+            value = self.context.get_step_output(identifier)
+        return value
+
     def resolve_to_any(self, text: str) -> Any:
         """
         Resolve a single variable to its original type (e.g., list, dict, UUID).
@@ -83,16 +100,7 @@ class VariableResolver:
             identifier = match.group(1)
             suffix = match.group(2)
 
-            if suffix == "artifact":
-                value = self.context.get_step_artifact(identifier)
-            elif suffix == "asset":
-                value = self.context.get_step_asset(identifier)
-            elif suffix == "image":
-                value = self.context.get_step_image(identifier)
-            elif suffix == "output":
-                value = self.context.get_step_output(identifier)
-            else: # Generic variable like {{item}}
-                value = self.context.get_variable(identifier)
+            value = self._resolve_value(identifier, suffix)
 
             if value is None:
                 raise ValueError(f"Unresolved variable: {text}")
@@ -113,24 +121,11 @@ class VariableResolver:
             identifier = match.group(1)
             suffix = match.group(2)
 
-            if suffix == "artifact":
-                value = self.context.get_step_artifact(identifier)
-            elif suffix == "asset":
-                value = self.context.get_step_asset(identifier)
-            elif suffix == "image":
-                value = self.context.get_step_image(identifier)
-            elif suffix == "output":
-                value = self.context.get_step_output(identifier)
-            else: # Generic variable like {{item}}
-                value = self.context.get_variable(identifier)
+            value = self._resolve_value(identifier, suffix)
 
             if value is None:
                 raise ValueError(f"Unresolved variable: {match.group(0)}")
 
             return str(value)
 
-        try:
-            return self.VARIABLE_PATTERN.sub(replace_match, text)
-        except ValueError as e:
-            # Re-raise to be caught by the runtime's error handling
-            raise e
+        return self.VARIABLE_PATTERN.sub(replace_match, text)

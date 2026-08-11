@@ -17,9 +17,9 @@ from apps.api.repositories import (
     WorkflowRepository,
     WorkflowStepRepository,
 )
+from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.storage import ObjectStorage
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.api.services.prompt_builder import PromptBuilder
 
 
 class WorkflowRuntimeService:
