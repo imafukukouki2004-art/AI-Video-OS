@@ -21,12 +21,16 @@ from apps.api.domain.models import (
     WorkflowExecutionStatus,
     WorkflowStep,
 )
+from apps.api.publishing.models import Publication, PublicationStatus
+from apps.api.publishing.providers import PublishingProviderResolver, PublishingResponse
+from apps.api.publishing.repository import PublicationRepository
+from apps.api.publishing.service import PublishingService
 from apps.api.services.workflow_queue import WorkflowQueueService
 from apps.api.storage import StoredObject
 from apps.api.video_rendering import VideoRenderingError, VideoRenderResult
 from apps.api.workflow.context import WorkflowContext
 from apps.api.workflow.runtime import WorkflowRuntime
-from apps.worker.tasks import _execute_workflow_execution_async
+from apps.worker.tasks import _execute_workflow_execution_async, _run_publication
 
 
 def _runtime_mvp_steps(workflow_id: UUID) -> list[WorkflowStep]:
@@ -77,7 +81,15 @@ def _runtime_mvp_steps(workflow_id: UUID) -> list[WorkflowStep]:
 @pytest.mark.asyncio
 async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
     workflow_id, execution_id = uuid4(), uuid4()
-    workflow = Workflow(id=workflow_id, workflow_type="ai_video_runtime_mvp")
+    workflow = Workflow(
+        id=workflow_id,
+        workflow_type="ai_video_runtime_mvp",
+        config={
+            "auto_publish": True,
+            "provider": "mock",
+            "publication_title": "Runtime MVP",
+        },
+    )
     steps = _runtime_mvp_steps(workflow_id)
     execution = WorkflowExecution(
         id=execution_id,
@@ -169,6 +181,7 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
         return artifact
 
     artifact_repo.create.side_effect = create_artifact
+    artifact_repo.list_by_execution.return_value = stored_artifacts
     objects: dict[str, StoredObject] = {}
 
     async def upload(key: str, body: bytes, content_type: str) -> None:
@@ -203,6 +216,52 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
     app: FastAPI = create_app()
     app.dependency_overrides[get_workflow_queue_service] = lambda: queue_service
     task = MagicMock(id="runtime-mvp-task")
+    publication_repo = AsyncMock(spec=PublicationRepository)
+    publication: Publication | None = None
+
+    async def create_automatic(publication_in):
+        nonlocal publication
+        if publication is not None:
+            return publication, False
+        publication = Publication(
+            id=uuid4(),
+            workflow_execution_id=publication_in.workflow_execution_id,
+            asset_id=publication_in.asset_id,
+            provider=publication_in.provider,
+            status=PublicationStatus.PENDING,
+            title=publication_in.title,
+            description=publication_in.description,
+            provider_metadata={},
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+        return publication, True
+
+    async def get_publication(publication_id: UUID):
+        if publication is not None and publication.id == publication_id:
+            return publication
+        return None
+
+    async def transition_publication(publication_id, from_status, to_status, update_in):
+        if (
+            publication is None
+            or publication.id != publication_id
+            or publication.status is not from_status
+        ):
+            return None
+        publication.status = to_status
+        for field, value in update_in.model_dump(exclude_unset=True).items():
+            setattr(publication, field, value)
+        return publication
+
+    publication_repo.create_automatic.side_effect = create_automatic
+    publication_repo.get_by_id.side_effect = get_publication
+    publication_repo.transition_status.side_effect = transition_publication
+
+    def queued_task(task_name, *_args, **kwargs):
+        if task_name == "apps.worker.tasks.execute_workflow_execution":
+            return task
+        return MagicMock(id=kwargs["task_id"])
 
     database = MagicMock()
     database.session_factory.return_value.__aenter__.return_value = AsyncMock()
@@ -210,7 +269,7 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
     database.dispose = AsyncMock()
 
     with (
-        patch("apps.api.services.workflow_queue.celery_app.send_task", return_value=task),
+        patch("apps.api.services.workflow_queue.celery_app.send_task", side_effect=queued_task),
         patch("apps.worker.tasks.Database", return_value=database),
         patch("apps.worker.tasks.S3ObjectStorage", return_value=storage),
         patch("apps.worker.tasks.WorkflowRepository", return_value=workflow_repo),
@@ -222,6 +281,7 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
         patch("apps.worker.tasks.WorkflowExecutionMetricRepository", return_value=metric_repo),
         patch("apps.worker.tasks.WorkflowArtifactRepository", return_value=artifact_repo),
         patch("apps.worker.tasks.AssetRepository", return_value=asset_repo),
+        patch("apps.worker.tasks.PublicationRepository", return_value=publication_repo),
         patch("apps.worker.tasks.FFmpegVideoRenderer", return_value=renderer),
         patch("apps.api.workflow.runtime.WorkflowContext", return_value=context),
         patch(
@@ -232,6 +292,22 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             enqueue_response = await client.post(f"/workflows/{workflow_id}/enqueue")
         worker_result = await _execute_workflow_execution_async(str(execution_id))
+
+    assert publication is not None
+    assert publication.status is PublicationStatus.QUEUED
+    publishing_provider = AsyncMock()
+    publishing_provider.publish.return_value = PublishingResponse(
+        external_id="mock-video-1",
+        external_url="https://example.invalid/mock-video-1",
+        metadata={"provider": "mock"},
+    )
+    publishing_service = PublishingService(
+        publication_repo,
+        asset_repo,
+        PublishingProviderResolver({"mock": publishing_provider}),
+    )
+    published_result = await _run_publication(publishing_service, publication.id)
+    duplicate_result = await _run_publication(publishing_service, publication.id)
 
     assert enqueue_response.status_code == 202
     assert enqueue_response.json() == {
@@ -260,6 +336,12 @@ async def test_api_enqueue_worker_completes_runtime_mvp() -> None:
     assert history_repo.create.await_count == 8
     assert metric_repo.create.await_count == 4
     error_repo.create.assert_not_awaited()
+    assert published_result == {"status": "published", "publication_id": str(publication.id)}
+    assert duplicate_result == published_result
+    assert publication.status is PublicationStatus.PUBLISHED
+    assert publication.workflow_execution_id == execution_id
+    assert publication.asset_id == final_artifact.asset_id
+    publishing_provider.publish.assert_awaited_once()
     storage.close.assert_awaited_once()
     database.dispose.assert_awaited_once()
 

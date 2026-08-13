@@ -10,6 +10,7 @@ from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
 from apps.api.publishing import (
+    AutomaticPublishingCoordinator,
     CredentialCipher,
     GoogleYouTubeOAuthClient,
     PublicationRepository,
@@ -461,6 +462,27 @@ PublishingQueueServiceDependency = Annotated[
 ]
 
 
+def get_automatic_publishing_coordinator(
+    execution_repo: WorkflowExecutionRepositoryDependency,
+    artifact_repo: WorkflowArtifactRepositoryDependency,
+    publication_repo: PublicationRepositoryDependency,
+    publishing_service: PublishingServiceDependency,
+    queue_service: PublishingQueueServiceDependency,
+) -> AutomaticPublishingCoordinator:
+    return AutomaticPublishingCoordinator(
+        execution_repo,
+        artifact_repo,
+        publication_repo,
+        publishing_service,
+        queue_service,
+    )
+
+
+AutomaticPublishingCoordinatorDependency = Annotated[
+    AutomaticPublishingCoordinator, Depends(get_automatic_publishing_coordinator)
+]
+
+
 def get_workflow_queue_service(
     repo: WorkflowExecutionRepositoryDependency,
 ) -> WorkflowQueueService:
@@ -497,6 +519,7 @@ def get_workflow_runtime_service(
     storage: StorageDependency,
     prompt_builder: PromptBuilderDependency,
     video_renderer: VideoRendererDependency,
+    automatic_publishing: AutomaticPublishingCoordinatorDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -511,6 +534,7 @@ def get_workflow_runtime_service(
         storage,
         prompt_builder,
         video_renderer,
+        automatic_publishing,
     )
 
 

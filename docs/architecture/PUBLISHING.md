@@ -8,27 +8,74 @@ User, Workspace, Tenant, or Account identity model, so exactly one most-recent C
 connection is treated as the operator connection. Multi-user account selection is intentionally
 deferred rather than approximated inside Publication or WorkflowRuntime.
 
-TICKET-039 adds a dedicated Celery queue and short-term scheduling path. It reuses the existing
-PublishingService and provider boundary; it does not connect Workflow completion to publication.
+TICKET-039 adds a dedicated Celery queue and short-term scheduling path. TICKET-040 connects a
+durably completed Workflow to that queue through a small application-level coordinator. The
+Runtime, OAuth, provider, queue, and scheduler implementations remain unchanged.
 
 ## Architecture boundary
 
 ```text
-WorkflowRuntime -> final Video Asset
-                         |
-                         v
-Create Publication -> PublishingQueueService -> Celery Worker
-          |                                          |
-          v                                          v
-PublicationRepository <- PublishingService <- execute_publication
-                              |
-                              v
-                     PublishingProvider
+WorkflowRuntime -> COMPLETED + final Video WorkflowArtifact
+                                      |
+                                      v
+                     AutomaticPublishingCoordinator
+                                      |
+                                      v
+Manual API -------> PublishingService -> PublicationRepository
+                                      |
+                                      v
+                           PublishingQueueService
+                                      |
+                                      v
+               execute_publication -> PublishingService
+                                      |
+                                      v
+                           PublishingProvider
 ```
 
 `WorkflowRuntime` remains responsible for content generation through the final Asset and
 WorkflowArtifact. Publishing starts only from an existing Asset ID and neither duplicates the
 Asset nor imports generation behavior.
+
+## Automatic publishing boundary
+
+Automatic publishing is opt-in through the existing Workflow `config` JSON:
+
+```json
+{
+  "auto_publish": true,
+  "provider": "youtube",
+  "publication_title": "Launch video",
+  "publication_description": "Review before publishing"
+}
+```
+
+The default is off, so existing Workflows still end at `COMPLETED`. The synchronous application
+service and the Workflow Celery Worker invoke the same `AutomaticPublishingCoordinator` only after
+`WorkflowRuntime.run` returns a completed execution. The coordinator re-reads the durable
+WorkflowExecution and requires `COMPLETED`; failed or incomplete executions never create a
+Publication.
+
+WorkflowArtifacts are the final-output source of truth. `list_by_execution` orders them by
+`created_at` and artifact ID, and the coordinator chooses the last persisted artifact whose type is
+`video` and which references an Asset. This provides a deterministic newest-video rule without a
+new output graph or Runtime contract.
+
+An automatic Publication records the WorkflowExecution ID, final Video Asset ID, and normalized
+provider. The database unique constraint `(workflow_execution_id, provider, asset_id)` is the
+idempotency authority. PostgreSQL `ON CONFLICT DO NOTHING` lets duplicate completion delivery
+recover the existing record safely. Because manual Publications keep a null execution ID,
+PostgreSQL's null uniqueness semantics preserve the existing manual API behavior.
+
+Only a `pending` automatic Publication is sent to the existing `PublishingQueueService`.
+`queued`, `publishing`, `published`, and `failed` records are not dispatched again. The queue task
+payload remains the Publication UUID only; the Publishing Worker resolves OAuth credentials at
+execution time.
+
+Automatic-trigger validation, repository, broker, and provider failures are contained in the
+Publishing failure domain. Safe structured logs include identifiers and stable error codes but no
+tokens or raw provider details. If a Publication exists, the existing queue/worker lifecycle
+records its failure. A previously completed Workflow remains `COMPLETED` in every case.
 
 ## Publication record
 
@@ -197,7 +244,8 @@ POST /publications/{publication_id}/schedule
 Creation validates the existing Asset and provider. The synchronous endpoint remains for
 compatibility. The enqueue and schedule endpoints return HTTP 202 with the existing Publication
 response, including status, schedule timestamps, and task ID. The existing GET endpoint is the
-status API. Automatic Workflow-to-Publishing integration remains out of scope.
+status API. Automatic integration adds no public route; it reuses the same Service, Repository,
+queue, Worker, provider, and status API contracts.
 
 ## Manual private upload verification
 

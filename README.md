@@ -13,9 +13,9 @@ adapters do not become WorkflowRuntime responsibilities.
 | Product version | AI Video OS Version 2.0 |
 | Phase | M4 — Publishing & Distribution |
 | Current milestone | Publishing Foundation |
-| Completed | TICKET-001 through TICKET-035; Runtime MVP completed |
-| Current ticket | TICKET-039 — Publishing Queue & Scheduling Foundation (In Review) |
-| Implementation progress | Runtime MVP and Publishing Foundations through TICKET-038 completed; TICKET-039 in review |
+| Completed | TICKET-001 through TICKET-039; Runtime MVP and Publishing foundations completed |
+| Current ticket | TICKET-040 — Automatic Workflow to Publishing Integration Foundation (In Review) |
+| Implementation progress | Automatic Workflow-to-Publishing integration in review |
 | Next technology review | TR-02 after M4 completion |
 | Technology review status | Pending |
 
@@ -306,6 +306,26 @@ The queued task carries only the Publication ID. The Worker resolves stored cred
 execution time and invokes the same `PublishingService → PublishingProvider` path as synchronous
 publishing. This foundation uses Celery ETA for short-term schedules; it is not a durable,
 long-horizon scheduler across arbitrary broker or worker outages.
+
+Completed video workflows can opt in to immediate automatic publishing by storing this minimal
+configuration in the existing Workflow `config` object:
+
+```json
+{
+  "auto_publish": true,
+  "provider": "youtube",
+  "publication_title": "Launch video",
+  "publication_description": "Review before publishing"
+}
+```
+
+The default is `auto_publish: false`. After the WorkflowExecution and all artifacts are durably
+completed, an application-level coordinator selects the newest video WorkflowArtifact (creation
+time, then artifact ID), creates one execution-linked Publication, and reuses
+`PublishingQueueService` for immediate dispatch. A database uniqueness constraint on execution,
+provider, and Asset prevents duplicate Publications. Queue and provider failures remain within the
+Publication lifecycle and never change a completed Workflow back to failed. Workflow task payloads
+contain no credentials; publishing tasks continue to carry only the Publication ID.
 
 The same API accepts `provider: youtube` when the three OAuth secrets are configured. The Provider
 downloads the existing Video Asset through ObjectStorage and uploads it with a `private` safety
