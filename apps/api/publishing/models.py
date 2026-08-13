@@ -17,6 +17,7 @@ class PublicationStatus(str, enum.Enum):
     """Lifecycle states of one publishing request."""
 
     PENDING = "pending"
+    QUEUED = "queued"
     PUBLISHING = "publishing"
     PUBLISHED = "published"
     FAILED = "failed"
@@ -59,6 +60,10 @@ class Publication(Base):
         nullable=False,
     )
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    scheduled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    queued_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    task_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     asset: Mapped[Asset] = relationship()
 

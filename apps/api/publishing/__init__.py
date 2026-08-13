@@ -21,6 +21,7 @@ from apps.api.publishing.providers import (
     PublishingProviderResolver,
     PublishingResponse,
 )
+from apps.api.publishing.queue import PublishingQueueService
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.publishing.service import PublishingService
 from apps.api.publishing.youtube import (
@@ -43,6 +44,7 @@ __all__ = [
     "PublishingProvider",
     "PublishingProviderError",
     "PublishingProviderResolver",
+    "PublishingQueueService",
     "PublishingResponse",
     "PublishingService",
     "YouTubeConnectionService",

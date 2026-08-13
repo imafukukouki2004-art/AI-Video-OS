@@ -62,6 +62,7 @@ def test_publication_domain_and_response_contract() -> None:
     assert publication.status is PublicationStatus.PENDING
     assert [status.value for status in PublicationStatus] == [
         "pending",
+        "queued",
         "publishing",
         "published",
         "failed",
@@ -179,13 +180,15 @@ async def test_service_publishes_and_persists_provider_result() -> None:
     service, publication_repo, _, _ = make_service(asset)
     publication_repo.get_by_id.return_value = publication
 
-    async def update(publication_id, schema):
+    async def transition(publication_id, from_status, to_status, schema):
         assert publication_id == publication.id
+        assert publication.status is from_status
+        publication.status = to_status
         for field, value in schema.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repo.update.side_effect = update
+    publication_repo.transition_status.side_effect = transition
 
     published = await service.publish(publication.id)
 
@@ -194,7 +197,7 @@ async def test_service_publishes_and_persists_provider_result() -> None:
     assert published.external_url is not None
     assert published.provider_metadata["provider"] == "mock"
     assert published.published_at is not None
-    assert publication_repo.update.await_count == 2
+    assert publication_repo.transition_status.await_count == 2
 
 
 class FailingProvider(PublishingProvider):
@@ -216,12 +219,13 @@ async def test_service_failure_persists_safe_error() -> None:
     publication_repo.get_by_id.return_value = publication
     resolver.resolve = Mock(return_value=FailingProvider())
 
-    async def update(publication_id, schema):
+    async def transition(publication_id, from_status, to_status, schema):
+        publication.status = to_status
         for field, value in schema.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repo.update.side_effect = update
+    publication_repo.transition_status.side_effect = transition
 
     with pytest.raises(ApplicationError) as raised:
         await service.publish(publication.id)
@@ -258,12 +262,13 @@ async def test_service_persists_specific_safe_youtube_error() -> None:
     provider.publish.side_effect = YouTubeUploadError()
     resolver.resolve = Mock(return_value=provider)
 
-    async def update(publication_id, schema):
+    async def transition(publication_id, from_status, to_status, schema):
+        publication.status = to_status
         for field, value in schema.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repo.update.side_effect = update
+    publication_repo.transition_status.side_effect = transition
 
     with pytest.raises(ApplicationError) as raised:
         await service.publish(publication.id)

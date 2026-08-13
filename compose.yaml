@@ -47,8 +47,22 @@ services:
       CELERY_RESULT_BACKEND: redis://redis:6379/1
       CELERY_TASK_MAX_RETRIES: ${CELERY_TASK_MAX_RETRIES:-3}
       CELERY_RETRY_BACKOFF_MAX_SECONDS: ${CELERY_RETRY_BACKOFF_MAX_SECONDS:-60}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-ai_video_os}:${POSTGRES_PASSWORD:-change-me-local-only}@postgres:5432/${POSTGRES_DB:-ai_video_os}
+      STORAGE_ENDPOINT_URL: http://minio:9000
+      STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER in .env}
+      STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD in .env}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-ai-video-os-assets}
+      YOUTUBE_CLIENT_ID: ${YOUTUBE_CLIENT_ID:-}
+      YOUTUBE_CLIENT_SECRET: ${YOUTUBE_CLIENT_SECRET:-}
+      YOUTUBE_REFRESH_TOKEN: ${YOUTUBE_REFRESH_TOKEN:-}
+      YOUTUBE_CREDENTIAL_ENCRYPTION_KEY: ${YOUTUBE_CREDENTIAL_ENCRYPTION_KEY:-}
+      YOUTUBE_PRIVACY_STATUS: ${YOUTUBE_PRIVACY_STATUS:-private}
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     healthcheck:
       test:

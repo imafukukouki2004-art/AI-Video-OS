@@ -14,8 +14,8 @@ adapters do not become WorkflowRuntime responsibilities.
 | Phase | M4 — Publishing & Distribution |
 | Current milestone | Publishing Foundation |
 | Completed | TICKET-001 through TICKET-035; Runtime MVP completed |
-| Current ticket | TICKET-036 — Publishing Domain & Provider Foundation (In Review) |
-| Implementation progress | Runtime MVP completed; Publishing Foundation in review |
+| Current ticket | TICKET-039 — Publishing Queue & Scheduling Foundation (In Review) |
+| Implementation progress | Runtime MVP and Publishing Foundations through TICKET-038 completed; TICKET-039 in review |
 | Next technology review | TR-02 after M4 completion |
 | Technology review status | Pending |
 
@@ -290,6 +290,22 @@ curl http://localhost:8000/publications/{publication_id}
 curl http://localhost:8000/assets/{asset_id}/publications
 curl -X POST http://localhost:8000/publications/{publication_id}/publish
 ```
+
+Publications can also be queued immediately or scheduled with a timezone-aware timestamp. The API
+normalizes schedules to UTC, persists the Celery task ID, and exposes queue state through the
+existing publication response.
+
+```bash
+curl -X POST http://localhost:8000/publications/{publication_id}/enqueue
+curl -X POST http://localhost:8000/publications/{publication_id}/schedule \
+  -H 'Content-Type: application/json' \
+  -d '{"scheduled_at":"2026-08-14T12:00:00+09:00"}'
+```
+
+The queued task carries only the Publication ID. The Worker resolves stored credentials at
+execution time and invokes the same `PublishingService → PublishingProvider` path as synchronous
+publishing. This foundation uses Celery ETA for short-term schedules; it is not a durable,
+long-horizon scheduler across arbitrary broker or worker outages.
 
 The same API accepts `provider: youtube` when the three OAuth secrets are configured. The Provider
 downloads the existing Video Asset through ObjectStorage and uploads it with a `private` safety

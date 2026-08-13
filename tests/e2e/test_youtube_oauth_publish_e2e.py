@@ -156,13 +156,14 @@ async def test_oauth_callback_encrypted_credential_drives_youtube_publication() 
     publication_repository.create.return_value = publication
     publication_repository.get_by_id.return_value = publication
 
-    async def update_publication(publication_id, update):
+    async def transition_publication(publication_id, from_status, to_status, update):
         assert publication_id == publication.id
+        publication.status = to_status
         for field, value in update.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repository.update.side_effect = update_publication
+    publication_repository.transition_status.side_effect = transition_publication
     publishing = PublishingService(
         publication_repository,
         asset_repository,

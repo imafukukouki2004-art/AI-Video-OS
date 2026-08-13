@@ -1,10 +1,10 @@
 """API and repository schemas for publications."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from apps.api.publishing.models import PublicationStatus, PublishingConnectionStatus
 
@@ -24,6 +24,21 @@ class PublicationUpdate(BaseModel):
     error_code: str | None = Field(None, max_length=100)
     error_message: str | None = Field(None, max_length=1000)
     published_at: datetime | None = None
+    scheduled_at: datetime | None = None
+    queued_at: datetime | None = None
+    started_at: datetime | None = None
+    task_id: str | None = Field(None, max_length=255)
+
+
+class PublicationSchedule(BaseModel):
+    scheduled_at: datetime
+
+    @field_validator("scheduled_at")
+    @classmethod
+    def require_timezone_and_normalize_utc(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("scheduled_at must include a timezone offset")
+        return value.astimezone(UTC)
 
 
 class PublicationResponse(BaseModel):
@@ -43,6 +58,10 @@ class PublicationResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: datetime | None
+    scheduled_at: datetime | None
+    queued_at: datetime | None
+    started_at: datetime | None
+    task_id: str | None
 
 
 class PublishingConnectionCreate(BaseModel):

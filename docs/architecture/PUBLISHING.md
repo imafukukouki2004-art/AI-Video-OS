@@ -1,13 +1,15 @@
 # Publishing Domain & Provider Foundation
 
 TICKET-036 established the Publishing boundary. TICKET-037 adds YouTube as the first real platform
-adapter while keeping platform SDK and OAuth material inside that boundary. Automatic posting, a
-queue, scheduling, and a user-facing OAuth system remain excluded.
+adapter while keeping platform SDK and OAuth material inside that boundary.
 
 TICKET-038 adds an operator-level OAuth connection foundation. The project does not yet contain a
 User, Workspace, Tenant, or Account identity model, so exactly one most-recent CONNECTED YouTube
 connection is treated as the operator connection. Multi-user account selection is intentionally
 deferred rather than approximated inside Publication or WorkflowRuntime.
+
+TICKET-039 adds a dedicated Celery queue and short-term scheduling path. It reuses the existing
+PublishingService and provider boundary; it does not connect Workflow completion to publication.
 
 ## Architecture boundary
 
@@ -15,10 +17,13 @@ deferred rather than approximated inside Publication or WorkflowRuntime.
 WorkflowRuntime -> final Video Asset
                          |
                          v
-Create Publication -> PublishingService -> PublishingProvider
-                              |                    |
-                              v                    v
-                   PublicationRepository   Mock / YouTube provider
+Create Publication -> PublishingQueueService -> Celery Worker
+          |                                          |
+          v                                          v
+PublicationRepository <- PublishingService <- execute_publication
+                              |
+                              v
+                     PublishingProvider
 ```
 
 `WorkflowRuntime` remains responsible for content generation through the final Asset and
@@ -35,19 +40,54 @@ configuration, never to Publication data.
 Only non-empty stored video Assets are publishable in this foundation. The service checks that the
 Asset exists, has a `video/*` content type, has a non-empty object key, and has a positive size.
 
-## Lifecycle
+## Lifecycle and scheduling
 
 ```text
-pending -> publishing -> published
-                   \-> failed
+pending -> queued -> publishing -> published
+              \            \-----> failed
+               \------------------> failed
 ```
 
-Only a pending Publication can be executed. The service persists `publishing` before invoking the
+Synchronous compatibility publishing claims `pending -> publishing`. Queue submission atomically
+claims `pending -> queued`; the Worker atomically claims `queued -> publishing` before invoking the
 provider. A successful normalized response persists the external ID, URL, metadata, and
 `published_at`. Provider exceptions or invalid responses persist `failed` plus a stable error code
 and safe message; raw provider exception text is not persisted or exposed.
 
-Retry and reset transitions are intentionally undefined in TICKET-036.
+Publication scheduling stores `scheduled_at`, `queued_at`, optional `started_at`, and the Celery
+`task_id`. API inputs must be timezone-aware and are normalized to UTC. Past timestamps, duplicate
+queue requests, published requests, and failed-request retries are rejected.
+
+Conditional SQL updates implement compare-and-set transitions. A duplicate queue request cannot
+create a second task, and duplicate Worker delivery observes `publishing`, `published`, or `failed`
+without invoking the provider again.
+
+Retry and reset transitions remain intentionally undefined.
+
+## Queue and worker boundary
+
+```text
+POST enqueue/schedule
+  -> PublishingQueueService
+  -> Celery task: execute_publication(publication_id)
+  -> PublishingService.publish_queued
+  -> PublishingProviderResolver
+  -> Mock / YouTube provider
+```
+
+The task payload contains only the Publication UUID. Tokens, credential ciphertext, OAuth client
+configuration, and encryption keys are never serialized to Redis. The Worker constructs the same
+repository, credential resolver, ObjectStorage adapter, PublishingService, and Provider contracts
+used by the API boundary.
+
+Immediate requests use a normal Celery task; scheduled requests use timezone-normalized UTC ETA.
+Redis AOF improves broker persistence, but Celery ETA tasks are held by a worker until due and are
+not a durable long-horizon scheduling guarantee across arbitrary broker/worker restarts. TICKET-039
+therefore supports short-term scheduling only; a durable scheduler platform is explicitly deferred.
+The database claim is committed before broker dispatch so workers never observe an uncommitted
+Publication. A process crash in the narrow interval between that commit and broker acceptance can
+leave a `queued` record without a delivered task. Transactional outbox recovery is deferred with
+the broader durable scheduling platform rather than introduced as a generic orchestration redesign.
 
 ## Provider contract
 
@@ -150,11 +190,14 @@ POST /publications
 GET  /publications/{publication_id}
 GET  /assets/{asset_id}/publications
 POST /publications/{publication_id}/publish
+POST /publications/{publication_id}/enqueue
+POST /publications/{publication_id}/schedule
 ```
 
-Creation validates the existing Asset and provider. Execution is synchronous for this foundation.
-Queueing, scheduling, automatic Workflow-to-Publishing integration, and actual social API posting
-outside the explicit YouTube Provider call remain out of scope.
+Creation validates the existing Asset and provider. The synchronous endpoint remains for
+compatibility. The enqueue and schedule endpoints return HTTP 202 with the existing Publication
+response, including status, schedule timestamps, and task ID. The existing GET endpoint is the
+status API. Automatic Workflow-to-Publishing integration remains out of scope.
 
 ## Manual private upload verification
 
