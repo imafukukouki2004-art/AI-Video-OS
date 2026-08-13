@@ -5,12 +5,12 @@
 | Property | Value |
 | --- | --- |
 | Current version | AI Video OS Version 2.0 |
-| Current phase | Implementation Execution Phase C |
-| Current milestone | M3 — Runtime Features |
-| Current task | Awaiting Next Phase CEO Approval |
-| Progress | Approximately 100% (M2 Foundation Complete, M3 Ongoing) |
+| Current phase | M4 — Publishing & Distribution |
+| Current milestone | Publishing Foundation |
+| Current task | TICKET-036 — Publishing Domain & Provider Foundation (In Review) |
+| Progress | Runtime MVP Completed; Publishing Foundation In Review |
 | Runtime MVP | Completed — Text → Image → Video Asset / WorkflowArtifact |
-| Next technology review | TR-02 after Milestone M4 — AI Content Pipeline Complete |
+| Next technology review | TR-02 after M4 completion |
 
 ## Roadmap & Milestone State
 
@@ -49,7 +49,7 @@
 - [x] TICKET-028: Workflow Loop & Iteration Foundation
 - [x] TICKET-029: Workflow Artifact & Asset Reference Foundation
 
-### M3: Runtime Features (Ongoing)
+### M3: Runtime Features (Completed)
 
 - [x] TICKET-030: AI Image Generation Provider Foundation
 - [x] TICKET-031: Asset Storage Integration (Completed)
@@ -57,6 +57,10 @@
 - [x] TICKET-033: Multi-Step AI Pipeline Foundation (Completed)
 - [x] TICKET-034: Video Rendering Foundation (Completed)
 - [x] TICKET-035: End-to-End Workflow Execution (Completed)
+
+### M4: Publishing & Distribution (Ongoing)
+
+- [ ] TICKET-036: Publishing Domain & Provider Foundation (In Review)
 
 ## Technology Decisions (TR-01)
 
@@ -73,6 +77,7 @@
 
 ## Recent Activities
 
+- [2026-08-13] TICKET-036: Publishing Domain & Provider Foundation moved to In Review.
 - [2026-08-13] AI Video OS Version 2.0 Runtime MVP Completed.
 - [2026-08-13] TICKET-035: End-to-End Workflow Execution Completed.
 - [2026-08-13] TICKET-034: Video Rendering Foundation Completed.

@@ -11,6 +11,7 @@ from apps.api.assets import models as asset_models  # noqa: F401
 from apps.api.config import get_settings
 from apps.api.database import Base
 from apps.api.domain import models as domain_models  # noqa: F401
+from apps.api.publishing import models as publishing_models  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

@@ -2,19 +2,21 @@
 
 AI Video OS is an implementation project for producing short-form social video through a traceable, human-approved AI workflow.
 
-TICKET-002 through TICKET-006 provide executable backend, frontend, PostgreSQL, Redis, Celery, and object storage foundations. Provider, workflow, media-processing, and product features remain intentionally out of scope.
+The Runtime MVP can generate text, create and store an image, render and store a video, and trace
+the final Asset and WorkflowArtifact. Publishing is a separate bounded domain so future platform
+adapters do not become WorkflowRuntime responsibilities.
 
 ## Current Project State
 
 | Field | Value |
 | --- | --- |
 | Product version | AI Video OS Version 2.0 |
-| Phase | Implementation Execution Phase C |
-| Current milestone | M1 — Development Environment Ready |
-| Completed | TICKET-001 through TICKET-007 |
-| Current ticket | Awaiting TICKET-008 roadmap confirmation and CEO approval |
-| Implementation progress | Approximately 65% |
-| Next technology review | TR-01 at M1 completion |
+| Phase | M4 — Publishing & Distribution |
+| Current milestone | Publishing Foundation |
+| Completed | TICKET-001 through TICKET-035; Runtime MVP completed |
+| Current ticket | TICKET-036 — Publishing Domain & Provider Foundation (In Review) |
+| Implementation progress | Runtime MVP completed; Publishing Foundation in review |
+| Next technology review | TR-02 after M4 completion |
 | Technology review status | Pending |
 
 See [Project State](docs/operations/PROJECT_STATE.md) for the operational record.
@@ -266,6 +268,24 @@ one Celery worker execution. Final image and video artifacts remain traceable fr
 WorkflowExecution, while Context references connect each completed step. See
 [AI Video Runtime MVP](docs/architecture/RUNTIME_MVP.md) for the exact WorkflowStep definitions,
 enqueue flow, result-tracking endpoints, lifecycle contract, and scope boundary.
+
+### Publishing foundation
+
+An existing Video Asset can be registered as a Publication, executed through the provider-neutral
+PublishingProvider contract, and tracked from `pending` through `published` or `failed`. TICKET-036
+includes only a deterministic Mock provider; it performs no external social API communication.
+
+```bash
+curl -X POST http://localhost:8000/publications \
+  -H 'Content-Type: application/json' \
+  -d '{"asset_id":"<video-asset-uuid>","provider":"mock","title":"Launch video"}'
+curl http://localhost:8000/publications/{publication_id}
+curl http://localhost:8000/assets/{asset_id}/publications
+curl -X POST http://localhost:8000/publications/{publication_id}/publish
+```
+
+See [Publishing Foundation](docs/architecture/PUBLISHING.md) for the domain boundary, provider
+contract, lifecycle, security rules, and explicit scope exclusions.
 
 ## Docker
 
