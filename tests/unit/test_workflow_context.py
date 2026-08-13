@@ -67,3 +67,12 @@ def test_variable_resolver_preserves_loop_output_fallback() -> None:
     context.set_step_output("item", {"shot": 1})
 
     assert VariableResolver(context).resolve_to_any("{{item}}") == {"shot": 1}
+
+
+def test_variable_resolver_resolves_video_reference() -> None:
+    context = WorkflowContext()
+    context.set_step_video("RenderVideo", "https://assets.test/video.mp4")
+
+    assert VariableResolver(context).resolve("Watch {{RenderVideo.video}}") == (
+        "Watch https://assets.test/video.mp4"
+    )

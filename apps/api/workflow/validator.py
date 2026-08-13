@@ -11,8 +11,10 @@ class WorkflowValidator:
     """Validator for structural and logical consistency of workflows."""
 
     # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
-    # {{identifier.image}} or {{variable}}
-    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}")
+    # {{identifier.image}}, {{identifier.video}} or {{variable}}
+    VARIABLE_PATTERN = re.compile(
+        r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image|video))?\s*\}\}"
+    )
 
     async def validate(
         self, workflow: Workflow, steps: list[WorkflowStep]

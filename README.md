@@ -251,6 +251,14 @@ existing variable references; API and Celery worker execution share the same run
 [Multi-Step AI Pipeline Foundation](docs/architecture/MULTI_STEP_AI_PIPELINE.md) for execution,
 failure, observability, and scope contracts.
 
+### Video rendering
+
+Workflow steps with `operation: video_render` can resolve a stored image Asset, render a
+fixed-duration H.264 MP4 through the FFmpeg adapter, and register the result as an Asset and
+WorkflowArtifact. Successful steps publish `video`, `asset`, and `artifact` Context references;
+failed renders publish none. See [Video Rendering Foundation](docs/architecture/VIDEO_RENDERING.md)
+for the step contract, registration order, temporary-file strategy, and FFmpeg setup.
+
 ## Docker
 
 Build from the repository root:

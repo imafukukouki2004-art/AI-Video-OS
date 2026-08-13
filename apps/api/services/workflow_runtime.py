@@ -19,6 +19,7 @@ from apps.api.repositories import (
 )
 from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.storage import ObjectStorage
+from apps.api.video_rendering import VideoRenderer
 from apps.api.workflow.runtime import WorkflowRuntime
 
 
@@ -38,6 +39,7 @@ class WorkflowRuntimeService:
         asset_repository: AssetRepository,
         storage: ObjectStorage,
         prompt_builder: PromptBuilder,
+        video_renderer: VideoRenderer | None = None,
     ) -> None:
         self.workflow_repository = workflow_repository
         self.runtime = WorkflowRuntime(
@@ -51,6 +53,7 @@ class WorkflowRuntimeService:
             asset_repository,
             storage,
             prompt_builder,
+            video_renderer,
         )
 
     async def execute_workflow(self, workflow_id: UUID) -> dict[str, Any]:

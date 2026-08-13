@@ -6,6 +6,7 @@ import logging
 import time
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
+from uuid import UUID, uuid4
 
 from apps.api.ai_providers import AIProviderFactory
 from apps.api.assets.schemas import AssetCreate
@@ -34,6 +35,7 @@ from apps.api.repositories import (
     WorkflowStepRepository,
 )
 from apps.api.storage import ObjectStorage
+from apps.api.video_rendering import FFmpegVideoRenderer, VideoRenderer, VideoRenderRequest
 from apps.api.workflow.context import VariableResolver, WorkflowContext
 from apps.api.workflow.evaluator import ConditionEvaluator
 from apps.api.workflow.retriever import ImageRetriever
@@ -60,6 +62,7 @@ class WorkflowRuntime:
         asset_repository: AssetRepository,
         storage: ObjectStorage,
         prompt_builder: PromptBuilder | None = None,
+        video_renderer: VideoRenderer | None = None,
     ) -> None:
         self.job_repository = job_repository
         self.execution_repository = execution_repository
@@ -75,6 +78,7 @@ class WorkflowRuntime:
 
             prompt_builder = PromptBuilder()
         self.prompt_builder = prompt_builder
+        self.video_renderer = video_renderer or FFmpegVideoRenderer()
         self.validator = WorkflowValidator()
         self.retriever = ImageRetriever()
 
@@ -259,16 +263,14 @@ class WorkflowRuntime:
                     if updated_job:
                         job = updated_job
 
-                    # 8. AI Provider Execution
-                    logger.info(f"Executing AI Provider for job {job.id} (Step: {step.name})")
+                    # 8. Operation Execution
+                    logger.info(f"Executing operation for job {job.id} (Step: {step.name})")
 
-                    # Determine provider and operation from step config
-                    provider_name = step.config.get("provider", "mock")
                     operation = step.config.get("operation", "text_generation")
-                    provider = AIProviderFactory.create(provider_name)
 
                     result_data: dict[str, Any] = {}
                     if operation == "text_generation":
+                        provider = AIProviderFactory.create(step.config.get("provider", "mock"))
                         try:
                             composed_prompts = self.prompt_builder.build_from_config(
                                 step.config,
@@ -318,6 +320,7 @@ class WorkflowRuntime:
 
                     elif operation == "image_generation":
                         # 1. Image Generation
+                        provider = AIProviderFactory.create(step.config.get("provider", "mock"))
                         try:
                             composed_prompts = self.prompt_builder.build_from_config(
                                 step.config,
@@ -357,11 +360,8 @@ class WorkflowRuntime:
                         else:
                             raise ValueError("AI Provider returned no image data or URL")
 
-                        # 4. Object Storage Upload
-                        import uuid
-
                         ext = self.retriever.get_extension(mime_type)
-                        object_key = f"generated/{execution.id}/{step.id}/{uuid.uuid4()}{ext}"
+                        object_key = f"generated/{execution.id}/{step.id}/{uuid4()}{ext}"
                         await self.storage.upload(
                             key=object_key, body=image_data, content_type=mime_type
                         )
@@ -406,8 +406,82 @@ class WorkflowRuntime:
                         }
                         iteration_results.append(result_data)
 
+                    elif operation == "video_render":
+                        input_reference = step.config.get("input_asset")
+                        if not isinstance(input_reference, str) or not input_reference:
+                            raise ValueError("video_render requires input_asset")
+                        try:
+                            resolved_asset_id = resolver.resolve_to_any(input_reference)
+                            input_asset_id = UUID(str(resolved_asset_id))
+                        except (ValueError, TypeError) as exc:
+                            raise ValueError(f"Video input resolution failed: {exc!s}") from exc
+
+                        input_asset = await self.asset_repository.get_by_id(input_asset_id)
+                        if not input_asset:
+                            raise ValueError(f"Video input asset not found: {input_asset_id}")
+                        stored_image = await self.storage.download(input_asset.object_key)
+
+                        render_request = VideoRenderRequest(
+                            image_data=stored_image.body,
+                            image_content_type=stored_image.content_type,
+                            duration_seconds=step.config.get("duration", 3.0),
+                            fps=step.config.get("fps", 30),
+                            width=step.config.get("width", 1280),
+                            height=step.config.get("height", 720),
+                        )
+                        render_result = await self.video_renderer.render(render_request)
+
+                        object_key = (
+                            f"rendered/{execution.id}/{step.id}/{uuid4()}"
+                            f"{render_result.file_extension}"
+                        )
+                        await self.storage.upload(
+                            key=object_key,
+                            body=render_result.video_data,
+                            content_type=render_result.content_type,
+                        )
+                        video_asset = await self.asset_repository.create(
+                            AssetCreate(
+                                filename=f"rendered_{step.name}{render_result.file_extension}",
+                                content_type=render_result.content_type,
+                                size_bytes=len(render_result.video_data),
+                                object_key=object_key,
+                            )
+                        )
+                        metadata = {
+                            **render_result.metadata,
+                            "source_asset_id": str(input_asset_id),
+                        }
+                        video_artifact = await self._record_artifact(
+                            execution_id=execution.id,
+                            step_id=step.id,
+                            artifact_type="video",
+                            asset_id=video_asset.id,
+                            metadata=metadata,
+                        )
+                        video_ref = await self.storage.create_presigned_download_url(
+                            object_key, expires_in=3600
+                        )
+
+                        # Publish only after rendering, storage, and persistence succeed.
+                        context.set_step_video(str(step.id), video_ref)
+                        context.set_step_video(step.name, video_ref)
+                        context.set_step_asset(str(step.id), video_asset.id)
+                        context.set_step_asset(step.name, video_asset.id)
+                        context.set_step_artifact(str(step.id), video_artifact.id)
+                        context.set_step_artifact(step.name, video_artifact.id)
+
+                        result_data = {
+                            "video_url": video_ref,
+                            "asset_id": str(video_asset.id),
+                            "artifact_id": str(video_artifact.id),
+                            "metadata": metadata,
+                        }
+                        iteration_results.append(result_data)
+
                     else:
                         logger.error(f"Unsupported operation: {operation}")
+                        # Preserve the existing public error contract for compatibility.
                         raise ValueError(f"Unsupported AI operation: {operation}")
 
                     updated_job = await self.job_repository.update(
