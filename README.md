@@ -142,6 +142,9 @@ The supported settings are:
 | `YOUTUBE_CLIENT_SECRET` | empty | OAuth client secret for YouTube publishing (secret) |
 | `YOUTUBE_REFRESH_TOKEN` | empty | OAuth refresh token with `youtube.upload` scope (secret) |
 | `YOUTUBE_PRIVACY_STATUS` | `private` | Upload visibility: `private`, `unlisted`, or `public` |
+| `YOUTUBE_OAUTH_REDIRECT_URI` | local callback | Exact Google OAuth web-client redirect URI |
+| `YOUTUBE_OAUTH_STATE_TTL_SECONDS` | `600` | Single-use OAuth state lifetime |
+| `YOUTUBE_CREDENTIAL_ENCRYPTION_KEY` | empty | External Fernet key for refresh-token encryption (secret) |
 
 Do not store secrets in `.env.example`, source files, images, or logs.
 Replace the MinIO credential placeholders in the local `.env` before starting Compose.
@@ -301,6 +304,9 @@ curl -X POST http://localhost:8000/publications/{publication_id}/publish
 
 See [Publishing Foundation](docs/architecture/PUBLISHING.md) for the domain boundary, YouTube
 credential and upload configuration, lifecycle, security rules, and manual verification procedure.
+See [YouTube OAuth setup](docs/operations/YOUTUBE_OAUTH_SETUP.md) to configure the Google Cloud
+web client, generate the external encryption key, connect one operator-level channel, and perform
+an opt-in private smoke test.
 
 ## Docker
 

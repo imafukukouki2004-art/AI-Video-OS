@@ -46,7 +46,7 @@ async def test_existing_video_asset_is_published_to_youtube_with_mock_sdk() -> N
             client_secret=SecretStr("fixture"),
             refresh_token=SecretStr("fixture"),
         ),
-        client_factory=lambda: client,
+        client_factory=lambda _: client,
         media_upload_factory=media_factory,
     )
     publication_repository = AsyncMock(spec=PublicationRepository)

@@ -4,6 +4,11 @@ TICKET-036 established the Publishing boundary. TICKET-037 adds YouTube as the f
 adapter while keeping platform SDK and OAuth material inside that boundary. Automatic posting, a
 queue, scheduling, and a user-facing OAuth system remain excluded.
 
+TICKET-038 adds an operator-level OAuth connection foundation. The project does not yet contain a
+User, Workspace, Tenant, or Account identity model, so exactly one most-recent CONNECTED YouTube
+connection is treated as the operator connection. Multi-user account selection is intentionally
+deferred rather than approximated inside Publication or WorkflowRuntime.
+
 ## Architecture boundary
 
 ```text
@@ -57,6 +62,50 @@ Retry and reset transitions are intentionally undefined in TICKET-036.
 and network-free. `YouTubePublishingProvider` uses the same interface, downloads the existing
 Asset through ObjectStorage, constructs the YouTube upload within the adapter, and normalizes the
 SDK result to the provider-neutral response. SDK response objects never reach Service or API code.
+
+The YouTube provider now asks `YouTubeCredentialResolver` for the active connected credential at
+publication time. A connected credential takes priority. The environment refresh token remains a
+temporary development/backward-compatible fallback when no connected credential exists.
+
+## OAuth connection boundary
+
+```text
+OAuth API
+  -> YouTubeConnectionService
+  -> Connection / OAuth State / Credential repositories
+  -> CredentialCipher
+
+PublishingService
+  -> YouTubePublishingProvider
+  -> YouTubeCredentialResolver
+  -> decrypted refresh token (in-memory only)
+  -> Google client
+```
+
+`WorkflowRuntime`, Worker, Asset, WorkflowArtifact, and Publication do not own OAuth credentials.
+Connection metadata, credential ciphertext, and OAuth state are separate database records.
+
+The connection lifecycle is deliberately small:
+
+```text
+PENDING -> CONNECTED
+PENDING -> FAILED
+CONNECTED -> DISCONNECTED
+```
+
+The authorization endpoint generates a random state and persists only its SHA-256 digest. State
+expires after ten minutes by default and is consumed atomically once under a row lock. Callback
+processing rejects missing, mismatched, expired, and reused state before exchanging a code.
+
+Refresh tokens are encrypted using Fernet authenticated encryption from `cryptography`. The key is
+provided only by `YOUTUBE_CREDENTIAL_ENCRYPTION_KEY`; missing or invalid configuration fails closed.
+The database stores ciphertext, never the plaintext token or encryption key. Access tokens are not
+persisted. Uvicorn's query-string access logger is disabled because callbacks contain authorization
+codes; the existing middleware continues to emit path-only structured access events.
+
+Disconnect deletes local credential ciphertext and marks the connection DISCONNECTED. Google-side
+revocation is deferred because Google documents that revocation can remove every scope granted to
+the project, not just the local connection record.
 
 ## YouTube upload and credentials
 
@@ -124,6 +173,9 @@ Manual verification is opt-in and is not part of pytest or GitHub Actions:
 No manual real-API upload was performed for TICKET-037 implementation. All required tests replace
 the SDK client and prohibit external YouTube communication.
 
+No manual real OAuth exchange was performed for TICKET-038. See the dedicated setup guide for the
+explicit opt-in procedure.
+
 ## Security rules
 
 - Publication schemas contain no credential or token fields.
@@ -133,3 +185,5 @@ the SDK client and prohibit external YouTube communication.
 - Publishing remains separate from generation and storage adapters.
 - YouTube OAuth values are SecretStr environment configuration only.
 - Upload visibility defaults to private and subscriber notification is disabled.
+- Refresh tokens are authenticated-encrypted at rest and are never returned through connection APIs.
+- OAuth state is expiring, single-use, and stored only as a digest.

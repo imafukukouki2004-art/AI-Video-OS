@@ -107,7 +107,7 @@ def provider_with_response(
         storage or storage_returning(),
         credentials(),
         privacy_status=privacy_status,
-        client_factory=lambda: FakeYouTubeClient(videos),
+        client_factory=lambda _: FakeYouTubeClient(videos),
         media_upload_factory=media_factory,
     )
     return provider, videos, streams
@@ -207,3 +207,39 @@ async def test_sdk_exception_is_normalized_without_exposing_details() -> None:
 
     assert raised.value.code == "YOUTUBE_UPLOAD_ERROR"
     assert "sensitive" not in raised.value.safe_message
+
+
+@pytest.mark.asyncio
+async def test_connected_credential_is_preferred_over_environment_fallback() -> None:
+    connected = credentials()
+    connected = YouTubeCredentialSettings(
+        client_id=connected.client_id,
+        client_secret=connected.client_secret,
+        refresh_token=SecretStr("connected-refresh"),
+    )
+    credential_source = Mock()
+    credential_source.resolve = Mock()
+
+    async def resolve() -> YouTubeCredentialSettings:
+        return connected
+
+    credential_source.resolve.side_effect = resolve
+    seen: list[str] = []
+    videos = FakeVideos(FakeRequest(response={"id": "connected-video"}))
+
+    def client_factory(settings: YouTubeCredentialSettings) -> FakeYouTubeClient:
+        seen.append(settings.refresh_token.get_secret_value())
+        return FakeYouTubeClient(videos)
+
+    provider = YouTubePublishingProvider(
+        storage_returning(),
+        credentials(),
+        credential_source=credential_source,
+        client_factory=client_factory,
+        media_upload_factory=lambda stream, content_type: "media",
+    )
+
+    response = await provider.publish(video_asset(), title="Title", description=None)
+
+    assert response.external_id == "connected-video"
+    assert seen == ["connected-refresh"]
