@@ -9,6 +9,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
+from apps.api.publishing import (
+    PublicationRepository,
+    PublishingProviderResolver,
+    PublishingService,
+)
 from apps.api.repositories import (
     AssetRepository,
     JobRepository,
@@ -200,6 +205,26 @@ def get_asset_repository(session: DatabaseSessionDependency) -> AssetRepository:
 AssetRepositoryDependency = Annotated[AssetRepository, Depends(get_asset_repository)]
 
 
+def get_publication_repository(
+    session: DatabaseSessionDependency,
+) -> PublicationRepository:
+    return PublicationRepository(session)
+
+
+PublicationRepositoryDependency = Annotated[
+    PublicationRepository, Depends(get_publication_repository)
+]
+
+
+def get_publishing_provider_resolver() -> PublishingProviderResolver:
+    return PublishingProviderResolver()
+
+
+PublishingProviderResolverDependency = Annotated[
+    PublishingProviderResolver, Depends(get_publishing_provider_resolver)
+]
+
+
 def get_project_service(repo: ProjectRepositoryDependency) -> ProjectService:
     return ProjectService(repo)
 
@@ -290,6 +315,17 @@ def get_workflow_artifact_service(
 WorkflowArtifactServiceDependency = Annotated[
     WorkflowArtifactService, Depends(get_workflow_artifact_service)
 ]
+
+
+def get_publishing_service(
+    publication_repo: PublicationRepositoryDependency,
+    asset_repo: AssetRepositoryDependency,
+    provider_resolver: PublishingProviderResolverDependency,
+) -> PublishingService:
+    return PublishingService(publication_repo, asset_repo, provider_resolver)
+
+
+PublishingServiceDependency = Annotated[PublishingService, Depends(get_publishing_service)]
 
 
 def get_workflow_queue_service(

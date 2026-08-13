@@ -11,7 +11,7 @@ from apps.api.database import Database
 from apps.api.errors import register_error_handlers
 from apps.api.logging import configure_logging, get_logger
 from apps.api.middleware import RequestContextMiddleware
-from apps.api.routers import assets_router, domain_router, system_router
+from apps.api.routers import assets_router, domain_router, publishing_router, system_router
 from apps.api.storage import ObjectStorage, S3ObjectStorage, StorageOperationError
 
 
@@ -77,4 +77,5 @@ def create_app(
     app.include_router(system_router)
     app.include_router(assets_router)
     app.include_router(domain_router)
+    app.include_router(publishing_router)
     return app
