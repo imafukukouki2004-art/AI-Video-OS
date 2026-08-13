@@ -22,6 +22,7 @@ from apps.api.repositories import (
 )
 from apps.api.services.prompt_builder import PromptBuilder
 from apps.api.storage.adapter import S3ObjectStorage
+from apps.api.video_rendering import FFmpegVideoRenderer
 from apps.api.workflow.runtime import WorkflowRuntime
 from apps.worker.celery_app import celery_app
 
@@ -95,6 +96,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
             asset_repo,
             storage,
             PromptBuilder(),
+            FFmpegVideoRenderer(),
         )
 
         # Get the execution record

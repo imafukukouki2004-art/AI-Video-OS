@@ -12,6 +12,7 @@ class WorkflowContext:
         self._artifacts: dict[str, Any] = {}
         self._assets: dict[str, Any] = {}
         self._images: dict[str, Any] = {}
+        self._videos: dict[str, Any] = {}
         self._variables: dict[str, Any] = {}
 
     def set_step_output(self, step_identifier: str, output: Any) -> None:
@@ -46,6 +47,14 @@ class WorkflowContext:
         """Retrieve the generated image URL of a step."""
         return self._images.get(step_identifier)
 
+    def set_step_video(self, step_identifier: str, video_url: str) -> None:
+        """Store the rendered video URL of a completed step."""
+        self._videos[step_identifier] = video_url
+
+    def get_step_video(self, step_identifier: str) -> Any:
+        """Retrieve the rendered video URL of a completed step."""
+        return self._videos.get(step_identifier)
+
     def set_variable(self, key: str, value: Any) -> None:
         """Store a generic variable in the context."""
         self._variables[key] = value
@@ -63,8 +72,10 @@ class VariableResolver:
     """Resolves variables in strings using the workflow context."""
 
     # Pattern: {{identifier.output}}, {{identifier.artifact}}, {{identifier.asset}},
-    # {{identifier.image}} or {{variable}}
-    VARIABLE_PATTERN = re.compile(r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image))?\s*\}\}")
+    # {{identifier.image}}, {{identifier.video}} or {{variable}}
+    VARIABLE_PATTERN = re.compile(
+        r"\{\{\s*([\w\-\.]+?)(?:\.(output|artifact|asset|image|video))?\s*\}\}"
+    )
 
     def __init__(self, context: WorkflowContext) -> None:
         self.context = context
@@ -76,6 +87,8 @@ class VariableResolver:
             return self.context.get_step_asset(identifier)
         if suffix == "image":
             return self.context.get_step_image(identifier)
+        if suffix == "video":
+            return self.context.get_step_video(identifier)
         if suffix == "output":
             return self.context.get_step_output(identifier)
 

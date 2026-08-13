@@ -39,6 +39,7 @@ from apps.api.services import (
     WorkflowValidationService,
 )
 from apps.api.storage import ObjectStorage
+from apps.api.video_rendering import FFmpegVideoRenderer, VideoRenderer
 
 SettingsDependency = Annotated[Settings, Depends(get_settings)]
 
@@ -90,6 +91,14 @@ def get_prompt_builder() -> PromptBuilder:
 
 
 PromptBuilderDependency = Annotated[PromptBuilder, Depends(get_prompt_builder)]
+
+
+def get_video_renderer() -> VideoRenderer:
+    """Return the configured video rendering adapter."""
+    return FFmpegVideoRenderer()
+
+
+VideoRendererDependency = Annotated[VideoRenderer, Depends(get_video_renderer)]
 
 
 def get_project_repository(session: DatabaseSessionDependency) -> ProjectRepository:
@@ -318,6 +327,7 @@ def get_workflow_runtime_service(
     asset_repo: AssetRepositoryDependency,
     storage: StorageDependency,
     prompt_builder: PromptBuilderDependency,
+    video_renderer: VideoRendererDependency,
 ) -> WorkflowRuntimeService:
     return WorkflowRuntimeService(
         workflow_repo,
@@ -331,6 +341,7 @@ def get_workflow_runtime_service(
         asset_repo,
         storage,
         prompt_builder,
+        video_renderer,
     )
 
 

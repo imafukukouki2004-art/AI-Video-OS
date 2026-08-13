@@ -4,6 +4,7 @@ from uuid import uuid4
 import pytest
 
 from apps.api.services.prompt_builder import PromptBuilder
+from apps.api.video_rendering import FFmpegVideoRenderer
 from apps.worker.tasks import _execute_workflow_execution_async
 
 
@@ -55,7 +56,8 @@ async def test_execute_workflow_execution_async_success():
         mock_workflow_repo.get_by_id.assert_called_once_with(workflow_id)
         mock_runtime.run.assert_called_once_with(mock_workflow, execution_id=execution_id)
         runtime_args = mock_runtime_class.call_args.args
-        assert isinstance(runtime_args[-1], PromptBuilder)
+        assert isinstance(runtime_args[-2], PromptBuilder)
+        assert isinstance(runtime_args[-1], FFmpegVideoRenderer)
 
 
 @pytest.mark.asyncio
