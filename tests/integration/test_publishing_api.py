@@ -171,12 +171,13 @@ def test_youtube_publication_uses_existing_api_and_actual_service_boundary() -> 
     publication_repository.create.return_value = publication
     publication_repository.get_by_id.return_value = publication
 
-    async def persist_update(publication_id, update):
+    async def persist_transition(publication_id, from_status, to_status, update):
+        publication.status = to_status
         for field, value in update.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repository.update.side_effect = persist_update
+    publication_repository.transition_status.side_effect = persist_transition
     service = PublishingService(
         publication_repository,
         asset_repository,

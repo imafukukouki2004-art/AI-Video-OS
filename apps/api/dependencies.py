@@ -17,6 +17,7 @@ from apps.api.publishing import (
     PublishingCredentialRepository,
     PublishingOAuthStateRepository,
     PublishingProviderResolver,
+    PublishingQueueService,
     PublishingService,
     YouTubeConnectionService,
     YouTubeCredentialResolver,
@@ -447,6 +448,17 @@ def get_publishing_service(
 
 
 PublishingServiceDependency = Annotated[PublishingService, Depends(get_publishing_service)]
+
+
+def get_publishing_queue_service(
+    publication_repo: PublicationRepositoryDependency,
+) -> PublishingQueueService:
+    return PublishingQueueService(publication_repo)
+
+
+PublishingQueueServiceDependency = Annotated[
+    PublishingQueueService, Depends(get_publishing_queue_service)
+]
 
 
 def get_workflow_queue_service(

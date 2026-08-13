@@ -9,6 +9,16 @@ from uuid import UUID
 from apps.api.config import get_settings
 from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
+from apps.api.errors.exceptions import ApplicationError
+from apps.api.publishing.connection_repository import (
+    PublishingConnectionRepository,
+    PublishingCredentialRepository,
+)
+from apps.api.publishing.credentials import CredentialCipher, YouTubeCredentialResolver
+from apps.api.publishing.providers import PublishingProviderResolver
+from apps.api.publishing.repository import PublicationRepository
+from apps.api.publishing.service import PublishingService
+from apps.api.publishing.youtube import YouTubeCredentialSettings, YouTubePublishingProvider
 from apps.api.repositories import (
     AssetRepository,
     JobRepository,
@@ -61,6 +71,80 @@ def foundation_test(value: str = "ok", *, request_retry: bool = False) -> Founda
 def execute_workflow_execution(execution_id_str: str) -> dict[str, Any]:
     """Celery task to execute a workflow by its execution ID."""
     return asyncio.run(_execute_workflow_execution_async(execution_id_str))
+
+
+@celery_app.task(name="apps.worker.tasks.execute_publication")  # type: ignore[misc]
+def execute_publication(publication_id_str: str) -> dict[str, Any]:
+    """Execute one queued publication using the existing publishing service."""
+
+    return asyncio.run(_execute_publication_async(publication_id_str))
+
+
+async def _execute_publication_async(publication_id_str: str) -> dict[str, Any]:
+    publication_id = UUID(publication_id_str)
+    application_settings = get_settings()
+    db = Database(application_settings)
+    storage = S3ObjectStorage(application_settings)
+
+    try:
+        async with db.session_factory() as session:
+            publication_repo = PublicationRepository(session)
+            asset_repo = AssetRepository(session)
+            connection_repo = PublishingConnectionRepository(session)
+            credential_repo = PublishingCredentialRepository(session)
+            credential_resolver = YouTubeCredentialResolver(
+                connection_repo,
+                credential_repo,
+                CredentialCipher(application_settings.youtube_credential_encryption_key),
+                application_settings.youtube_client_id,
+                application_settings.youtube_client_secret,
+            )
+            youtube_provider = YouTubePublishingProvider(
+                storage,
+                YouTubeCredentialSettings(
+                    client_id=application_settings.youtube_client_id,
+                    client_secret=application_settings.youtube_client_secret,
+                    refresh_token=application_settings.youtube_refresh_token,
+                ),
+                credential_source=credential_resolver,
+                privacy_status=application_settings.youtube_privacy_status,
+            )
+            service = PublishingService(
+                publication_repo,
+                asset_repo,
+                PublishingProviderResolver({"youtube": youtube_provider}),
+            )
+            return await _run_publication(service, publication_id)
+    finally:
+        await storage.close()
+        await db.dispose()
+
+
+async def _run_publication(
+    service: PublishingService,
+    publication_id: UUID,
+) -> dict[str, Any]:
+    """Run the worker service boundary with secret-safe failure reporting."""
+
+    try:
+        publication = await service.publish_queued(publication_id)
+    except ApplicationError as error:
+        await service.fail_queued_or_publishing(publication_id)
+        logger.warning(
+            "Publishing worker could not complete publication %s: %s",
+            publication_id,
+            error.code,
+        )
+        return {"status": "failed", "error": error.code}
+    except Exception:
+        await service.fail_queued_or_publishing(publication_id)
+        logger.error("Unexpected publishing worker failure for %s", publication_id)
+        return {"status": "failed", "error": "PUBLISHING_WORKER_ERROR"}
+
+    return {
+        "status": publication.status.value,
+        "publication_id": str(publication.id),
+    }
 
 
 async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, Any]:

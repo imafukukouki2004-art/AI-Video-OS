@@ -4,11 +4,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, status
 
-from apps.api.dependencies import PublishingServiceDependency, YouTubeConnectionServiceDependency
+from apps.api.dependencies import (
+    PublishingQueueServiceDependency,
+    PublishingServiceDependency,
+    YouTubeConnectionServiceDependency,
+)
 from apps.api.errors.exceptions import ApplicationError
 from apps.api.publishing.schemas import (
     PublicationCreate,
     PublicationResponse,
+    PublicationSchedule,
     PublishingConnectionResponse,
     YouTubeAuthorizationResponse,
 )
@@ -59,6 +64,33 @@ async def publish_publication(
     service: PublishingServiceDependency,
 ) -> PublicationResponse:
     publication = await service.publish(publication_id)
+    return PublicationResponse.model_validate(publication)
+
+
+@router.post(
+    "/publications/{publication_id}/enqueue",
+    response_model=PublicationResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def enqueue_publication(
+    publication_id: UUID,
+    service: PublishingQueueServiceDependency,
+) -> PublicationResponse:
+    publication = await service.enqueue(publication_id)
+    return PublicationResponse.model_validate(publication)
+
+
+@router.post(
+    "/publications/{publication_id}/schedule",
+    response_model=PublicationResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def schedule_publication(
+    publication_id: UUID,
+    schedule: PublicationSchedule,
+    service: PublishingQueueServiceDependency,
+) -> PublicationResponse:
+    publication = await service.enqueue(publication_id, scheduled_at=schedule.scheduled_at)
     return PublicationResponse.model_validate(publication)
 
 

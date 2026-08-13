@@ -45,6 +45,8 @@ class PublishingService:
         return await self.publication_repository.list_by_asset(asset_id)
 
     async def publish(self, publication_id: UUID) -> Publication:
+        """Synchronously claim and publish a pending publication."""
+
         publication = await self.publication_repository.get_by_id(publication_id)
         if publication is None:
             raise ApplicationError(
@@ -59,26 +61,111 @@ class PublishingService:
                 status_code=409,
             )
 
-        asset = await self._get_publishable_asset(publication.asset_id)
-        provider = self._resolve_provider(publication.provider)
-        publishing = await self.publication_repository.update(
+        publishing = await self.publication_repository.transition_status(
             publication.id,
-            PublicationUpdate(status=PublicationStatus.PUBLISHING),
+            PublicationStatus.PENDING,
+            PublicationStatus.PUBLISHING,
+            PublicationUpdate(started_at=datetime.now(UTC)),
         )
         if publishing is None:
-            raise ApplicationError(code="PUBLICATION_NOT_FOUND", message="Publication not found.")
+            raise ApplicationError(
+                code="INVALID_PUBLICATION_STATE",
+                message="The publication could not be claimed for publishing.",
+                status_code=409,
+            )
+        return await self._publish_claimed(publishing)
 
+    async def publish_queued(self, publication_id: UUID) -> Publication:
+        """Atomically claim a queued publication and execute it at most once."""
+
+        publication = await self.publication_repository.get_by_id(publication_id)
+        if publication is None:
+            raise ApplicationError(
+                code="PUBLICATION_NOT_FOUND",
+                message="Publication not found.",
+                status_code=404,
+            )
+        if publication.status in {
+            PublicationStatus.PUBLISHING,
+            PublicationStatus.PUBLISHED,
+            PublicationStatus.FAILED,
+        }:
+            return publication
+        if publication.status is not PublicationStatus.QUEUED:
+            raise ApplicationError(
+                code="INVALID_PUBLICATION_STATE",
+                message="Only queued publications can be executed by the worker.",
+                status_code=409,
+            )
+
+        publishing = await self.publication_repository.transition_status(
+            publication.id,
+            PublicationStatus.QUEUED,
+            PublicationStatus.PUBLISHING,
+            PublicationUpdate(started_at=datetime.now(UTC)),
+        )
+        if publishing is None:
+            current = await self.publication_repository.get_by_id(publication.id)
+            if current is not None and current.status in {
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.PUBLISHED,
+                PublicationStatus.FAILED,
+            }:
+                return current
+            raise ApplicationError(
+                code="INVALID_PUBLICATION_STATE",
+                message="The publication could not be claimed for execution.",
+                status_code=409,
+            )
+        return await self._publish_claimed(publishing)
+
+    async def fail_queued_or_publishing(self, publication_id: UUID) -> None:
+        """Persist a safe terminal state after an unexpected worker failure."""
+
+        failure = PublicationUpdate(
+            error_code="PUBLISHING_WORKER_ERROR",
+            error_message="The publication worker could not complete the request.",
+        )
+        failed = await self.publication_repository.transition_status(
+            publication_id,
+            PublicationStatus.QUEUED,
+            PublicationStatus.FAILED,
+            failure,
+        )
+        if failed is None:
+            await self.publication_repository.transition_status(
+                publication_id,
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.FAILED,
+                failure,
+            )
+
+    async def _publish_claimed(self, publication: Publication) -> Publication:
         try:
+            asset = await self._get_publishable_asset(publication.asset_id)
+            provider = self._resolve_provider(publication.provider)
             response = await provider.publish(
                 asset,
                 title=publication.title,
                 description=publication.description,
             )
-        except PublishingProviderError as error:
-            await self.publication_repository.update(
+        except ApplicationError as error:
+            await self.publication_repository.transition_status(
                 publication.id,
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.FAILED,
                 PublicationUpdate(
-                    status=PublicationStatus.FAILED,
+                    error_code=error.code,
+                    error_message=error.message,
+                ),
+            )
+            raise
+        except PublishingProviderError as error:
+            await self.publication_repository.transition_status(
+                publication.id,
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.FAILED,
+                PublicationUpdate(
                     error_code=error.code,
                     error_message=error.safe_message,
                 ),
@@ -89,10 +176,11 @@ class PublishingService:
                 status_code=502,
             ) from error
         except Exception as error:
-            await self.publication_repository.update(
+            await self.publication_repository.transition_status(
                 publication.id,
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.FAILED,
                 PublicationUpdate(
-                    status=PublicationStatus.FAILED,
                     error_code="PUBLISHING_PROVIDER_ERROR",
                     error_message="The publishing provider could not publish the asset.",
                 ),
@@ -104,10 +192,11 @@ class PublishingService:
             ) from error
 
         if not response.external_id or not response.external_url:
-            await self.publication_repository.update(
+            await self.publication_repository.transition_status(
                 publication.id,
+                PublicationStatus.PUBLISHING,
+                PublicationStatus.FAILED,
                 PublicationUpdate(
-                    status=PublicationStatus.FAILED,
                     error_code="INVALID_PROVIDER_RESPONSE",
                     error_message="The publishing provider returned an invalid response.",
                 ),
@@ -118,10 +207,11 @@ class PublishingService:
                 status_code=502,
             )
 
-        published = await self.publication_repository.update(
+        published = await self.publication_repository.transition_status(
             publication.id,
+            PublicationStatus.PUBLISHING,
+            PublicationStatus.PUBLISHED,
             PublicationUpdate(
-                status=PublicationStatus.PUBLISHED,
                 external_id=response.external_id,
                 external_url=response.external_url,
                 provider_metadata=response.metadata,

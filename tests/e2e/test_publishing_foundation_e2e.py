@@ -48,13 +48,14 @@ async def test_existing_video_asset_is_published_through_mock_provider() -> None
     publication_repository.create.return_value = publication
     publication_repository.get_by_id.return_value = publication
 
-    async def persist_update(publication_id, update):
+    async def persist_transition(publication_id, from_status, to_status, update):
         assert publication_id == publication.id
+        publication.status = to_status
         for field, value in update.model_dump(exclude_unset=True).items():
             setattr(publication, field, value)
         return publication
 
-    publication_repository.update.side_effect = persist_update
+    publication_repository.transition_status.side_effect = persist_transition
 
     created = await service.create(
         PublicationCreate(
@@ -75,4 +76,4 @@ async def test_existing_video_asset_is_published_through_mock_provider() -> None
         "title": "Runtime MVP final video",
     }
     assert published.published_at is not None
-    assert publication_repository.update.await_count == 2
+    assert publication_repository.transition_status.await_count == 2
