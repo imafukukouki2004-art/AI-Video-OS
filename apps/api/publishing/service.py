@@ -7,7 +7,11 @@ from uuid import UUID
 from apps.api.assets.models import Asset
 from apps.api.errors.exceptions import ApplicationError
 from apps.api.publishing.models import Publication, PublicationStatus
-from apps.api.publishing.providers import PublishingProvider, PublishingProviderResolver
+from apps.api.publishing.providers import (
+    PublishingProvider,
+    PublishingProviderError,
+    PublishingProviderResolver,
+)
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.publishing.schemas import PublicationCreate, PublicationUpdate
 from apps.api.repositories import AssetRepository
@@ -70,6 +74,20 @@ class PublishingService:
                 title=publication.title,
                 description=publication.description,
             )
+        except PublishingProviderError as error:
+            await self.publication_repository.update(
+                publication.id,
+                PublicationUpdate(
+                    status=PublicationStatus.FAILED,
+                    error_code=error.code,
+                    error_message=error.safe_message,
+                ),
+            )
+            raise ApplicationError(
+                code=error.code,
+                message=error.safe_message,
+                status_code=502,
+            ) from error
         except Exception as error:
             await self.publication_repository.update(
                 publication.id,

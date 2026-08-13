@@ -58,6 +58,10 @@ class Settings(BaseSettings):
     storage_read_timeout_seconds: int = Field(default=10, ge=1, le=120)
     openai_api_key: SecretStr = Field(default_factory=lambda: SecretStr("sk-dummy"))
     openai_model: str = "gpt-4o"
+    youtube_client_id: SecretStr = Field(default_factory=lambda: SecretStr(""))
+    youtube_client_secret: SecretStr = Field(default_factory=lambda: SecretStr(""))
+    youtube_refresh_token: SecretStr = Field(default_factory=lambda: SecretStr(""))
+    youtube_privacy_status: Literal["private", "unlisted", "public"] = "private"
 
 
 @lru_cache

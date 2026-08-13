@@ -19,6 +19,7 @@ from apps.api.publishing.providers import (
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.publishing.schemas import PublicationCreate
 from apps.api.publishing.service import PublishingService
+from apps.api.publishing.youtube import YouTubeUploadError
 from apps.api.repositories import AssetRepository
 
 
@@ -244,3 +245,30 @@ async def test_service_requires_pending_publication() -> None:
         await service.publish(publication.id)
 
     assert raised.value.code == "INVALID_PUBLICATION_STATE"
+
+
+@pytest.mark.asyncio
+async def test_service_persists_specific_safe_youtube_error() -> None:
+    asset = make_video_asset()
+    publication = make_publication(asset)
+    publication.provider = "youtube"
+    service, publication_repo, _, resolver = make_service(asset)
+    publication_repo.get_by_id.return_value = publication
+    provider = AsyncMock(spec=PublishingProvider)
+    provider.publish.side_effect = YouTubeUploadError()
+    resolver.resolve = Mock(return_value=provider)
+
+    async def update(publication_id, schema):
+        for field, value in schema.model_dump(exclude_unset=True).items():
+            setattr(publication, field, value)
+        return publication
+
+    publication_repo.update.side_effect = update
+
+    with pytest.raises(ApplicationError) as raised:
+        await service.publish(publication.id)
+
+    assert raised.value.code == "YOUTUBE_UPLOAD_ERROR"
+    assert publication.status is PublicationStatus.FAILED
+    assert publication.error_code == "YOUTUBE_UPLOAD_ERROR"
+    assert publication.error_message == "YouTube could not upload the video."
