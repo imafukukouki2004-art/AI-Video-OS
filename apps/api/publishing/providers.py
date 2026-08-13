@@ -1,8 +1,9 @@
 """Provider-independent publishing contract and mock implementation."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from dataclasses import dataclass, field
-from typing import Any, ClassVar
+from typing import Any
 
 from apps.api.assets.models import Asset
 
@@ -30,6 +31,15 @@ class PublishingProvider(ABC):
         """Publish an existing asset and return provider-neutral identifiers."""
 
 
+class PublishingProviderError(Exception):
+    """Provider failure with a stable code and safe public message."""
+
+    def __init__(self, code: str, safe_message: str) -> None:
+        super().__init__(safe_message)
+        self.code = code
+        self.safe_message = safe_message
+
+
 class MockPublishingProvider(PublishingProvider):
     """Deterministic provider used without external API communication."""
 
@@ -50,12 +60,13 @@ class MockPublishingProvider(PublishingProvider):
 class PublishingProviderResolver:
     """Resolve configured provider names without exposing credentials to publications."""
 
-    _providers: ClassVar[dict[str, type[PublishingProvider]]] = {
-        "mock": MockPublishingProvider,
-    }
+    def __init__(self, providers: Mapping[str, PublishingProvider] | None = None) -> None:
+        self._providers: dict[str, PublishingProvider] = {"mock": MockPublishingProvider()}
+        if providers:
+            self._providers.update({name.lower(): provider for name, provider in providers.items()})
 
     def resolve(self, provider_name: str) -> PublishingProvider:
-        provider_type = self._providers.get(provider_name.lower())
-        if provider_type is None:
+        provider = self._providers.get(provider_name.lower())
+        if provider is None:
             raise ValueError("Unsupported publishing provider")
-        return provider_type()
+        return provider

@@ -138,6 +138,10 @@ The supported settings are:
 | `STORAGE_PRESIGNED_EXPIRY_SECONDS` | `900` | Presigned download lifetime |
 | `STORAGE_CONNECT_TIMEOUT_SECONDS` | `3` | S3 connection timeout |
 | `STORAGE_READ_TIMEOUT_SECONDS` | `10` | S3 operation timeout |
+| `YOUTUBE_CLIENT_ID` | empty | OAuth client ID for YouTube publishing (secret) |
+| `YOUTUBE_CLIENT_SECRET` | empty | OAuth client secret for YouTube publishing (secret) |
+| `YOUTUBE_REFRESH_TOKEN` | empty | OAuth refresh token with `youtube.upload` scope (secret) |
+| `YOUTUBE_PRIVACY_STATUS` | `private` | Upload visibility: `private`, `unlisted`, or `public` |
 
 Do not store secrets in `.env.example`, source files, images, or logs.
 Replace the MinIO credential placeholders in the local `.env` before starting Compose.
@@ -284,8 +288,19 @@ curl http://localhost:8000/assets/{asset_id}/publications
 curl -X POST http://localhost:8000/publications/{publication_id}/publish
 ```
 
-See [Publishing Foundation](docs/architecture/PUBLISHING.md) for the domain boundary, provider
-contract, lifecycle, security rules, and explicit scope exclusions.
+The same API accepts `provider: youtube` when the three OAuth secrets are configured. The Provider
+downloads the existing Video Asset through ObjectStorage and uploads it with a `private` safety
+default. No YouTube-specific API route is added.
+
+```bash
+curl -X POST http://localhost:8000/publications \
+  -H 'Content-Type: application/json' \
+  -d '{"asset_id":"<video-asset-uuid>","provider":"youtube","title":"Private upload","description":"Review before publishing"}'
+curl -X POST http://localhost:8000/publications/{publication_id}/publish
+```
+
+See [Publishing Foundation](docs/architecture/PUBLISHING.md) for the domain boundary, YouTube
+credential and upload configuration, lifecycle, security rules, and manual verification procedure.
 
 ## Docker
 

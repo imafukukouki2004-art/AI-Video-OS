@@ -13,6 +13,8 @@ from apps.api.publishing import (
     PublicationRepository,
     PublishingProviderResolver,
     PublishingService,
+    YouTubeCredentialSettings,
+    YouTubePublishingProvider,
 )
 from apps.api.repositories import (
     AssetRepository,
@@ -216,8 +218,20 @@ PublicationRepositoryDependency = Annotated[
 ]
 
 
-def get_publishing_provider_resolver() -> PublishingProviderResolver:
-    return PublishingProviderResolver()
+def get_publishing_provider_resolver(
+    settings: SettingsDependency,
+    storage: StorageDependency,
+) -> PublishingProviderResolver:
+    youtube_provider = YouTubePublishingProvider(
+        storage,
+        YouTubeCredentialSettings(
+            client_id=settings.youtube_client_id,
+            client_secret=settings.youtube_client_secret,
+            refresh_token=settings.youtube_refresh_token,
+        ),
+        privacy_status=settings.youtube_privacy_status,
+    )
+    return PublishingProviderResolver({"youtube": youtube_provider})
 
 
 PublishingProviderResolverDependency = Annotated[

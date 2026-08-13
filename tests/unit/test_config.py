@@ -16,6 +16,9 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     )
     monkeypatch.setenv("REDIS_URL", "redis://:redis-password@cache:6379/0")
     monkeypatch.setenv("CELERY_BROKER_URL", "redis://:broker-password@cache:6379/0")
+    monkeypatch.setenv("YOUTUBE_CLIENT_ID", "youtube-client-fixture")
+    monkeypatch.setenv("YOUTUBE_CLIENT_SECRET", "youtube-secret-fixture")
+    monkeypatch.setenv("YOUTUBE_REFRESH_TOKEN", "youtube-refresh-fixture")
 
     settings = Settings(_env_file=None)
 
@@ -28,6 +31,10 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     assert settings.redis_url.get_secret_value().endswith("@cache:6379/0")
     assert "redis-password" not in repr(settings)
     assert "broker-password" not in repr(settings)
+    assert settings.youtube_client_id.get_secret_value() == "youtube-client-fixture"
+    assert settings.youtube_privacy_status == "private"
+    assert "youtube-secret-fixture" not in repr(settings)
+    assert "youtube-refresh-fixture" not in repr(settings)
 
 
 def test_api_host_alias_is_supported(monkeypatch: MonkeyPatch) -> None:
