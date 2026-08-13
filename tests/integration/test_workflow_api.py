@@ -1,6 +1,7 @@
 """Integration tests for the workflow execution API."""
 
 from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -10,7 +11,9 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from apps.api.application import create_app
-from apps.api.dependencies import get_workflow_runtime_service
+from apps.api.dependencies import get_workflow_runtime_service, get_workflow_step_service
+from apps.api.domain.models import WorkflowStep, WorkflowStepStatus
+from apps.api.services.domain import WorkflowStepService
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 
 
@@ -41,6 +44,41 @@ async def test_run_workflow_api(app: FastAPI, client: AsyncClient):
     assert response.json()["status"] == "completed"
     mock_service.execute_workflow.assert_awaited_once_with(workflow_id)
 
+    app.dependency_overrides.clear()
+
+
+@pytest.mark.asyncio
+async def test_create_workflow_step_api(app: FastAPI, client: AsyncClient):
+    workflow_id, step_id = uuid4(), uuid4()
+    step = WorkflowStep(
+        id=step_id,
+        workflow_id=workflow_id,
+        name="GenerateScript",
+        step_type="ai",
+        order=1,
+        config={"provider": "mock", "operation": "text_generation", "prompt": "Write"},
+        status=WorkflowStepStatus.PENDING,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
+    )
+    mock_service = AsyncMock(spec=WorkflowStepService)
+    mock_service.create.return_value = step
+    app.dependency_overrides[get_workflow_step_service] = lambda: mock_service
+    payload = {
+        "workflow_id": str(workflow_id),
+        "name": "GenerateScript",
+        "step_type": "ai",
+        "order": 1,
+        "config": {"provider": "mock", "operation": "text_generation", "prompt": "Write"},
+    }
+
+    response = await client.post("/workflow-steps", json=payload)
+
+    assert response.status_code == 201
+    assert response.json()["id"] == str(step_id)
+    assert response.json()["workflow_id"] == str(workflow_id)
+    create_input = mock_service.create.await_args.args[0]
+    assert create_input.config["operation"] == "text_generation"
     app.dependency_overrides.clear()
 
 
