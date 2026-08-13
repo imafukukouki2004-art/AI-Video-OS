@@ -9,6 +9,7 @@ from apps.api.dependencies import (
     JobServiceDependency,
     ProjectServiceDependency,
     VideoServiceDependency,
+    WorkflowArtifactServiceDependency,
     WorkflowExecutionErrorServiceDependency,
     WorkflowExecutionHistoryServiceDependency,
     WorkflowExecutionMetricServiceDependency,
@@ -28,6 +29,7 @@ from apps.api.domain.schemas import (
     ProjectUpdate,
     VideoCreate,
     VideoResponse,
+    WorkflowArtifactResponse,
     WorkflowCreate,
     WorkflowEnqueueResponse,
     WorkflowExecutionErrorResponse,
@@ -35,6 +37,7 @@ from apps.api.domain.schemas import (
     WorkflowExecutionMetricResponse,
     WorkflowExecutionResponse,
     WorkflowResponse,
+    WorkflowStepCreate,
     WorkflowStepResponse,
     WorkflowValidationResult,
 )
@@ -180,6 +183,19 @@ async def list_workflow_steps(
     return [WorkflowStepResponse.model_validate(s) for s in steps]
 
 
+@router.post(
+    "/workflow-steps",
+    response_model=WorkflowStepResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_workflow_step(
+    step_in: WorkflowStepCreate, service: WorkflowStepServiceDependency
+) -> WorkflowStepResponse:
+    """Persist one step in a workflow definition."""
+    step = await service.create(step_in)
+    return WorkflowStepResponse.model_validate(step)
+
+
 # --- Workflow Executions ---
 
 
@@ -232,6 +248,18 @@ async def list_execution_metrics(
     """Retrieve all metrics for a specific execution."""
     metrics = await service.list_by_execution(execution_id)
     return [WorkflowExecutionMetricResponse.model_validate(m) for m in metrics]
+
+
+@router.get(
+    "/workflow-executions/{execution_id}/artifacts",
+    response_model=list[WorkflowArtifactResponse],
+)
+async def list_execution_artifacts(
+    execution_id: UUID, service: WorkflowArtifactServiceDependency
+) -> list[WorkflowArtifactResponse]:
+    """Retrieve generated artifacts for one workflow execution."""
+    artifacts = await service.list_by_execution(execution_id)
+    return [WorkflowArtifactResponse.model_validate(artifact) for artifact in artifacts]
 
 
 @router.post(

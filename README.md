@@ -259,6 +259,14 @@ WorkflowArtifact. Successful steps publish `video`, `asset`, and `artifact` Cont
 failed renders publish none. See [Video Rendering Foundation](docs/architecture/VIDEO_RENDERING.md)
 for the step contract, registration order, temporary-file strategy, and FFmpeg setup.
 
+### Runtime MVP
+
+The production execution path can enqueue a persisted Workflow and run Text → Image → Video in
+one Celery worker execution. Final image and video artifacts remain traceable from the
+WorkflowExecution, while Context references connect each completed step. See
+[AI Video Runtime MVP](docs/architecture/RUNTIME_MVP.md) for the exact WorkflowStep definitions,
+enqueue flow, result-tracking endpoints, lifecycle contract, and scope boundary.
+
 ## Docker
 
 Build from the repository root:
