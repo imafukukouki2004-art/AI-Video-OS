@@ -243,6 +243,14 @@ composed before the existing provider interface is called. See
 [Prompt Composition Foundation](docs/architecture/PROMPT_COMPOSITION.md) for the configuration
 contract, supported variables, and explicit scope boundaries.
 
+### Multi-step AI pipelines
+
+The Workflow Runtime supports ordered AI pipelines such as text generation → text rewrite →
+image generation. Completed results move between steps only through `WorkflowContext` and the
+existing variable references; API and Celery worker execution share the same runtime path. See
+[Multi-Step AI Pipeline Foundation](docs/architecture/MULTI_STEP_AI_PIPELINE.md) for execution,
+failure, observability, and scope contracts.
+
 ## Docker
 
 Build from the repository root:

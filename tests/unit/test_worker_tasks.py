@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 
+from apps.api.services.prompt_builder import PromptBuilder
 from apps.worker.tasks import _execute_workflow_execution_async
 
 
@@ -39,7 +40,7 @@ async def test_execute_workflow_execution_async_success():
         patch("apps.worker.tasks.WorkflowExecutionHistoryRepository"),
         patch("apps.worker.tasks.WorkflowExecutionErrorRepository"),
         patch("apps.worker.tasks.WorkflowExecutionMetricRepository"),
-        patch("apps.worker.tasks.WorkflowRuntime", return_value=mock_runtime),
+        patch("apps.worker.tasks.WorkflowRuntime", return_value=mock_runtime) as mock_runtime_class,
     ):
         # Setup DB session mock
         mock_session = AsyncMock()
@@ -53,6 +54,8 @@ async def test_execute_workflow_execution_async_success():
         mock_execution_repo.get_by_id.assert_called_once_with(execution_id)
         mock_workflow_repo.get_by_id.assert_called_once_with(workflow_id)
         mock_runtime.run.assert_called_once_with(mock_workflow, execution_id=execution_id)
+        runtime_args = mock_runtime_class.call_args.args
+        assert isinstance(runtime_args[-1], PromptBuilder)
 
 
 @pytest.mark.asyncio
