@@ -15,7 +15,8 @@ def test_dependency_resolver_registers_mock_and_youtube() -> None:
     )
     storage = Mock(spec=ObjectStorage)
 
-    resolver = get_publishing_provider_resolver(settings, storage)
+    credential_resolver = Mock()
+    resolver = get_publishing_provider_resolver(settings, storage, credential_resolver)
 
     assert isinstance(resolver.resolve("mock"), MockPublishingProvider)
     assert isinstance(resolver.resolve("youtube"), YouTubePublishingProvider)

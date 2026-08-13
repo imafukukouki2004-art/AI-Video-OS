@@ -62,6 +62,11 @@ class Settings(BaseSettings):
     youtube_client_secret: SecretStr = Field(default_factory=lambda: SecretStr(""))
     youtube_refresh_token: SecretStr = Field(default_factory=lambda: SecretStr(""))
     youtube_privacy_status: Literal["private", "unlisted", "public"] = "private"
+    youtube_oauth_redirect_uri: str = (
+        "http://localhost:8000/publishing/connections/youtube/callback"
+    )
+    youtube_oauth_state_ttl_seconds: int = Field(default=600, ge=60, le=3600)
+    youtube_credential_encryption_key: SecretStr = Field(default_factory=lambda: SecretStr(""))
 
 
 @lru_cache

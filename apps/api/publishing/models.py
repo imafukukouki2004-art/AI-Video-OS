@@ -22,6 +22,15 @@ class PublicationStatus(str, enum.Enum):
     FAILED = "failed"
 
 
+class PublishingConnectionStatus(str, enum.Enum):
+    """Lifecycle states for an operator-managed provider connection."""
+
+    PENDING = "pending"
+    CONNECTED = "connected"
+    FAILED = "failed"
+    DISCONNECTED = "disconnected"
+
+
 class Publication(Base):
     """Track publication of an existing asset through a named provider."""
 
@@ -52,3 +61,74 @@ class Publication(Base):
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     asset: Mapped[Asset] = relationship()
+
+
+class PublishingConnection(Base):
+    """Non-secret metadata for one operator-level publishing connection."""
+
+    __tablename__ = "publishing_connections"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    provider: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    status: Mapped[PublishingConnectionStatus] = mapped_column(
+        Enum(PublishingConnectionStatus),
+        default=PublishingConnectionStatus.PENDING,
+        nullable=False,
+    )
+    scopes: Mapped[list[str]] = mapped_column(JSONB, default=list, nullable=False)
+    account_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    account_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+    connected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    disconnected_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class PublishingCredential(Base):
+    """Encrypted provider credential kept separate from connection metadata."""
+
+    __tablename__ = "publishing_credentials"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    connection_id: Mapped[UUID] = mapped_column(
+        ForeignKey("publishing_connections.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    encrypted_refresh_token: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+        nullable=False,
+    )
+
+
+class PublishingOAuthState(Base):
+    """Hashed, expiring, single-use OAuth state record."""
+
+    __tablename__ = "publishing_oauth_states"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    connection_id: Mapped[UUID] = mapped_column(
+        ForeignKey("publishing_connections.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    state_digest: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    consumed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False
+    )

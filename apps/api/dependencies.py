@@ -10,9 +10,16 @@ from apps.api.cache import RedisManager
 from apps.api.config import Settings, get_settings
 from apps.api.database import Database
 from apps.api.publishing import (
+    CredentialCipher,
+    GoogleYouTubeOAuthClient,
     PublicationRepository,
+    PublishingConnectionRepository,
+    PublishingCredentialRepository,
+    PublishingOAuthStateRepository,
     PublishingProviderResolver,
     PublishingService,
+    YouTubeConnectionService,
+    YouTubeCredentialResolver,
     YouTubeCredentialSettings,
     YouTubePublishingProvider,
 )
@@ -218,9 +225,108 @@ PublicationRepositoryDependency = Annotated[
 ]
 
 
+def get_publishing_connection_repository(
+    session: DatabaseSessionDependency,
+) -> PublishingConnectionRepository:
+    return PublishingConnectionRepository(session)
+
+
+PublishingConnectionRepositoryDependency = Annotated[
+    PublishingConnectionRepository, Depends(get_publishing_connection_repository)
+]
+
+
+def get_publishing_credential_repository(
+    session: DatabaseSessionDependency,
+) -> PublishingCredentialRepository:
+    return PublishingCredentialRepository(session)
+
+
+PublishingCredentialRepositoryDependency = Annotated[
+    PublishingCredentialRepository, Depends(get_publishing_credential_repository)
+]
+
+
+def get_publishing_oauth_state_repository(
+    session: DatabaseSessionDependency,
+) -> PublishingOAuthStateRepository:
+    return PublishingOAuthStateRepository(session)
+
+
+PublishingOAuthStateRepositoryDependency = Annotated[
+    PublishingOAuthStateRepository, Depends(get_publishing_oauth_state_repository)
+]
+
+
+def get_credential_cipher(settings: SettingsDependency) -> CredentialCipher:
+    return CredentialCipher(settings.youtube_credential_encryption_key)
+
+
+CredentialCipherDependency = Annotated[CredentialCipher, Depends(get_credential_cipher)]
+
+
+def get_youtube_credential_resolver(
+    connection_repo: PublishingConnectionRepositoryDependency,
+    credential_repo: PublishingCredentialRepositoryDependency,
+    cipher: CredentialCipherDependency,
+    settings: SettingsDependency,
+) -> YouTubeCredentialResolver:
+    return YouTubeCredentialResolver(
+        connection_repo,
+        credential_repo,
+        cipher,
+        settings.youtube_client_id,
+        settings.youtube_client_secret,
+    )
+
+
+YouTubeCredentialResolverDependency = Annotated[
+    YouTubeCredentialResolver, Depends(get_youtube_credential_resolver)
+]
+
+
+def get_google_youtube_oauth_client(
+    settings: SettingsDependency,
+) -> GoogleYouTubeOAuthClient:
+    return GoogleYouTubeOAuthClient(
+        settings.youtube_client_id,
+        settings.youtube_client_secret,
+        settings.youtube_oauth_redirect_uri,
+    )
+
+
+GoogleYouTubeOAuthClientDependency = Annotated[
+    GoogleYouTubeOAuthClient, Depends(get_google_youtube_oauth_client)
+]
+
+
+def get_youtube_connection_service(
+    connection_repo: PublishingConnectionRepositoryDependency,
+    credential_repo: PublishingCredentialRepositoryDependency,
+    state_repo: PublishingOAuthStateRepositoryDependency,
+    oauth_client: GoogleYouTubeOAuthClientDependency,
+    cipher: CredentialCipherDependency,
+    settings: SettingsDependency,
+) -> YouTubeConnectionService:
+    return YouTubeConnectionService(
+        connection_repo,
+        credential_repo,
+        state_repo,
+        oauth_client,
+        cipher,
+        state_ttl_seconds=settings.youtube_oauth_state_ttl_seconds,
+    )
+
+
+YouTubeConnectionServiceDependency = Annotated[
+    YouTubeConnectionService, Depends(get_youtube_connection_service)
+]
+
+
 def get_publishing_provider_resolver(
     settings: SettingsDependency,
     storage: StorageDependency,
+    credential_resolver: YouTubeCredentialResolverDependency,
 ) -> PublishingProviderResolver:
     youtube_provider = YouTubePublishingProvider(
         storage,
@@ -229,6 +335,7 @@ def get_publishing_provider_resolver(
             client_secret=settings.youtube_client_secret,
             refresh_token=settings.youtube_refresh_token,
         ),
+        credential_source=credential_resolver,
         privacy_status=settings.youtube_privacy_status,
     )
     return PublishingProviderResolver({"youtube": youtube_provider})

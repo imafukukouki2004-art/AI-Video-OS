@@ -151,7 +151,7 @@ def test_youtube_publication_uses_existing_api_and_actual_service_boundary() -> 
             client_secret=SecretStr("fixture"),
             refresh_token=SecretStr("fixture"),
         ),
-        client_factory=lambda: client,
+        client_factory=lambda _: client,
         media_upload_factory=lambda stream, content_type: "mock-media",
     )
     publication_repository = AsyncMock(spec=PublicationRepository)

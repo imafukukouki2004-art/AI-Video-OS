@@ -49,6 +49,9 @@ def configure_logging(settings: Settings, *, force: bool = False) -> None:
         level=getattr(logging, settings.log_level),
         force=True,
     )
+    # The default Uvicorn access log includes raw query strings. OAuth callback
+    # authorization codes must never be logged; middleware emits path-only events.
+    logging.getLogger("uvicorn.access").disabled = True
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
