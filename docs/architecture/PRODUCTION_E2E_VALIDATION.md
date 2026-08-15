@@ -12,16 +12,16 @@ The Production End-to-End (E2E) Validation Foundation provides a safe and repeat
 ## Architecture
 
 ### Components
-1. **ValidationRunner**: Orchestrates the flow by creating a dedicated validation workflow, executing it, and performing post-execution checks.
+1. **ValidationRunner**: Orchestrates the flow by creating a dedicated validation workflow, executing it, performing async publishing polling/wait, and validating strict privacy.
 2. **VisualValidator**: Uses FFmpeg to extract frames from generated videos and verify they are not black or blank.
 3. **E2E Script**: A CLI entry point for manually triggering the validation.
 
 ### Validation Flow
-1. **Setup**: Create a temporary workflow with a fixed sequence (Text -> Image -> Video).
+1. **Setup**: Create a temporary workflow with a fixed sequence (Text -> Image -> Video) and forced private publishing config.
 2. **Execution**: Run the workflow using `WorkflowRuntimeService`.
 3. **Visual Check**: Extract a frame from the resulting video asset and perform a non-black check.
-4. **Publishing Check**: Verify that the `Publication` record exists and is in the `published` state with `private` privacy status.
-5. **Reporting**: Generate a JSON report summarizing the findings.
+4. **Publishing Wait & Check**: Poll publication status with timeout (60s) until `PUBLISHED` or `FAILED`. Ensure strict `privacyStatus == private` assertion passes.
+5. **Reporting**: Generate a JSON report summarizing findings without exposing secrets.
 
 ## Safety & Security
 - **Explicit Opt-in**: Requires `AI_VIDEO_OS_RUN_PRODUCTION_E2E=true` environment variable.

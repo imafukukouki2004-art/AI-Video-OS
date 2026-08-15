@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
@@ -43,40 +44,44 @@ async def test_validation_runner_enforces_private_status(mock_deps):
     with patch.dict(os.environ, {"AI_VIDEO_OS_RUN_PRODUCTION_E2E": "true"}):
         runner = ValidationRunner(**mock_deps)
 
-        # Mock repository calls
         workflow_id = uuid4()
         mock_workflow = MagicMock(id=workflow_id)
         mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
         mock_deps["step_repository"].create = AsyncMock()
 
-        # Capture the workflow created
         await runner._setup_validation_workflow({})
 
-        # Check that the workflow config forces private
         args, _ = mock_deps["workflow_repository"].create.call_args
         workflow_in = args[0]
         assert workflow_in.config["publishing_config"]["privacyStatus"] == "private"
 
 
 @pytest.mark.asyncio
-async def test_validation_runner_handles_workflow_failure(mock_deps):
+async def test_validation_runner_rejects_non_private(mock_deps):
     with patch.dict(os.environ, {"AI_VIDEO_OS_RUN_PRODUCTION_E2E": "true"}):
         runner = ValidationRunner(**mock_deps)
 
-        # Mock workflow setup
         mock_workflow = MagicMock(id=uuid4())
         mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
         mock_deps["step_repository"].create = AsyncMock()
-
-        # Mock execution failure
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "failed", "error": "OpenAI API Error", "execution_id": uuid4()}
+            return_value={"status": "completed", "execution_id": uuid4()}
         )
 
-        # Patch _setup_validation_workflow to return our mock
-        with patch.object(runner, "_setup_validation_workflow", return_value=mock_workflow):
-            result = await runner.run_production_e2e({})
+        with patch.object(runner, "_get_video_asset_id", return_value=uuid4()):
+            with patch.object(
+                runner,
+                "_perform_visual_validation",
+                return_value={"valid": True, "reason": "Valid"},
+            ):
+                mock_pub = MagicMock()
+                mock_pub.id = uuid4()
+                mock_pub.status = PublicationStatus.PUBLISHED
+                mock_pub.provider_metadata = {"privacyStatus": "public"}
+                mock_deps["publication_repository"].list_by_execution = AsyncMock(
+                    return_value=[mock_pub]
+                )
 
-            assert result["validation_result"] == "FAILED"
-            assert result["workflow_status"] == "failed"
-            assert result["error"] == "OpenAI API Error"
+                result = await runner.run_production_e2e({})
+                assert result["validation_result"] == "FAILED"
+                assert "privacyStatus is 'public'" in result["error"]

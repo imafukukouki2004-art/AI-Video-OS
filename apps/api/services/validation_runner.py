@@ -5,6 +5,7 @@ from typing import Any
 from uuid import UUID, uuid4
 
 from apps.api.domain.models import Workflow, WorkflowArtifact, WorkflowStep, WorkflowStepStatus
+from apps.api.publishing.models import PublicationStatus
 from apps.api.domain.schemas import WorkflowCreate, WorkflowStepCreate
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
@@ -92,20 +93,43 @@ class ValidationRunner:
                 report["error"] = "Video asset not found after completion"
                 return report
 
-            # 4. Publishing Validation
-            publications = await self.publication_repository.list_by_execution(execution_id)
-            if publications:
-                publication = publications[0]
-                report["publication_id"] = str(publication.id)
-                report["publication_status"] = publication.status
-                report["youtube_external_id"] = publication.external_id
-                report["youtube_url"] = publication.external_url
-                report["privacy_status"] = publication.provider_metadata.get("privacyStatus")
+            # 4. Publishing Validation (Async Wait & Strict Privacy)
+            import asyncio
 
-                if publication.status == "published":
-                    report["validation_result"] = "SUCCESS"
-            else:
+            timeout_seconds = 60
+            poll_interval = 2
+            elapsed = 0
+            publication = None
+
+            while elapsed < timeout_seconds:
+                publications = await self.publication_repository.list_by_execution(execution_id)
+                if publications:
+                    publication = publications[0]
+                    if publication.status in (PublicationStatus.PUBLISHED, PublicationStatus.FAILED):
+                        break
+                await asyncio.sleep(poll_interval)
+                elapsed += poll_interval
+
+            if not publication:
                 report["error"] = "Publication record not found"
+                return report
+
+            report["publication_id"] = str(publication.id)
+            report["publication_status"] = publication.status
+            report["youtube_external_id"] = publication.external_id
+            report["youtube_url"] = publication.external_url
+            privacy_status = publication.provider_metadata.get("privacyStatus") or publication.provider_metadata.get("privacy_status")
+            report["privacy_status"] = privacy_status
+
+            if publication.status == PublicationStatus.PUBLISHED:
+                if privacy_status == "private":
+                    report["validation_result"] = "SUCCESS"
+                else:
+                    report["error"] = f"Validation failed: privacyStatus is '{privacy_status}', expected 'private'"
+            elif publication.status == PublicationStatus.FAILED:
+                report["error"] = f"Publication failed with error: {publication.error_message}"
+            else:
+                report["error"] = f"Publication timed out in status: {publication.status}"
 
             return report
 

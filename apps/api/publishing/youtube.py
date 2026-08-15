@@ -209,7 +209,7 @@ class YouTubePublishingProvider(PublishingProvider):
             stream.close()
 
     def _build_client(self, settings: YouTubeCredentialSettings) -> YouTubeClient:
-        credentials = Credentials(
+        credentials = Credentials(  # type: ignore[no-untyped-call]
             token=None,
             refresh_token=settings.refresh_token.get_secret_value(),
             token_uri=YOUTUBE_TOKEN_URI,
