@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import DateTime, Enum, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -36,9 +36,20 @@ class Publication(Base):
     """Track publication of an existing asset through a named provider."""
 
     __tablename__ = "publications"
+    __table_args__ = (
+        UniqueConstraint(
+            "workflow_execution_id",
+            "provider",
+            "asset_id",
+            name="uq_publications_auto_workflow_provider_asset",
+        ),
+    )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     asset_id: Mapped[UUID] = mapped_column(ForeignKey("assets.id"), nullable=False, index=True)
+    workflow_execution_id: Mapped[UUID | None] = mapped_column(
+        ForeignKey("workflow_executions.id"), nullable=True, index=True
+    )
     provider: Mapped[str] = mapped_column(String(100), nullable=False)
     status: Mapped[PublicationStatus] = mapped_column(
         Enum(PublicationStatus), default=PublicationStatus.PENDING, nullable=False

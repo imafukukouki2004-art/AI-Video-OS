@@ -10,12 +10,14 @@ from apps.api.config import get_settings
 from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.errors.exceptions import ApplicationError
+from apps.api.publishing.automatic import AutomaticPublishingCoordinator
 from apps.api.publishing.connection_repository import (
     PublishingConnectionRepository,
     PublishingCredentialRepository,
 )
 from apps.api.publishing.credentials import CredentialCipher, YouTubeCredentialResolver
 from apps.api.publishing.providers import PublishingProviderResolver
+from apps.api.publishing.queue import PublishingQueueService
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.publishing.service import PublishingService
 from apps.api.publishing.youtube import YouTubeCredentialSettings, YouTubePublishingProvider
@@ -167,6 +169,7 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         metric_repo = WorkflowExecutionMetricRepository(session)
         artifact_repo = WorkflowArtifactRepository(session)
         asset_repo = AssetRepository(session)
+        publication_repo = PublicationRepository(session)
 
         # Initialize runtime dependencies while the database session is active.
         runtime = WorkflowRuntime(
@@ -199,6 +202,39 @@ async def _execute_workflow_execution_async(execution_id_str: str) -> dict[str, 
         logger.info(f"Worker starting execution {execution_id} for workflow {workflow.id}")
         try:
             result = await runtime.run(workflow, execution_id=execution_id)
+            if result.get("status") == "completed":
+                connection_repo = PublishingConnectionRepository(session)
+                credential_repo = PublishingCredentialRepository(session)
+                credential_resolver = YouTubeCredentialResolver(
+                    connection_repo,
+                    credential_repo,
+                    CredentialCipher(settings.youtube_credential_encryption_key),
+                    settings.youtube_client_id,
+                    settings.youtube_client_secret,
+                )
+                youtube_provider = YouTubePublishingProvider(
+                    storage,
+                    YouTubeCredentialSettings(
+                        client_id=settings.youtube_client_id,
+                        client_secret=settings.youtube_client_secret,
+                        refresh_token=settings.youtube_refresh_token,
+                    ),
+                    credential_source=credential_resolver,
+                    privacy_status=settings.youtube_privacy_status,
+                )
+                publishing_service = PublishingService(
+                    publication_repo,
+                    asset_repo,
+                    PublishingProviderResolver({"youtube": youtube_provider}),
+                )
+                automatic_publishing = AutomaticPublishingCoordinator(
+                    execution_repo,
+                    artifact_repo,
+                    publication_repo,
+                    publishing_service,
+                    PublishingQueueService(publication_repo),
+                )
+                await automatic_publishing.handle_completion(workflow, execution_id)
             logger.info(
                 f"Worker completed execution {execution_id} with status {result.get('status')}"
             )

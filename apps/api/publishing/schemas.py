@@ -16,6 +16,12 @@ class PublicationCreate(BaseModel):
     description: str | None = Field(None, max_length=5000)
 
 
+class AutomaticPublicationCreate(PublicationCreate):
+    """Internal creation contract linking a publication to one workflow execution."""
+
+    workflow_execution_id: UUID
+
+
 class PublicationUpdate(BaseModel):
     status: PublicationStatus | None = None
     external_id: str | None = Field(None, max_length=255)
@@ -46,6 +52,7 @@ class PublicationResponse(BaseModel):
 
     id: UUID
     asset_id: UUID
+    workflow_execution_id: UUID | None
     provider: str
     status: PublicationStatus
     title: str

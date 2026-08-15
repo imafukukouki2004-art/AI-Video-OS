@@ -13,7 +13,11 @@ from apps.api.publishing.providers import (
     PublishingProviderResolver,
 )
 from apps.api.publishing.repository import PublicationRepository
-from apps.api.publishing.schemas import PublicationCreate, PublicationUpdate
+from apps.api.publishing.schemas import (
+    AutomaticPublicationCreate,
+    PublicationCreate,
+    PublicationUpdate,
+)
 from apps.api.repositories import AssetRepository
 
 
@@ -36,6 +40,18 @@ class PublishingService:
         if not asset.object_key:
             raise self._invalid_asset()
         return await self.publication_repository.create(publication_in)
+
+    async def create_automatic(
+        self,
+        publication_in: AutomaticPublicationCreate,
+    ) -> tuple[Publication, bool]:
+        """Create or recover one workflow-linked publication idempotently."""
+
+        asset = await self._get_publishable_asset(publication_in.asset_id)
+        self._resolve_provider(publication_in.provider)
+        if not asset.object_key:
+            raise self._invalid_asset()
+        return await self.publication_repository.create_automatic(publication_in)
 
     async def get_by_id(self, publication_id: UUID) -> Publication | None:
         return await self.publication_repository.get_by_id(publication_id)

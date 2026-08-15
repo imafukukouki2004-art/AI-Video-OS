@@ -221,7 +221,7 @@ class WorkflowArtifactRepository(
         result = await self.session.execute(
             select(self.model)
             .where(self.model.workflow_execution_id == execution_id)
-            .order_by(self.model.created_at)
+            .order_by(self.model.created_at, self.model.id)
         )
         return result.scalars().all()
 

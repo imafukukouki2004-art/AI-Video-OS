@@ -1,5 +1,10 @@
 """Publishing domain, provider, and connection foundation."""
 
+from apps.api.publishing.automatic import (
+    AutomaticPublishingConfig,
+    AutomaticPublishingCoordinator,
+    AutomaticPublishingResult,
+)
 from apps.api.publishing.connection_repository import (
     PublishingConnectionRepository,
     PublishingCredentialRepository,
@@ -30,6 +35,9 @@ from apps.api.publishing.youtube import (
 )
 
 __all__ = [
+    "AutomaticPublishingConfig",
+    "AutomaticPublishingCoordinator",
+    "AutomaticPublishingResult",
     "CredentialCipher",
     "GoogleYouTubeOAuthClient",
     "MockPublishingProvider",
