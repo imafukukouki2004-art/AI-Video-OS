@@ -39,7 +39,11 @@ async def test_validation_runner_workflow_failure(mock_deps):
         mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
         mock_deps["step_repository"].create = AsyncMock()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "failed", "error": "Runtime failed", "execution_id": uuid4()}
+            return_value={
+                "status": "failed",
+                "error": "Runtime failed",
+                "execution_id": uuid4(),
+            }
         )
 
         result = await runner.run_production_e2e({})
@@ -56,7 +60,10 @@ async def test_validation_runner_invalid_execution_id(mock_deps):
         mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
         mock_deps["step_repository"].create = AsyncMock()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": "not-a-uuid"}
+            return_value={
+                "status": "completed",
+                "execution_id": "not-a-uuid",
+            }
         )
 
         result = await runner.run_production_e2e({})
@@ -74,7 +81,10 @@ async def test_validation_runner_video_asset_not_found(mock_deps):
         mock_deps["step_repository"].create = AsyncMock()
         execution_id = uuid4()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": execution_id}
+            return_value={
+                "status": "completed",
+                "execution_id": execution_id,
+            }
         )
 
         with patch.object(runner, "_get_video_asset_id", return_value=None):
@@ -93,7 +103,10 @@ async def test_validation_runner_visual_validation_fails(mock_deps):
         mock_deps["step_repository"].create = AsyncMock()
         execution_id = uuid4()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": execution_id}
+            return_value={
+                "status": "completed",
+                "execution_id": execution_id,
+            }
         )
 
         with patch.object(runner, "_get_video_asset_id", return_value=uuid4()):
@@ -117,7 +130,10 @@ async def test_validation_runner_publication_not_found(mock_deps):
         mock_deps["step_repository"].create = AsyncMock()
         execution_id = uuid4()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": execution_id}
+            return_value={
+                "status": "completed",
+                "execution_id": execution_id,
+            }
         )
 
         with patch.object(runner, "_get_video_asset_id", return_value=uuid4()):
@@ -143,7 +159,10 @@ async def test_validation_runner_publication_failed_status(mock_deps):
         mock_deps["step_repository"].create = AsyncMock()
         execution_id = uuid4()
         mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": execution_id}
+            return_value={
+                "status": "completed",
+                "execution_id": execution_id,
+            }
         )
 
         with patch.object(runner, "_get_video_asset_id", return_value=uuid4()):
@@ -160,7 +179,10 @@ async def test_validation_runner_publication_failed_status(mock_deps):
                     return_value=[mock_pub]
                 )
 
-                with patch("asyncio.sleep", new_callable=AsyncMock):
+                with patch(
+                    "apps.api.services.validation_runner.asyncio.sleep",
+                    new_callable=AsyncMock,
+                ):
                     result = await runner.run_production_e2e({})
                     assert result["validation_result"] == "FAILED"
                     assert "YouTube API quota exceeded" in result["error"]
@@ -177,38 +199,3 @@ async def test_validation_runner_exception_handling(mock_deps):
         result = await runner.run_production_e2e({})
         assert result["validation_result"] == "FAILED"
         assert "DB Connection Error" in result["error"]
-
-
-@pytest.mark.asyncio
-async def test_validation_runner_publication_timeout(mock_deps):
-    with patch.dict(os.environ, {"AI_VIDEO_OS_RUN_PRODUCTION_E2E": "true"}):
-        runner = ValidationRunner(**mock_deps)
-
-        mock_workflow = MagicMock(id=uuid4())
-        mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
-        mock_deps["step_repository"].create = AsyncMock()
-        execution_id = uuid4()
-        mock_deps["workflow_runtime_service"].execute_workflow = AsyncMock(
-            return_value={"status": "completed", "execution_id": execution_id}
-        )
-
-        with patch.object(runner, "_get_video_asset_id", return_value=uuid4()):
-            with patch.object(
-                runner,
-                "_perform_visual_validation",
-                return_value={"valid": True, "reason": "Valid"},
-            ):
-                mock_pub = MagicMock()
-                mock_pub.id = uuid4()
-                mock_pub.status = PublicationStatus.QUEUED
-                mock_deps["publication_repository"].list_by_execution = AsyncMock(
-                    return_value=[mock_pub]
-                )
-
-                # Test timeout by setting timeout_seconds locally via monkeypatch or mocking
-                with patch(
-                    "apps.api.services.validation_runner.asyncio.sleep",
-                    new_callable=AsyncMock,
-                ):
-                    # We can let status remain QUEUED and mock timeout check or let loop finish
-                    pass
