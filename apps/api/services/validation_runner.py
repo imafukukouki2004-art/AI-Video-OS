@@ -4,9 +4,9 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
-from apps.api.domain.models import Workflow, WorkflowArtifact, WorkflowStep, WorkflowStepStatus
-from apps.api.publishing.models import PublicationStatus
+from apps.api.domain.models import Workflow
 from apps.api.domain.schemas import WorkflowCreate, WorkflowStepCreate
+from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
@@ -105,7 +105,10 @@ class ValidationRunner:
                 publications = await self.publication_repository.list_by_execution(execution_id)
                 if publications:
                     publication = publications[0]
-                    if publication.status in (PublicationStatus.PUBLISHED, PublicationStatus.FAILED):
+                    if publication.status in (
+                        PublicationStatus.PUBLISHED,
+                        PublicationStatus.FAILED,
+                    ):
                         break
                 await asyncio.sleep(poll_interval)
                 elapsed += poll_interval
@@ -118,14 +121,19 @@ class ValidationRunner:
             report["publication_status"] = publication.status
             report["youtube_external_id"] = publication.external_id
             report["youtube_url"] = publication.external_url
-            privacy_status = publication.provider_metadata.get("privacyStatus") or publication.provider_metadata.get("privacy_status")
+            privacy_status = publication.provider_metadata.get(
+                "privacyStatus"
+            ) or publication.provider_metadata.get("privacy_status")
             report["privacy_status"] = privacy_status
 
             if publication.status == PublicationStatus.PUBLISHED:
                 if privacy_status == "private":
                     report["validation_result"] = "SUCCESS"
                 else:
-                    report["error"] = f"Validation failed: privacyStatus is '{privacy_status}', expected 'private'"
+                    report["error"] = (
+                        "Validation failed: "
+                        f"privacyStatus is '{privacy_status}', expected 'private'"
+                    )
             elif publication.status == PublicationStatus.FAILED:
                 report["error"] = f"Publication failed with error: {publication.error_message}"
             else:

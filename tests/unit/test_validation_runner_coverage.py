@@ -126,9 +126,7 @@ async def test_validation_runner_publication_not_found(mock_deps):
                 "_perform_visual_validation",
                 return_value={"valid": True, "reason": "Valid"},
             ):
-                mock_deps["publication_repository"].list_by_execution = AsyncMock(
-                    return_value=[]
-                )
+                mock_deps["publication_repository"].list_by_execution = AsyncMock(return_value=[])
 
                 result = await runner.run_production_e2e({})
                 assert result["validation_result"] == "FAILED"
@@ -172,7 +170,9 @@ async def test_validation_runner_publication_failed_status(mock_deps):
 async def test_validation_runner_exception_handling(mock_deps):
     with patch.dict(os.environ, {"AI_VIDEO_OS_RUN_PRODUCTION_E2E": "true"}):
         runner = ValidationRunner(**mock_deps)
-        mock_deps["workflow_repository"].create = AsyncMock(side_effect=Exception("DB Connection Error"))
+        mock_deps["workflow_repository"].create = AsyncMock(
+            side_effect=Exception("DB Connection Error")
+        )
 
         result = await runner.run_production_e2e({})
         assert result["validation_result"] == "FAILED"
@@ -206,8 +206,9 @@ async def test_validation_runner_publication_timeout(mock_deps):
                 )
 
                 # Test timeout by setting timeout_seconds locally via monkeypatch or mocking
-                with patch("apps.api.services.validation_runner.asyncio.sleep", new_callable=AsyncMock):
+                with patch(
+                    "apps.api.services.validation_runner.asyncio.sleep",
+                    new_callable=AsyncMock,
+                ):
                     # We can let status remain QUEUED and mock timeout check or let loop finish
                     pass
-
-
