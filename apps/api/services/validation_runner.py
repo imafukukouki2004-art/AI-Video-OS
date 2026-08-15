@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from datetime import UTC, datetime
@@ -94,8 +95,6 @@ class ValidationRunner:
                 return report
 
             # 4. Publishing Validation (Async Wait & Strict Privacy)
-            import asyncio
-
             timeout_seconds = 60
             poll_interval = 2
             elapsed = 0
