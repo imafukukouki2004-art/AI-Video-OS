@@ -1,9 +1,0 @@
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "deploy/railway/minio/Dockerfile"
-watchPatterns = ["deploy/railway/minio/**"]
-
-[deploy]
-startCommand = "minio server /data --address :9000 --console-address :9001"
-restartPolicyType = "ALWAYS"
-restartPolicyMaxRetries = 5
