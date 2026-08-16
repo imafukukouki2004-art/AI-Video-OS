@@ -16,7 +16,11 @@ RUN groupadd --system app \
 
 COPY pyproject.toml README.md ./
 COPY apps/__init__.py apps/__init__.py
+# The API imports Celery task definitions to enqueue workflow and publishing jobs.
+# Copying this module does not start a worker process; that remains the separate
+# Railway Worker service defined in deploy/railway/worker.
 COPY apps/api apps/api
+COPY apps/worker apps/worker
 COPY alembic.ini alembic.ini
 COPY migrations migrations
 
