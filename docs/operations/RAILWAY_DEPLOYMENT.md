@@ -438,3 +438,132 @@ The following evidence must be gathered by the human operator after the Railway 
 ### Preparation completion criteria
 
 Repository-based variables, mapping, service configuration, validation runbook, OAuth runbook, and PR #77 evidence criteria are complete when this document is committed and CI remains successful. Actual production readiness requires both this repository specification and human-verified Railway state; neither source alone is sufficient.
+
+
+## Railway-independent completion toolkit
+
+### Repository deployment audit
+
+The PR #77 package has the following repository-audited properties. This table describes repository content only; it does not attest to an actual Railway deployment.
+
+| Audit item | Repository result |
+|---|---|
+| API Dockerfile | Python 3.12 slim image; installs FFmpeg; copies `apps/api`, `apps/worker`, migrations, and Alembic configuration. |
+| Worker Dockerfile | Python 3.12 slim image; installs FFmpeg; copies `apps/api` and `apps/worker`; starts Celery only. |
+| API `railway.toml` | Dockerfile build, Alembic pre-deploy migration, Railway runtime `PORT`, `/health` check, and `ON_FAILURE` restart policy. |
+| Worker `railway.toml` | Dockerfile build, Celery worker start command, and `ALWAYS` restart policy. |
+| API/Worker separation | Maintained. API copies Worker module only because queue imports require its task definitions; it does not start a Celery process. |
+| FFmpeg dependency | Installed in both API and Worker images. |
+| Storage addressing | `path` remains default for development/CI MinIO; `virtual` is available and documented for Railway Storage Bucket. |
+| Development MinIO regression | Existing path-style unit contract is retained. |
+| Railway Bucket compatibility | Virtual-hosted-style upload/read/delete/presigned contract is unit-tested. |
+
+### Safe Infrastructure Validator
+
+`scripts/validate_production_infrastructure.py` is an infrastructure-only tool. It has no imports or calls for Workflow Runtime execution, OpenAI generation, image generation, OAuth authorization, publishing, publication creation, or YouTube upload.
+
+| Mode | Command shape | Permitted behavior | Prohibited behavior |
+|---|---|---|---|
+| Dry-run (default) | `PYTHONPATH=. python scripts/validate_production_infrastructure.py --dry-run --json` | Settings load, configured/missing Secret presence only, endpoint-shape checks, service-target summary, private/virtual/E2E safety checks. | Network access, storage write, database write, OAuth, AI, publishing. |
+| Live dependency checks | `PYTHONPATH=. python scripts/validate_production_infrastructure.py --live --api-base-url https://<actual-api-domain>` | Read-only API health/readiness GETs, PostgreSQL `SELECT 1`, migration revision read, Redis PING, Bucket head request. | Any AI/OAuth/workflow/publication call or destructive database operation. |
+| Temporary storage probe | Add `--storage-probe` to `--live`. | Upload/read/delete a generated `validation/infrastructure/<uuid>.txt` key and generate a presigned URL. | Access or delete existing production assets. |
+| Explicit presigned access check | Add `--check-presigned-access` with `--live --storage-probe`. | GET only the generated temporary-key URL without printing the URL or query string. | Public Bucket exposure or access to a production asset. |
+
+The validator defaults to dry-run and refuses `--storage-probe` without explicit `--live`. It reports only `CONFIGURED`, `MISSING`, `PASS`, `FAIL`, `SKIPPED`, or `UNSAFE`; Secret values are never emitted. Temporary storage-key cleanup runs in a `finally` block, including after a probe failure.
+
+### Human Railway UI Setup Checklist
+
+Complete these steps only when Railway UI access is available. The operator must stop at the first failed expected result and use the indicated safe verification; Manus must not perform any Railway UI action.
+
+| Step | Railway screen | Action | Expected result | Failure indication | Next step |
+|---:|---|---|---|---|---|
+| 1 | PostgreSQL service | Confirm one private managed PostgreSQL service is online. | Service is running and exposes private connection inputs. | Missing/offline/duplicate database service. | Stop and resolve in Railway UI. |
+| 2 | Redis service | Confirm one private managed Redis service is online. | Service is running and exposes a private URL reference. | Missing/offline/duplicate Redis service. | Stop and resolve in Railway UI. |
+| 3 | Storage Bucket | Confirm one private Bucket exists. | Endpoint, Bucket, Region, and secret-bearing reference inputs are available. | Missing Bucket or unavailable references. | Stop and resolve in Railway UI. |
+| 4 | Worker service | Create or confirm one private GitHub-backed Worker service from PR #77 branch. | Repository source is selected; no public domain. | Wrong source, duplicate service, or public exposure. | Correct service setup before variables. |
+| 5 | API service | Create or confirm one GitHub-backed API service from PR #77 branch. | Repository source is selected. | Wrong source or duplicate service. | Continue to config path. |
+| 6 | Service settings | Set exact Config File Paths: API `/deploy/railway/api/railway.toml`; Worker `/deploy/railway/worker/railway.toml`. | Railway resolves the nested config files. | Build ignores expected Dockerfile/command. | Correct config path. |
+| 7 | Service variables | Add only verified PostgreSQL, Redis, and Bucket reference variables. | References resolve without exposing values. | Reference unavailable or source variable differs. | **VERIFY IN RAILWAY UI**; do not guess. |
+| 8 | Service variables | Add non-secret production variables, including `APP_ENV=production`, `APP_DEBUG=false`, `LOG_FORMAT=json`, `STORAGE_ADDRESSING_STYLE=virtual`, `YOUTUBE_PRIVACY_STATUS=private`, and E2E disabled. | Variables save without values being logged. | Invalid value or missing setting. | Correct from Production Variables Matrix. |
+| 9 | Service variables | Human enters sealed Secret variables only. Preserve existing encryption key. | Secret metadata shows configured; no value is copied to Git/logs/chat. | Missing human Secret input. | Stop as `HUMAN ACTION REQUIRED — SECRET INPUT`. |
+| 10 | Worker deployments | Deploy Worker. | Stable Celery deployment starts. | Crash-loop or broker connection error. | Use Worker troubleshooting. |
+| 11 | API deployments | Deploy API. | Pre-deploy migrations succeed and Uvicorn starts. | Migration/build/health failure. | Use API troubleshooting. |
+| 12 | API deployment log | Confirm migration operation completed. | `alembic upgrade head` succeeds. | Migration failure. | Verify database reference; Worker must not migrate. |
+| 13 | API health | Confirm Railway health status, then later `/health` after domain generation. | Healthy/HTTP 200. | Timeout, non-200, or crash-loop. | Use API health troubleshooting. |
+| 14 | Worker deployment log | Confirm Celery broker connection and stable process. | Worker remains running. | Repeated restart/task import/broker error. | Use Worker troubleshooting. |
+| 15 | Validator | Run dry-run, then approved live dependency and temporary storage checks. | DB/Redis/Storage and temporary probe pass. | Any failed check. | Stop and remediate only the named infrastructure dependency. |
+| 16 | API networking | Generate a public HTTPS domain for API only after health passes. | One non-secret API domain is known. | Domain unavailable or API unhealthy. | Do not create domains for private services. |
+| 17 | Google Cloud / API variables | Form exact callback URI from the actual API domain; register it in Google Cloud and set identical API redirect setting. | Exact URI matches in both places. | Domain mismatch or guessed value. | Correct manually; do not start OAuth. |
+| 18 | Stop | Record evidence and stop before OAuth authorization or Production E2E. | Ready for separately approved OAuth step. | Any missing evidence. | CEO review / human validation. |
+
+### Final Production E2E Preflight Checklist
+
+This checklist is a specification only. Do not execute it until a separate CEO authorization permits the real Production E2E.
+
+| Preflight condition | Required evidence | Expected status before authorization |
+|---|---|---|
+| API healthy | Railway health plus `/health` status. | PASS |
+| Worker healthy | Stable Worker deployment and broker-ready log. | PASS |
+| PostgreSQL ready | Validator direct check and current migration revision. | PASS |
+| Redis ready | Validator Redis PING and API readiness state. | PASS |
+| Storage ready | Validator Bucket connectivity and temporary-key probe. | PASS |
+| Migration current | Validator migration result / API pre-deploy evidence. | PASS |
+| OpenAI credential configured | Validator reports configured only; value not shown. | PASS |
+| YouTube OAuth client configured | Validator reports client ID and Secret configured only. | PASS |
+| Connected YouTube credential exists | Future database evidence of encrypted persisted credential, no ciphertext. | PASS after a separately approved OAuth action |
+| Credential encryption key configured | Validator reports configured only. | PASS |
+| YouTube privacy | `YOUTUBE_PRIVACY_STATUS=private`. | PASS |
+| Production E2E gate | `AI_VIDEO_OS_RUN_PRODUCTION_E2E=false` or unset before final approval. | PASS |
+
+### Final OAuth Setup Runbook
+
+This Runbook is for a future human-only operation after the actual API domain is known and a separate OAuth authorization is approved.
+
+| Step | Human action | Validation point | Safety boundary |
+|---:|---|---|---|
+| 1 | Obtain the actual HTTPS API domain from Railway. | Domain is non-secret and API-only. | Do not guess a domain. |
+| 2 | Form `https://<actual-api-domain>/publishing/connections/youtube/callback`. | Literal route suffix matches repository router. | Do not create an authorization URL yet. |
+| 3 | In Google Cloud OAuth Web Client, add that exact redirect URI. | Redirect URI is saved exactly. | Never record Client Secret or authorization code. |
+| 4 | In Railway API variables, set identical `YOUTUBE_OAUTH_REDIRECT_URI`; confirm required OAuth and encryption Secrets are configured by presence only. | Google Cloud and Railway strings match. | Preserve existing encryption key. |
+| 5 | Human redeploys API if required by Railway variable application. | API health returns after deployment. | Manus does not deploy. |
+| 6 | After separate approval, use `POST /publishing/connections/youtube/authorize`. | Response creates a connection and state; do not log URL query values. | This current preparation task does not call it. |
+| 7 | Human selects the intended Google/YouTube account and grants consent. | Google consent completes. | Human browser action only. |
+| 8 | Existing callback receives the code and state. | Connection changes to `CONNECTED` after successful callback. | No token/code values are copied or displayed. |
+| 9 | Verify an encrypted connected credential exists through non-secret database/application evidence. | Credential exists at rest; encryption key remains undisclosed. | Do not retrieve ciphertext. |
+| 10 | Stop. | Production E2E is still not executed. | Requires separate CEO authorization. |
+
+### Troubleshooting and rollback preparation
+
+| Symptom | Likely cause | Safe verification | Safe remediation | Escalation condition |
+|---|---|---|---|---|
+| API build failure | Wrong Config File Path, Dockerfile path, or dependency build error. | Railway build status and sanitized build log. | Human confirms PR #77 branch and exact API config path. | Build still fails after verified repository source. |
+| API migration failure | Database reference unavailable, wrong driver scheme, or migration issue. | API pre-deploy log and non-secret revision state. | Human verifies private database reference mapping; do not run Worker migrations. | Valid mapping still fails migration. |
+| API health failure | Process binding, migration, dependency readiness, or config issue. | Railway health status; `/health` and `/ready` when domain exists. | Verify runtime `PORT`, config path, and dependency references. | Persistent crash-loop after verified settings. |
+| Worker crash-loop | Invalid command, missing module, Redis/Broker failure, or database/storage dependency. | Sanitized Worker logs and restart history. | Verify Worker config path, Redis references, and PR #77 commit. | Persistent loop after verified settings. |
+| Redis connection failure | Missing/wrong private reference or Redis offline. | API `/ready`, validator Redis PING, Railway Redis status. | Human verifies Redis service and all three Redis destination variables. | Redis is online but private connection still fails. |
+| Database connection failure | Wrong `DATABASE_URL` construction or PostgreSQL unavailable. | Validator database check and migration log. | Human verifies private PostgreSQL source variables and `postgresql+psycopg` requirement. | Connection still fails after exact mapping verification. |
+| Storage authorization failure | Missing Bucket credentials reference or wrong Bucket service. | Validator Bucket head and sanitized error type. | Human verifies Bucket reference destinations without exposing values. | Correct reference mapping still returns access failure. |
+| Storage endpoint mismatch | Endpoint/Bucket/Region mismatch or incorrect routing. | Validator connectivity and generated temporary key result. | Verify Bucket service reference mapping. | Endpoint is verified but operations fail. |
+| Virtual-hosted-style mismatch | `STORAGE_ADDRESSING_STYLE` remains `path` in production. | Validator dry-run reports setting state; presigned/Storage probe result. | Set `STORAGE_ADDRESSING_STYLE=virtual` on API and Worker. | Valid virtual setting still fails against Bucket. |
+| Presigned URL failure | Addressing, endpoint, signature, expiry, or Bucket access mismatch. | Validator temporary-key presigned generation and optional access result, without printing URL. | Verify virtual addressing and Bucket references; keep Bucket private. | Generated temporary-key URL remains inaccessible after verified mapping. |
+
+### PR #77 Merge Readiness Checklist
+
+| Evidence category | Required item | Current status |
+|---|---|---|
+| Repository | GitHub CI success | PASS — collect latest PR #77 run URL at review time. |
+| Repository | Code review | PENDING CEO REVIEW |
+| Repository | MinIO path-style regression | PASS — unit contract retained. |
+| Repository | Railway virtual addressing contract | PASS — upload/read/delete/presigned unit contract. |
+| Repository | Documentation, Validator, and Runbooks complete | PASS |
+| Repository | Working Tree clean | Verify at final CEO review. |
+| Railway | API healthy | PENDING HUMAN VALIDATION |
+| Railway | Worker healthy | PENDING HUMAN VALIDATION |
+| Railway | PostgreSQL, Redis, Storage ready | PENDING HUMAN VALIDATION |
+| Railway | Migrations applied | PENDING HUMAN VALIDATION |
+| Railway | Public API URL | PENDING HUMAN VALIDATION |
+| Railway | Presigned URL validation | PENDING HUMAN VALIDATION |
+| Railway | Secrets non-exposed | PENDING HUMAN VALIDATION |
+| Safety | Production E2E remains OFF; OpenAI/YouTube calls remain zero | REQUIRED BEFORE MERGE REVIEW |
+
+The readiness checklist does not authorize merge, Issue #76 closure, Closure Sync, OAuth, or Production E2E. Railway evidence remains `PENDING HUMAN VALIDATION` until the human operator completes UI configuration and supplies non-secret evidence.
