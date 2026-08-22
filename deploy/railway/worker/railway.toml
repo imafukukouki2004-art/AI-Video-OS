@@ -1,0 +1,14 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "deploy/railway/worker/Dockerfile"
+watchPatterns = [
+  "apps/api/**",
+  "apps/worker/**",
+  "pyproject.toml",
+  "deploy/railway/worker/**",
+]
+
+[deploy]
+startCommand = "celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO"
+restartPolicyType = "ALWAYS"
+restartPolicyMaxRetries = 5

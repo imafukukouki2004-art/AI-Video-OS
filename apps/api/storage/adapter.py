@@ -60,7 +60,7 @@ class S3ObjectStorage:
                 connect_timeout=settings.storage_connect_timeout_seconds,
                 read_timeout=settings.storage_read_timeout_seconds,
                 retries={"max_attempts": 2, "mode": "standard"},
-                s3={"addressing_style": "path"},
+                s3={"addressing_style": settings.storage_addressing_style},
                 signature_version="s3v4",
             ),
         )
