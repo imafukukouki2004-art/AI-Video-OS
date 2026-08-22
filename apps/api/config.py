@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     celery_result_backend: SecretStr = SecretStr("redis://127.0.0.1:6379/1")
     celery_task_max_retries: int = Field(default=3, ge=0, le=20)
     celery_retry_backoff_max_seconds: int = Field(default=60, ge=1, le=3600)
+    celery_worker_concurrency: int = Field(default=2, ge=1, le=8)
     storage_endpoint_url: str = "http://127.0.0.1:9000"
     storage_access_key: SecretStr = Field(default_factory=lambda: SecretStr(""))
     storage_secret_key: SecretStr = Field(default_factory=lambda: SecretStr(""))

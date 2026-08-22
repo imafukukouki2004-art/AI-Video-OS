@@ -567,3 +567,54 @@ This Runbook is for a future human-only operation after the actual API domain is
 | Safety | Production E2E remains OFF; OpenAI/YouTube calls remain zero | REQUIRED BEFORE MERGE REVIEW |
 
 The readiness checklist does not authorize merge, Issue #76 closure, Closure Sync, OAuth, or Production E2E. Railway evidence remains `PENDING HUMAN VALIDATION` until the human operator completes UI configuration and supplies non-secret evidence.
+
+## Railway Production Worker recovery and concurrency control
+
+### Audited root cause and configuration source of truth
+
+The Worker OOM/crash-loop symptom was caused by **configuration drift combined with Railway command precedence**. Railway's Worker service was connected to `manus/railway-production-hosting-clean`, where `deploy/railway/worker/railway.toml` exists. Its `deploy.startCommand` overrode the Dockerfile `CMD`. The prior start command did not include `--concurrency`, so Celery selected its platform default (`48` prefork processes in the observed environment), regardless of a later `--concurrency=2` change in `main`'s `apps/worker/Dockerfile`.
+
+Changing the Railway service source from the clean Railway branch to `main` exposed the opposite drift: `main` did contain the Dockerfile fallback change but did **not** contain `/deploy/railway/worker/railway.toml`. Because the Railway service configuration path remained `/deploy/railway/worker/railway.toml`, Railway correctly failed during initialization with a config-file-not-found error.
+
+The configuration source of truth is intentionally layered as follows.
+
+| Execution context | Authoritative start configuration | Effective concurrency | Rationale |
+|---|---|---:|---|
+| Railway Worker service | `deploy/railway/worker/railway.toml` `deploy.startCommand` | `${CELERY_WORKER_CONCURRENCY:-2}` | Railway `startCommand` overrides Dockerfile `CMD`; it must contain the production control. |
+| Non-Railway container execution | `apps/worker/Dockerfile` `CMD` | `2` | Safe fallback when Railway config-as-code is not applied. |
+| Configuration contract | `apps/api/config.py` `CELERY_WORKER_CONCURRENCY` | Default `2`, valid range `1..8` | Bounded, reviewable non-secret capacity control. Invalid values fail settings validation rather than starting an oversized Worker. |
+
+`CELERY_WORKER_CONCURRENCY` is a **non-secret** variable. It is optional because the Railway command safely defaults to `2`, but setting it explicitly to `2` on the Worker service makes the production intent observable and removes ambiguity. Any increase above `2` is a capacity decision requiring a separate review and must remain within the validated upper bound of `8`.
+
+### Worker recovery validation contract
+
+| Verification | Expected result | Safe evidence |
+|---|---|---|
+| Railway config resolution | Service finds `/deploy/railway/worker/railway.toml`. | Railway deployment initialization succeeds. |
+| Effective command | Worker command includes `--concurrency=2` when variable is unset or explicitly `2`. | Sanitized deployment/startup log; no Secret values. |
+| Celery worker model | Celery logs `concurrency: 2 (prefork)` or equivalent. | Sanitized Worker startup log. |
+| Broker readiness | Worker connects to Redis and stays running. | Sanitized startup log and stable deployment status. |
+| OOM/crash-loop prevention | No repeated restarts after deployment. | Railway restart history and memory graph monitored by human. |
+| API/Web isolation | API, Web, PostgreSQL, Redis, and Storage remain on their existing services. | No service source/config changes outside Worker recovery scope. |
+
+### Human Railway UI recovery steps
+
+These steps must be performed by a human only after the recovery PR is approved. They do not authorize OAuth, Production E2E, OpenAI generation, or YouTube upload.
+
+| Step | Service → tab | Human operation | Expected result | Stop condition |
+|---:|---|---|---|---|
+| 1 | `hopeful-laughter` → Settings → Source | Confirm the service remains connected to the reviewed Railway configuration branch; do not point it at `main` while `main` lacks the configured path. | Source branch contains `deploy/railway/worker/railway.toml`. | Branch/path mismatch. |
+| 2 | `hopeful-laughter` → Settings → Build | Confirm **Config File Path** is exactly `/deploy/railway/worker/railway.toml`. | Railway resolves the config from the selected source. | Config path missing or points at API config. |
+| 3 | `hopeful-laughter` → Variables | Add or confirm non-secret `CELERY_WORKER_CONCURRENCY=2`. Do not change database, Redis, storage, OAuth, OpenAI, or encryption Secrets. | Effective Worker command resolves to concurrency 2. | Any missing Secret/reference is discovered; report rather than replacing values. |
+| 4 | `hopeful-laughter` → Deployments | Deploy the approved recovery commit through the normal reviewed branch/PR process. | Initialization succeeds and Worker starts. | Config-not-found, build failure, or unexpected restart. |
+| 5 | `hopeful-laughter` → Logs | Verify a sanitized startup line shows `concurrency: 2 (prefork)` or equivalent. | Worker is broker-ready and stable. | Any higher concurrency, broker error, or crash-loop. |
+| 6 | `hopeful-laughter` → Metrics / Deployments | Observe memory and restart behavior after normal queue idleness. | Memory remains within service limits; restart count does not increase. | OOM, unhealthy status, or repeated restart. |
+| 7 | Stop | Record only non-secret deployment evidence for CEO review. | Recovery evidence is ready. | Do not run Production E2E or change unrelated services. |
+
+### Drift prevention rules
+
+1. Do not switch a Railway service to `main` unless `main` first contains the exact config file path configured in Railway.
+2. Treat Railway `startCommand` as the primary production Worker command whenever it is configured; Dockerfile `CMD` is a fallback, not an override.
+3. Keep the Railway Worker configuration, Dockerfile fallback, Settings default, `.env.example`, tests, and Runbook aligned on a safe concurrency of `2`.
+4. Do not increase `CELERY_WORKER_CONCURRENCY` without memory measurement, queue-load evidence, and a separately reviewed capacity decision.
+5. Keep Worker restart policy and `worker_prefetch_multiplier=1` unchanged; they already limit per-worker task reservation and are outside this recovery change.

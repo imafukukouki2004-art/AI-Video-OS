@@ -1,5 +1,7 @@
 """Settings unit tests."""
 
+import pytest
+from pydantic import ValidationError
 from pytest import MonkeyPatch
 
 from apps.api.config import Settings
@@ -17,6 +19,7 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setenv("REDIS_URL", "redis://:redis-password@cache:6379/0")
     monkeypatch.setenv("CELERY_BROKER_URL", "redis://:broker-password@cache:6379/0")
     monkeypatch.setenv("STORAGE_ADDRESSING_STYLE", "virtual")
+    monkeypatch.setenv("CELERY_WORKER_CONCURRENCY", "4")
     monkeypatch.setenv("YOUTUBE_CLIENT_ID", "youtube-client-fixture")
     monkeypatch.setenv("YOUTUBE_CLIENT_SECRET", "youtube-secret-fixture")
     monkeypatch.setenv("YOUTUBE_REFRESH_TOKEN", "youtube-refresh-fixture")
@@ -34,12 +37,22 @@ def test_settings_read_environment_variables(monkeypatch: MonkeyPatch) -> None:
     assert "redis-password" not in repr(settings)
     assert "broker-password" not in repr(settings)
     assert settings.storage_addressing_style == "virtual"
+    assert settings.celery_worker_concurrency == 4
     assert settings.youtube_client_id.get_secret_value() == "youtube-client-fixture"
     assert settings.youtube_privacy_status == "private"
     assert "youtube-secret-fixture" not in repr(settings)
     assert "youtube-refresh-fixture" not in repr(settings)
     assert "encryption-key-fixture" not in repr(settings)
     assert settings.youtube_oauth_state_ttl_seconds == 600
+
+
+def test_worker_concurrency_defaults_to_two_and_rejects_unsafe_values() -> None:
+    assert Settings(_env_file=None).celery_worker_concurrency == 2
+
+    with pytest.raises(ValidationError):
+        Settings(celery_worker_concurrency=0, _env_file=None)
+    with pytest.raises(ValidationError):
+        Settings(celery_worker_concurrency=9, _env_file=None)
 
 
 def test_api_host_alias_is_supported(monkeypatch: MonkeyPatch) -> None:
