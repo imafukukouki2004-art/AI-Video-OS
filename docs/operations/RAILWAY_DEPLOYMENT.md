@@ -46,7 +46,7 @@ The repository retains the existing `ObjectStorage` protocol and `S3ObjectStorag
 | Service | Railway Config File Path | Dockerfile | Runtime command |
 |---|---|---|---|
 | API | `/deploy/railway/api/railway.toml` | `deploy/railway/api/Dockerfile` | `uvicorn apps.api.main:app --host 0.0.0.0 --port ${PORT:-8000}` |
-| Worker | `/deploy/railway/worker/railway.toml` | `deploy/railway/worker/Dockerfile` | `celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO` |
+| Worker | `/deploy/railway/worker/railway.toml` | `deploy/railway/worker/Dockerfile` | `/bin/sh -c "exec celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO --concurrency=${CELERY_WORKER_CONCURRENCY:-2}"` |
 
 Keep the GitHub source root at `/` for both services and set the service's **Config File Path** to the exact absolute path above. Railway config files are evaluated independently of a service root directory, so a nested configuration file must be explicitly selected in the Railway UI.[4]
 
@@ -580,18 +580,18 @@ The configuration source of truth is intentionally layered as follows.
 
 | Execution context | Authoritative start configuration | Effective concurrency | Rationale |
 |---|---|---:|---|
-| Railway Worker service | `deploy/railway/worker/railway.toml` `deploy.startCommand` | `${CELERY_WORKER_CONCURRENCY:-2}` | Railway `startCommand` overrides Dockerfile `CMD`; it must contain the production control. |
+| Railway Worker service | `deploy/railway/worker/railway.toml` `deploy.startCommand` | `/bin/sh -c` expands `${CELERY_WORKER_CONCURRENCY:-2}` before Celery starts | Railway runs a Dockerfile/image `startCommand` in exec form; the explicit shell prevents Celery from receiving the literal expression. |
 | Non-Railway container execution | `apps/worker/Dockerfile` `CMD` | `2` | Safe fallback when Railway config-as-code is not applied. |
 | Configuration contract | `apps/api/config.py` `CELERY_WORKER_CONCURRENCY` | Default `2`, valid range `1..8` | Bounded, reviewable non-secret capacity control. Invalid values fail settings validation rather than starting an oversized Worker. |
 
-`CELERY_WORKER_CONCURRENCY` is a **non-secret** variable. It is optional because the Railway command safely defaults to `2`, but setting it explicitly to `2` on the Worker service makes the production intent observable and removes ambiguity. Any increase above `2` is a capacity decision requiring a separate review and must remain within the validated upper bound of `8`.
+`CELERY_WORKER_CONCURRENCY` is a **non-secret** variable. The Railway Worker command explicitly invokes `/bin/sh -c`, so the shell resolves the optional value to `2` before Celery is called. Setting it explicitly to `2` on the Worker service makes the production intent observable and removes ambiguity. Any increase above `2` is a capacity decision requiring a separate review and must remain within the validated upper bound of `8`.
 
 ### Worker recovery validation contract
 
 | Verification | Expected result | Safe evidence |
 |---|---|---|
 | Railway config resolution | Service finds `/deploy/railway/worker/railway.toml`. | Railway deployment initialization succeeds. |
-| Effective command | Worker command includes `--concurrency=2` when variable is unset or explicitly `2`. | Sanitized deployment/startup log; no Secret values. |
+| Effective command | `/bin/sh -c` expands the variable and Celery receives `--concurrency=2` when it is unset or explicitly `2`; Celery never receives the literal `${CELERY_WORKER_CONCURRENCY:-2}` expression. | Sanitized deployment/startup log; no Secret values. |
 | Celery worker model | Celery logs `concurrency: 2 (prefork)` or equivalent. | Sanitized Worker startup log. |
 | Broker readiness | Worker connects to Redis and stays running. | Sanitized startup log and stable deployment status. |
 | OOM/crash-loop prevention | No repeated restarts after deployment. | Railway restart history and memory graph monitored by human. |
@@ -614,7 +614,7 @@ These steps must be performed by a human only after the recovery PR is approved.
 ### Drift prevention rules
 
 1. Do not switch a Railway service to `main` unless `main` first contains the exact config file path configured in Railway.
-2. Treat Railway `startCommand` as the primary production Worker command whenever it is configured; Dockerfile `CMD` is a fallback, not an override.
+2. Treat Railway `startCommand` as the primary production Worker command whenever it is configured; Dockerfile `CMD` is a fallback, not an override. For Dockerfile/image services, use an explicit shell wrapper whenever the command needs environment-variable expansion.
 3. Keep the Railway Worker configuration, Dockerfile fallback, Settings default, `.env.example`, tests, and Runbook aligned on a safe concurrency of `2`.
 4. Do not increase `CELERY_WORKER_CONCURRENCY` without memory measurement, queue-load evidence, and a separately reviewed capacity decision.
 5. Keep Worker restart policy and `worker_prefetch_multiplier=1` unchanged; they already limit per-worker task reservation and are outside this recovery change.
