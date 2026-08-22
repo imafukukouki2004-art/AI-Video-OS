@@ -9,6 +9,6 @@ watchPatterns = [
 ]
 
 [deploy]
-startCommand = "celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO"
+startCommand = "celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO --concurrency=${CELERY_WORKER_CONCURRENCY:-2}"
 restartPolicyType = "ALWAYS"
 restartPolicyMaxRetries = 5
