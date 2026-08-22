@@ -31,6 +31,14 @@ class PublicationRepository(
         )
         return result.scalars().all()
 
+    async def list_by_execution(self, execution_id: UUID) -> Sequence[Publication]:
+        result = await self.session.execute(
+            select(self.model)
+            .where(self.model.workflow_execution_id == execution_id)
+            .order_by(self.model.created_at)
+        )
+        return result.scalars().all()
+
     async def get_automatic(
         self,
         workflow_execution_id: UUID,
