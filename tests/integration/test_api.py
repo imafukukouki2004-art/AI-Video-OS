@@ -84,6 +84,27 @@ def test_ready_response_schema() -> None:
     }
 
 
+def test_public_legal_pages() -> None:
+    with TestClient(make_app()) as client:
+        privacy_response = client.get("/privacy")
+        terms_response = client.get("/terms")
+
+    assert privacy_response.status_code == 200
+    assert privacy_response.headers["content-type"].startswith("text/html")
+    assert "Privacy Policy" in privacy_response.text
+    assert "Google OAuth" in privacy_response.text
+    assert "Credentials are encrypted" in privacy_response.text
+    assert 'name="viewport"' in privacy_response.text
+
+    assert terms_response.status_code == 200
+    assert terms_response.headers["content-type"].startswith("text/html")
+    assert "Terms of Service" in terms_response.text
+    assert "Authorized account usage" in terms_response.text
+    assert "Prohibited misuse" in terms_response.text
+    assert "hello.koki.design@gmail.com" in terms_response.text
+    assert 'name="viewport"' in terms_response.text
+
+
 def test_ready_reports_database_failure() -> None:
     with TestClient(make_app(database_connected=False)) as client:
         response = client.get("/ready")
