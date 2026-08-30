@@ -132,7 +132,9 @@ async def test_openai_text_text_image_pipeline_reaches_storage_and_context() -> 
     }
     image_provider.client.images.generate.assert_awaited_once()
     image_call = image_provider.client.images.generate.await_args.kwargs
+    assert image_call["model"] == "gpt-image-2"
     assert image_call["prompt"] == "Illustrate Rewritten script"
+    assert image_call["quality"] == "auto"
     assert "response_format" not in image_call
     storage.upload.assert_awaited_once()
     artifact_repo.create.assert_awaited_once()

@@ -1,12 +1,14 @@
 """OpenAI AI provider implementation."""
 
 import base64
-from typing import Any
+from typing import Any, Literal, cast
 
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionMessageParam
 
 from apps.api.ai_providers.base import AIImageResponse, AIProvider, AIResponse
+
+ImageQuality = Literal["low", "medium", "high", "auto"]
 
 
 class OpenAIProvider(AIProvider):
@@ -45,10 +47,14 @@ class OpenAIProvider(AIProvider):
         )
 
     async def generate_image(self, prompt: str, **kwargs: Any) -> AIImageResponse:
-        """Generate an image using OpenAI DALL-E."""
-        model = kwargs.get("model", "dall-e-3")
+        """Generate an image using the OpenAI Image API."""
+        model = kwargs.get("model", "gpt-image-2")
         size = kwargs.get("size", "1024x1024")
-        quality = kwargs.get("quality", "standard")
+        requested_quality = kwargs.get("quality", "auto")
+        quality = cast(
+            ImageQuality,
+            "auto" if requested_quality == "standard" else requested_quality,
+        )
         background = kwargs.get("background")
 
         # If background is provided, append it to the prompt
@@ -76,6 +82,8 @@ class OpenAIProvider(AIProvider):
             },
         )
 
+        if not response.data:
+            raise ValueError("OpenAI Image API returned no image data")
         image_data = response.data[0]
         image_url = image_data.url
         image_bytes = base64.b64decode(image_data.b64_json) if image_data.b64_json else None

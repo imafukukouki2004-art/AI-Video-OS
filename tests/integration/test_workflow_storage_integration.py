@@ -92,7 +92,7 @@ async def test_workflow_runtime_image_generation_with_storage(runtime, mock_repo
     mock_ai_res = AIImageResponse(
         image_url=image_url,
         raw_response={},
-        metadata={"model": "dall-e-3"},
+        metadata={"model": "gpt-image-2"},
     )
 
     with patch("apps.api.ai_providers.factory.AIProviderFactory.create") as mock_factory:
