@@ -1,5 +1,6 @@
 """OpenAI AI provider implementation."""
 
+import base64
 from typing import Any
 
 from openai import AsyncOpenAI
@@ -48,7 +49,6 @@ class OpenAIProvider(AIProvider):
         model = kwargs.get("model", "dall-e-3")
         size = kwargs.get("size", "1024x1024")
         quality = kwargs.get("quality", "standard")
-        response_format = kwargs.get("response_format", "url")
         background = kwargs.get("background")
 
         # If background is provided, append it to the prompt
@@ -60,7 +60,6 @@ class OpenAIProvider(AIProvider):
             prompt=prompt,
             size=size,
             quality=quality,
-            response_format=response_format,
             n=1,
             **{
                 k: v
@@ -78,12 +77,8 @@ class OpenAIProvider(AIProvider):
         )
 
         image_data = response.data[0]
-        image_url = image_data.url if response_format == "url" else None
-        image_bytes = None
-        if response_format == "b64_json" and image_data.b64_json:
-            import base64
-
-            image_bytes = base64.b64decode(image_data.b64_json)
+        image_url = image_data.url
+        image_bytes = base64.b64decode(image_data.b64_json) if image_data.b64_json else None
 
         return AIImageResponse(
             image_url=image_url,
