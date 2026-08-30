@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -42,6 +43,7 @@ async def test_openai_provider_generate_image():
     mock_client = MagicMock()
     mock_image_data = MagicMock()
     mock_image_data.url = "https://example.com/image.png"
+    mock_image_data.b64_json = None
     mock_image_data.revised_prompt = "A cute cat"
     mock_response = MagicMock()
     mock_response.data = [mock_image_data]
@@ -63,6 +65,28 @@ async def test_openai_provider_generate_image():
         assert kwargs["prompt"] == "A cat"
         assert kwargs["size"] == "512x512"
         assert kwargs["quality"] == "hd"
+        assert "response_format" not in kwargs
+
+
+@pytest.mark.asyncio
+async def test_openai_provider_decodes_base64_without_sending_response_format():
+    mock_client = MagicMock()
+    mock_image_data = MagicMock(
+        url=None,
+        b64_json=base64.b64encode(b"generated-image").decode(),
+        revised_prompt="A generated cat",
+    )
+    mock_response = MagicMock(data=[mock_image_data])
+    mock_client.images.generate = AsyncMock(return_value=mock_response)
+
+    with patch("apps.api.ai_providers.openai.AsyncOpenAI", return_value=mock_client):
+        provider = OpenAIProvider(api_key="sk-test")
+        response = await provider.generate_image("A cat", response_format="b64_json")
+
+    assert response.image_url is None
+    assert response.image_bytes == b"generated-image"
+    _, kwargs = mock_client.images.generate.call_args
+    assert "response_format" not in kwargs
 
 
 def test_openai_provider_factory_integration():
