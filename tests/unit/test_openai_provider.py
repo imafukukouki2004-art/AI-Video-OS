@@ -52,7 +52,7 @@ async def test_openai_provider_generate_image():
 
     with patch("apps.api.ai_providers.openai.AsyncOpenAI", return_value=mock_client):
         provider = OpenAIProvider(api_key="sk-test")
-        response = await provider.generate_image("A cat", size="512x512", quality="hd")
+        response = await provider.generate_image("A cat", size="1024x1024", quality="high")
 
         assert isinstance(response, AIImageResponse)
         assert response.image_url == "https://example.com/image.png"
@@ -62,14 +62,15 @@ async def test_openai_provider_generate_image():
         # Verify arguments sent to OpenAI
         mock_client.images.generate.assert_called_once()
         _, kwargs = mock_client.images.generate.call_args
+        assert kwargs["model"] == "gpt-image-2"
         assert kwargs["prompt"] == "A cat"
-        assert kwargs["size"] == "512x512"
-        assert kwargs["quality"] == "hd"
+        assert kwargs["size"] == "1024x1024"
+        assert kwargs["quality"] == "high"
         assert "response_format" not in kwargs
 
 
 @pytest.mark.asyncio
-async def test_openai_provider_decodes_base64_without_sending_response_format():
+async def test_openai_provider_decodes_base64_and_normalizes_legacy_quality():
     mock_client = MagicMock()
     mock_image_data = MagicMock(
         url=None,
@@ -81,11 +82,15 @@ async def test_openai_provider_decodes_base64_without_sending_response_format():
 
     with patch("apps.api.ai_providers.openai.AsyncOpenAI", return_value=mock_client):
         provider = OpenAIProvider(api_key="sk-test")
-        response = await provider.generate_image("A cat", response_format="b64_json")
+        response = await provider.generate_image(
+            "A cat", response_format="b64_json", quality="standard"
+        )
 
     assert response.image_url is None
     assert response.image_bytes == b"generated-image"
     _, kwargs = mock_client.images.generate.call_args
+    assert kwargs["model"] == "gpt-image-2"
+    assert kwargs["quality"] == "auto"
     assert "response_format" not in kwargs
 
 

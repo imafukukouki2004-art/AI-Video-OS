@@ -88,7 +88,7 @@ async def test_workflow_runtime_image_generation_flow(repositories):
         mock_ai_res = AIImageResponse(
             image_url="https://example.com/temp.png",
             mime_type="image/png",
-            metadata={"provider": "openai", "model": "dall-e-3"},
+            metadata={"provider": "openai", "model": "gpt-image-2"},
         )
 
         with (
