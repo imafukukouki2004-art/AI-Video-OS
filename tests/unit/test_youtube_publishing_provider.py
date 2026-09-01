@@ -1,5 +1,6 @@
 """Unit tests for the YouTube Publishing Provider boundary."""
 
+import json
 from datetime import UTC, datetime
 from io import BytesIO
 from typing import Literal
@@ -7,6 +8,9 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
+from google.auth.exceptions import RefreshError
+from googleapiclient.errors import HttpError
+from httplib2 import Response
 from pydantic import SecretStr
 
 from apps.api.assets.models import Asset
@@ -207,6 +211,79 @@ async def test_sdk_exception_is_normalized_without_exposing_details() -> None:
 
     assert raised.value.code == "YOUTUBE_UPLOAD_ERROR"
     assert "sensitive" not in raised.value.safe_message
+    assert raised.value.metadata == {
+        "provider": "youtube",
+        "stage": "upload_execute",
+        "error_category": "unexpected_sdk_error",
+        "exception_class": "Exception",
+    }
+    assert "sensitive" not in str(raised.value.metadata)
+
+
+@pytest.mark.asyncio
+async def test_http_error_preserves_only_allowlisted_diagnostics() -> None:
+    http_error = HttpError(
+        Response({"status": "403", "reason": "Forbidden"}),
+        json.dumps(
+            {
+                "error": {
+                    "code": 403,
+                    "status": "PERMISSION_DENIED",
+                    "message": "access-token-sensitive-message",
+                    "errors": [
+                        {
+                            "reason": "insufficientPermissions",
+                            "message": "refresh-token-sensitive-message",
+                        }
+                    ],
+                }
+            }
+        ).encode(),
+        uri="https://youtube.example/upload?access_token=sensitive",
+    )
+    provider, _, _ = provider_with_response(None, error=http_error)
+
+    with pytest.raises(YouTubeUploadError) as raised:
+        await provider.publish(video_asset(), title="Title", description=None)
+
+    assert raised.value.metadata == {
+        "provider": "youtube",
+        "stage": "upload_execute",
+        "error_category": "google_http_error",
+        "exception_class": "HttpError",
+        "http_status": 403,
+        "google_code": "PERMISSION_DENIED",
+        "google_reason": "insufficientPermissions",
+    }
+    assert "sensitive" not in str(raised.value.metadata)
+
+
+@pytest.mark.asyncio
+async def test_refresh_error_is_classified_without_retaining_message() -> None:
+    provider, _, _ = provider_with_response(
+        None,
+        error=RefreshError(
+            "refresh-token-sensitive-message",
+            {
+                "error": "invalid_grant",
+                "error_description": "client-secret-sensitive-description",
+            },
+            retryable=True,
+        ),
+    )
+
+    with pytest.raises(YouTubeUploadError) as raised:
+        await provider.publish(video_asset(), title="Title", description=None)
+
+    assert raised.value.metadata == {
+        "provider": "youtube",
+        "stage": "token_refresh",
+        "error_category": "oauth_refresh_error",
+        "exception_class": "RefreshError",
+        "retryable": True,
+        "google_code": "invalid_grant",
+    }
+    assert "sensitive" not in str(raised.value.metadata)
 
 
 @pytest.mark.asyncio

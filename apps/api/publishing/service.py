@@ -184,6 +184,7 @@ class PublishingService:
                 PublicationUpdate(
                     error_code=error.code,
                     error_message=error.safe_message,
+                    provider_metadata=error.metadata,
                 ),
             )
             raise ApplicationError(

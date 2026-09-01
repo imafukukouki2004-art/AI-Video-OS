@@ -259,7 +259,15 @@ async def test_service_persists_specific_safe_youtube_error() -> None:
     service, publication_repo, _, resolver = make_service(asset)
     publication_repo.get_by_id.return_value = publication
     provider = AsyncMock(spec=PublishingProvider)
-    provider.publish.side_effect = YouTubeUploadError()
+    safe_metadata = {
+        "provider": "youtube",
+        "stage": "upload_execute",
+        "error_category": "google_http_error",
+        "exception_class": "HttpError",
+        "http_status": 403,
+        "google_reason": "insufficientPermissions",
+    }
+    provider.publish.side_effect = YouTubeUploadError(safe_metadata)
     resolver.resolve = Mock(return_value=provider)
 
     async def transition(publication_id, from_status, to_status, schema):
@@ -277,3 +285,4 @@ async def test_service_persists_specific_safe_youtube_error() -> None:
     assert publication.status is PublicationStatus.FAILED
     assert publication.error_code == "YOUTUBE_UPLOAD_ERROR"
     assert publication.error_message == "YouTube could not upload the video."
+    assert publication.provider_metadata == safe_metadata

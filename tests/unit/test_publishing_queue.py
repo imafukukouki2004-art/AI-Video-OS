@@ -1,7 +1,7 @@
 """Publishing queue, scheduling, atomic lifecycle, and worker tests."""
 
 from datetime import UTC, datetime, timedelta, timezone
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
@@ -219,9 +219,17 @@ async def test_queued_provider_failure_persists_failed_and_is_not_retried() -> N
     assets = AsyncMock(spec=AssetRepository)
     assets.get_by_id.return_value = asset
     provider = AsyncMock()
+    safe_metadata = {
+        "provider": "youtube",
+        "stage": "upload_execute",
+        "error_category": "google_http_error",
+        "exception_class": "HttpError",
+        "http_status": 403,
+    }
     provider.publish.side_effect = PublishingProviderError(
         "MOCK_PROVIDER_FAILURE",
         "The mock provider could not publish the asset.",
+        metadata=safe_metadata,
     )
     service = PublishingService(
         repository,
@@ -229,11 +237,20 @@ async def test_queued_provider_failure_persists_failed_and_is_not_retried() -> N
         PublishingProviderResolver({"mock": provider}),
     )
 
-    first = await _run_publication(service, publication.id)
-    second = await _run_publication(service, publication.id)
+    structured_logger = Mock()
+    with patch("apps.worker.tasks.get_logger", return_value=structured_logger):
+        first = await _run_publication(service, publication.id)
+        second = await _run_publication(service, publication.id)
 
     assert first == {"status": "failed", "error": "MOCK_PROVIDER_FAILURE"}
     assert second["status"] == "failed"
     assert publication.status is PublicationStatus.FAILED
     assert publication.error_code == "MOCK_PROVIDER_FAILURE"
+    assert publication.provider_metadata == safe_metadata
     provider.publish.assert_awaited_once()
+    structured_logger.warning.assert_called_once_with(
+        "publishing_worker_failed",
+        publication_id=str(publication.id),
+        error_code="MOCK_PROVIDER_FAILURE",
+        provider_metadata=safe_metadata,
+    )
