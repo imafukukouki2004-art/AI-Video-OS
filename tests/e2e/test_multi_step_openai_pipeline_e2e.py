@@ -1,5 +1,6 @@
 """End-to-end runtime pipeline with the OpenAI SDK boundary mocked."""
 
+import base64
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
 
@@ -101,7 +102,11 @@ async def test_openai_text_text_image_pipeline_reaches_storage_and_context() -> 
     image_provider.client = MagicMock()
     image_response = MagicMock()
     image_response.data = [
-        MagicMock(url="https://provider.test/image.png", b64_json=None, revised_prompt=None)
+        MagicMock(
+            url=None,
+            b64_json=base64.b64encode(b"openai-image").decode(),
+            revised_prompt=None,
+        )
     ]
     image_provider.client.images.generate = AsyncMock(return_value=image_response)
     context = WorkflowContext()
@@ -127,7 +132,10 @@ async def test_openai_text_text_image_pipeline_reaches_storage_and_context() -> 
     }
     image_provider.client.images.generate.assert_awaited_once()
     image_call = image_provider.client.images.generate.await_args.kwargs
+    assert image_call["model"] == "gpt-image-2"
     assert image_call["prompt"] == "Illustrate Rewritten script"
+    assert image_call["quality"] == "auto"
+    assert "response_format" not in image_call
     storage.upload.assert_awaited_once()
     artifact_repo.create.assert_awaited_once()
     asset_repo.create.assert_awaited_once()

@@ -8,6 +8,7 @@ from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
+    ProjectRepository,
     WorkflowArtifactRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -16,11 +17,14 @@ from apps.api.services.validation_runner import ValidationRunner
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.storage import ObjectStorage
 
+PROJECT_ID = uuid4()
+
 
 @pytest.fixture
 def mock_deps():
-    return {
+    dependencies = {
         "workflow_runtime_service": MagicMock(spec=WorkflowRuntimeService),
+        "project_repository": MagicMock(spec=ProjectRepository),
         "workflow_repository": MagicMock(spec=WorkflowRepository),
         "step_repository": MagicMock(spec=WorkflowStepRepository),
         "artifact_repository": MagicMock(spec=WorkflowArtifactRepository),
@@ -28,6 +32,8 @@ def mock_deps():
         "publication_repository": MagicMock(spec=PublicationRepository),
         "storage": MagicMock(spec=ObjectStorage),
     }
+    dependencies["project_repository"].get_by_id = AsyncMock(return_value=MagicMock(id=PROJECT_ID))
+    return dependencies
 
 
 @pytest.mark.asyncio
@@ -46,7 +52,7 @@ async def test_validation_runner_workflow_failure(mock_deps):
             }
         )
 
-        result = await runner.run_production_e2e({})
+        result = await runner.run_production_e2e({"project_id": PROJECT_ID})
         assert result["validation_result"] == "FAILED"
         assert result["error"] == "Runtime failed"
 
@@ -66,7 +72,7 @@ async def test_validation_runner_invalid_execution_id(mock_deps):
             }
         )
 
-        result = await runner.run_production_e2e({})
+        result = await runner.run_production_e2e({"project_id": PROJECT_ID})
         assert result["validation_result"] == "FAILED"
         assert "Invalid execution ID" in result["error"]
 
@@ -88,7 +94,7 @@ async def test_validation_runner_video_asset_not_found(mock_deps):
         )
 
         with patch.object(runner, "_get_video_asset_id", return_value=None):
-            result = await runner.run_production_e2e({})
+            result = await runner.run_production_e2e({"project_id": PROJECT_ID})
             assert result["validation_result"] == "FAILED"
             assert "Video asset not found" in result["error"]
 
@@ -115,7 +121,7 @@ async def test_validation_runner_visual_validation_fails(mock_deps):
                 "_perform_visual_validation",
                 return_value={"valid": False, "reason": "Black frames detected"},
             ):
-                result = await runner.run_production_e2e({})
+                result = await runner.run_production_e2e({"project_id": PROJECT_ID})
                 assert result["validation_result"] == "FAILED"
                 assert result["visual_validation"]["reason"] == "Black frames detected"
 
@@ -144,7 +150,7 @@ async def test_validation_runner_publication_not_found(mock_deps):
             ):
                 mock_deps["publication_repository"].list_by_execution = AsyncMock(return_value=[])
 
-                result = await runner.run_production_e2e({})
+                result = await runner.run_production_e2e({"project_id": PROJECT_ID})
                 assert result["validation_result"] == "FAILED"
                 assert "Publication record not found" in result["error"]
 
@@ -183,7 +189,7 @@ async def test_validation_runner_publication_failed_status(mock_deps):
                     "apps.api.services.validation_runner.asyncio.sleep",
                     new_callable=AsyncMock,
                 ):
-                    result = await runner.run_production_e2e({})
+                    result = await runner.run_production_e2e({"project_id": PROJECT_ID})
                     assert result["validation_result"] == "FAILED"
                     assert "YouTube API quota exceeded" in result["error"]
 
@@ -196,6 +202,7 @@ async def test_validation_runner_exception_handling(mock_deps):
             side_effect=Exception("DB Connection Error")
         )
 
-        result = await runner.run_production_e2e({})
+        result = await runner.run_production_e2e({"project_id": PROJECT_ID})
         assert result["validation_result"] == "FAILED"
-        assert "DB Connection Error" in result["error"]
+        assert result["error_code"] == "PRODUCTION_E2E_VALIDATION_ERROR"
+        assert "DB Connection Error" not in result["error"]

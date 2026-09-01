@@ -11,14 +11,16 @@ RUN apt-get update \
     && apt-get install --yes --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd --system worker && useradd --system --gid worker --create-home worker
+RUN groupadd --system worker \
+    && useradd --system --gid worker --create-home worker
 
 COPY pyproject.toml README.md ./
 COPY apps/__init__.py apps/__init__.py
 COPY apps/api apps/api
 COPY apps/worker apps/worker
+
 RUN pip install --no-cache-dir .
 
 USER worker
 
-CMD ["celery", "-A", "apps.worker.celery_app:celery_app", "worker", "--loglevel=INFO", "--concurrency=2"]
+CMD ["celery", "-A", "apps.worker.celery_app:celery_app", "worker", "--loglevel=INFO"]

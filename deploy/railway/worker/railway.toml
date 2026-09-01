@@ -1,0 +1,14 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "deploy/railway/worker/Dockerfile"
+watchPatterns = [
+  "apps/api/**",
+  "apps/worker/**",
+  "pyproject.toml",
+  "deploy/railway/worker/**",
+]
+
+[deploy]
+startCommand = "/bin/sh -c \"exec celery -A apps.worker.celery_app:celery_app worker --loglevel=INFO --concurrency=${CELERY_WORKER_CONCURRENCY:-2}\""
+restartPolicyType = "ALWAYS"
+restartPolicyMaxRetries = 5

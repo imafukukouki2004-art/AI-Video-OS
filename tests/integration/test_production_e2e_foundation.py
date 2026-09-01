@@ -7,6 +7,7 @@ import pytest
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
+    ProjectRepository,
     WorkflowArtifactRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -33,10 +34,14 @@ async def test_production_e2e_foundation_flow_success(mock_repositories):
     """
     mock_runtime_service = MagicMock(spec=WorkflowRuntimeService)
     mock_storage = MagicMock(spec=ObjectStorage)
+    project_id = uuid4()
+    project_repository = MagicMock(spec=ProjectRepository)
+    project_repository.get_by_id = AsyncMock(return_value=MagicMock(id=project_id))
 
     with patch.dict(os.environ, {"AI_VIDEO_OS_RUN_PRODUCTION_E2E": "true"}):
         runner = ValidationRunner(
             workflow_runtime_service=mock_runtime_service,
+            project_repository=project_repository,
             workflow_repository=mock_repositories["workflow"],
             step_repository=mock_repositories["step"],
             artifact_repository=MagicMock(spec=WorkflowArtifactRepository),
@@ -76,7 +81,7 @@ async def test_production_e2e_foundation_flow_success(mock_repositories):
                 )
 
                 # Execute
-                report = await runner.run_production_e2e({})
+                report = await runner.run_production_e2e({"project_id": project_id})
 
                 # Assertions
                 assert report["validation_result"] == "SUCCESS"

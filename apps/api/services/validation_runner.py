@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import UTC, datetime
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from apps.api.domain.models import Workflow
 from apps.api.domain.schemas import WorkflowCreate, WorkflowStepCreate
@@ -11,6 +11,7 @@ from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
+    ProjectRepository,
     WorkflowArtifactRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -28,6 +29,7 @@ class ValidationRunner:
     def __init__(
         self,
         workflow_runtime_service: WorkflowRuntimeService,
+        project_repository: ProjectRepository,
         workflow_repository: WorkflowRepository,
         step_repository: WorkflowStepRepository,
         artifact_repository: WorkflowArtifactRepository,
@@ -36,6 +38,7 @@ class ValidationRunner:
         storage: ObjectStorage,
     ) -> None:
         self.workflow_runtime_service = workflow_runtime_service
+        self.project_repository = project_repository
         self.workflow_repository = workflow_repository
         self.step_repository = step_repository
         self.artifact_repository = artifact_repository
@@ -140,23 +143,26 @@ class ValidationRunner:
 
             return report
 
-        except Exception as e:
-            logger.exception("Production E2E Validation failed with unexpected error")
-            report["error"] = str(e)
+        except Exception as error:
+            logger.error(
+                "Production E2E Validation failed with unexpected error type: %s",
+                type(error).__name__,
+            )
+            report["error_code"] = "PRODUCTION_E2E_VALIDATION_ERROR"
+            report["error"] = "Production E2E validation failed unexpectedly"
             return report
 
     async def _setup_validation_workflow(self, config: dict[str, Any]) -> Workflow:
         """Create a workflow configured for production E2E validation."""
+        project_id = await self._get_existing_project_id(config)
         workflow_in = WorkflowCreate(
             name=f"Production E2E Validation {datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
             workflow_type="production_validation",
-            project_id=uuid4(),  # Placeholder project ID
+            project_id=project_id,
             config={
                 "auto_publish": True,
-                "publishing_config": {
-                    "provider": "youtube",
-                    "privacyStatus": "private",  # Force private
-                },
+                "provider": "youtube",
+                "publication_title": "AI Video OS Production E2E Validation",
             },
         )
         workflow = await self.workflow_repository.create(workflow_in)
@@ -206,6 +212,21 @@ class ValidationRunner:
 
         return workflow
 
+    async def _get_existing_project_id(self, config: dict[str, Any]) -> UUID:
+        """Require an explicitly selected Project that already exists in the target DB."""
+        raw_project_id = config.get("project_id")
+        try:
+            project_id = (
+                raw_project_id if isinstance(raw_project_id, UUID) else UUID(raw_project_id)
+            )
+        except (TypeError, ValueError, AttributeError) as error:
+            raise ValueError("A valid existing project_id is required") from error
+
+        project = await self.project_repository.get_by_id(project_id)
+        if project is None:
+            raise ValueError("The configured project_id does not exist")
+        return project_id
+
     async def _get_video_asset_id(self, execution_id: UUID) -> UUID | None:
         """Find the video asset ID for a given execution."""
         artifacts = await self.artifact_repository.list_by_execution(execution_id)
@@ -247,6 +268,6 @@ class ValidationRunner:
 
                 valid, reason = self.visual_validator.is_not_black_or_blank(temp_image)
                 return {"valid": valid, "reason": reason}
-            except Exception as e:
-                logger.error(f"Visual validation failed: {e!s}")
-                return {"valid": False, "reason": str(e)}
+            except Exception as error:
+                logger.error("Visual validation failed with error type: %s", type(error).__name__)
+                return {"valid": False, "reason": "Visual validation failed"}

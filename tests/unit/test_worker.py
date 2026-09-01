@@ -22,6 +22,7 @@ def test_celery_application_uses_redis_and_safe_defaults() -> None:
     assert app.conf.task_acks_late is True
     assert app.conf.worker_prefetch_multiplier == 1
     assert app.conf.broker_connection_retry_on_startup is True
+    assert Settings(_env_file=None).celery_worker_concurrency == 2
 
 
 def test_foundation_task_is_registered_with_retry_policy() -> None:

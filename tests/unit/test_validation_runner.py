@@ -4,10 +4,12 @@ from uuid import uuid4
 
 import pytest
 
+from apps.api.publishing.automatic import AutomaticPublishingConfig
 from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
 from apps.api.repositories.sqlalchemy import (
     AssetRepository,
+    ProjectRepository,
     WorkflowArtifactRepository,
     WorkflowRepository,
     WorkflowStepRepository,
@@ -16,11 +18,14 @@ from apps.api.services.validation_runner import ValidationRunner
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.storage import ObjectStorage
 
+PROJECT_ID = uuid4()
+
 
 @pytest.fixture
 def mock_deps():
-    return {
+    dependencies = {
         "workflow_runtime_service": MagicMock(spec=WorkflowRuntimeService),
+        "project_repository": MagicMock(spec=ProjectRepository),
         "workflow_repository": MagicMock(spec=WorkflowRepository),
         "step_repository": MagicMock(spec=WorkflowStepRepository),
         "artifact_repository": MagicMock(spec=WorkflowArtifactRepository),
@@ -28,6 +33,8 @@ def mock_deps():
         "publication_repository": MagicMock(spec=PublicationRepository),
         "storage": MagicMock(spec=ObjectStorage),
     }
+    dependencies["project_repository"].get_by_id = AsyncMock(return_value=MagicMock(id=PROJECT_ID))
+    return dependencies
 
 
 @pytest.mark.asyncio
@@ -49,11 +56,29 @@ async def test_validation_runner_enforces_private_status(mock_deps):
         mock_deps["workflow_repository"].create = AsyncMock(return_value=mock_workflow)
         mock_deps["step_repository"].create = AsyncMock()
 
-        await runner._setup_validation_workflow({})
+        await runner._setup_validation_workflow({"project_id": PROJECT_ID})
 
         args, _ = mock_deps["workflow_repository"].create.call_args
         workflow_in = args[0]
-        assert workflow_in.config["publishing_config"]["privacyStatus"] == "private"
+        assert workflow_in.project_id == PROJECT_ID
+        assert workflow_in.config["auto_publish"] is True
+        assert workflow_in.config["provider"] == "youtube"
+        assert "publishing_config" not in workflow_in.config
+        publishing_config = AutomaticPublishingConfig.model_validate(workflow_in.config)
+        assert publishing_config.auto_publish is True
+        assert publishing_config.provider == "youtube"
+
+
+@pytest.mark.asyncio
+async def test_validation_runner_requires_existing_project_before_writes(mock_deps):
+    runner = ValidationRunner(**mock_deps)
+    mock_deps["project_repository"].get_by_id = AsyncMock(return_value=None)
+
+    with pytest.raises(ValueError, match="does not exist"):
+        await runner._setup_validation_workflow({"project_id": PROJECT_ID})
+
+    mock_deps["workflow_repository"].create.assert_not_called()
+    mock_deps["step_repository"].create.assert_not_called()
 
 
 @pytest.mark.asyncio
@@ -82,6 +107,6 @@ async def test_validation_runner_rejects_non_private(mock_deps):
                     return_value=[mock_pub]
                 )
 
-                result = await runner.run_production_e2e({})
+                result = await runner.run_production_e2e({"project_id": PROJECT_ID})
                 assert result["validation_result"] == "FAILED"
                 assert "privacyStatus is 'public'" in result["error"]
