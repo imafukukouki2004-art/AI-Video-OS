@@ -204,7 +204,8 @@ class ValidationRunner:
             step_type="video_render",
             order=3,
             config={
-                "image_source": f"{{{{{image_step.id}.image}}}}",
+                "operation": "video_render",
+                "input_asset": f"{{{{{image_step.id}.asset}}}}",
                 "duration": 5,
             },
         )

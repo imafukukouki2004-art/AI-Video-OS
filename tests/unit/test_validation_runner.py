@@ -4,6 +4,7 @@ from uuid import uuid4
 
 import pytest
 
+from apps.api.domain.models import Workflow, WorkflowStep
 from apps.api.publishing.automatic import AutomaticPublishingConfig
 from apps.api.publishing.models import PublicationStatus
 from apps.api.publishing.repository import PublicationRepository
@@ -17,6 +18,7 @@ from apps.api.repositories.sqlalchemy import (
 from apps.api.services.validation_runner import ValidationRunner
 from apps.api.services.workflow_runtime import WorkflowRuntimeService
 from apps.api.storage import ObjectStorage
+from apps.api.workflow.validator import WorkflowValidator
 
 PROJECT_ID = uuid4()
 
@@ -67,6 +69,39 @@ async def test_validation_runner_enforces_private_status(mock_deps):
         publishing_config = AutomaticPublishingConfig.model_validate(workflow_in.config)
         assert publishing_config.auto_publish is True
         assert publishing_config.provider == "youtube"
+
+
+@pytest.mark.asyncio
+async def test_validation_runner_builds_runtime_compatible_video_dependency(mock_deps):
+    workflow_id = uuid4()
+    workflow = Workflow(
+        id=workflow_id,
+        project_id=PROJECT_ID,
+        workflow_type="production_validation",
+        config={},
+    )
+    created_steps: list[WorkflowStep] = []
+
+    async def create_step(step_in):
+        step = WorkflowStep(id=uuid4(), **step_in.model_dump())
+        created_steps.append(step)
+        return step
+
+    mock_deps["workflow_repository"].create = AsyncMock(return_value=workflow)
+    mock_deps["step_repository"].create = AsyncMock(side_effect=create_step)
+
+    runner = ValidationRunner(**mock_deps)
+    await runner._setup_validation_workflow({"project_id": PROJECT_ID})
+
+    image_step = created_steps[1]
+    video_step = created_steps[2]
+    assert video_step.config["operation"] == "video_render"
+    assert video_step.config["input_asset"] == f"{{{{{image_step.id}.asset}}}}"
+    assert "image_source" not in video_step.config
+
+    validation = await WorkflowValidator().validate(workflow, created_steps)
+    assert validation.valid is True
+    assert validation.errors == []
 
 
 @pytest.mark.asyncio
