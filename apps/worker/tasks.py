@@ -10,6 +10,7 @@ from apps.api.config import get_settings
 from apps.api.database.manager import Database
 from apps.api.domain.models import WorkflowExecutionStatus
 from apps.api.errors.exceptions import ApplicationError
+from apps.api.logging import get_logger
 from apps.api.publishing.automatic import AutomaticPublishingCoordinator
 from apps.api.publishing.connection_repository import (
     PublishingConnectionRepository,
@@ -132,6 +133,16 @@ async def _run_publication(
         publication = await service.publish_queued(publication_id)
     except ApplicationError as error:
         await service.fail_queued_or_publishing(publication_id)
+        failed_publication = await service.get_by_id(publication_id)
+        provider_metadata = (
+            failed_publication.provider_metadata if failed_publication is not None else {}
+        )
+        get_logger().warning(
+            "publishing_worker_failed",
+            publication_id=str(publication_id),
+            error_code=error.code,
+            provider_metadata=provider_metadata,
+        )
         logger.warning(
             "Publishing worker could not complete publication %s: %s",
             publication_id,

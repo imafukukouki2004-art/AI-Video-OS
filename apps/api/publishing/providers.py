@@ -7,6 +7,8 @@ from typing import Any
 
 from apps.api.assets.models import Asset
 
+ProviderErrorMetadata = dict[str, str | int | bool]
+
 
 @dataclass(frozen=True)
 class PublishingResponse:
@@ -34,10 +36,17 @@ class PublishingProvider(ABC):
 class PublishingProviderError(Exception):
     """Provider failure with a stable code and safe public message."""
 
-    def __init__(self, code: str, safe_message: str) -> None:
+    def __init__(
+        self,
+        code: str,
+        safe_message: str,
+        *,
+        metadata: ProviderErrorMetadata | None = None,
+    ) -> None:
         super().__init__(safe_message)
         self.code = code
         self.safe_message = safe_message
+        self.metadata = dict(metadata or {})
 
 
 class MockPublishingProvider(PublishingProvider):
