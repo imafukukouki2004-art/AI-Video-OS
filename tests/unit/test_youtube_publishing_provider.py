@@ -259,6 +259,42 @@ async def test_http_error_preserves_only_allowlisted_diagnostics() -> None:
 
 
 @pytest.mark.asyncio
+async def test_request_construction_http_error_records_safe_stage_and_status() -> None:
+    http_error = HttpError(
+        Response({"status": "400", "reason": "Bad Request"}),
+        json.dumps(
+            {
+                "error": {
+                    "status": "INVALID_ARGUMENT",
+                    "message": "authorization-header-sensitive-message",
+                    "errors": [{"reason": "badRequest"}],
+                }
+            }
+        ).encode(),
+        uri="https://youtube.example/upload?access_token=sensitive",
+    )
+    provider = YouTubePublishingProvider(
+        storage_returning(),
+        credentials(),
+        client_factory=Mock(side_effect=http_error),
+    )
+
+    with pytest.raises(YouTubeUploadError) as raised:
+        await provider.publish(video_asset(), title="Title", description=None)
+
+    assert raised.value.metadata == {
+        "provider": "youtube",
+        "stage": "request_construction",
+        "error_category": "google_http_error",
+        "exception_class": "HttpError",
+        "http_status": 400,
+        "google_code": "INVALID_ARGUMENT",
+        "google_reason": "badRequest",
+    }
+    assert "sensitive" not in str(raised.value.metadata)
+
+
+@pytest.mark.asyncio
 async def test_refresh_error_is_classified_without_retaining_message() -> None:
     provider, _, _ = provider_with_response(
         None,
