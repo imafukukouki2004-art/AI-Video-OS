@@ -13,7 +13,7 @@ def create_celery_app(settings: Settings | None = None) -> Celery:
         "ai-video-os-worker",
         broker=application_settings.celery_broker_url.get_secret_value(),
         backend=application_settings.celery_result_backend.get_secret_value(),
-        include=["apps.worker.tasks"],
+        include=["apps.worker.tasks", "apps.worker.preflight"],
     )
     app.conf.update(
         accept_content=["json"],
