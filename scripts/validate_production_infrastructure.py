@@ -11,6 +11,7 @@ import asyncio
 import json
 import os
 import sys
+from uuid import UUID
 from dataclasses import asdict, dataclass
 from typing import Literal
 from uuid import uuid4
@@ -19,11 +20,21 @@ import httpx
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from pydantic import ValidationError
-from sqlalchemy import text
+from sqlalchemy import select, text
 
 from apps.api.cache import RedisManager
 from apps.api.config import Settings
 from apps.api.database import Database
+from apps.api.domain.models import Project
+from apps.api.publishing.connection_repository import (
+    PublishingConnectionRepository,
+    PublishingCredentialRepository,
+)
+from apps.api.publishing.credentials import (
+    CredentialCipher,
+    CredentialResolutionError,
+    YouTubeCredentialResolver,
+)
 from apps.api.storage import S3ObjectStorage
 
 CheckStatus = Literal[
@@ -33,6 +44,7 @@ CheckStatus = Literal[
     "FAIL",
     "SKIPPED",
     "UNSAFE",
+    "NOT_CHECKABLE",
 ]
 
 _FALSE_VALUES = {"", "0", "false", "no", "off"}
@@ -248,12 +260,114 @@ async def _storage_probe(
     return results
 
 
+async def _project_result(database: Database, project_id_raw: str | None) -> ValidationResult:
+    """Verify the explicitly selected Production E2E Project exists without mutation."""
+
+    if not project_id_raw:
+        return ValidationResult(
+            "PRODUCTION_E2E_PROJECT",
+            "FAIL",
+            "AI_VIDEO_OS_PRODUCTION_E2E_PROJECT_ID is required",
+        )
+    try:
+        project_id = UUID(project_id_raw)
+    except ValueError:
+        return ValidationResult("PRODUCTION_E2E_PROJECT", "FAIL", "Project ID is not a UUID")
+
+    try:
+        async with database.session_factory() as session:
+            project = await session.scalar(select(Project).where(Project.id == project_id))
+    except Exception as error:
+        return ValidationResult(
+            "PRODUCTION_E2E_PROJECT",
+            "FAIL",
+            f"Project lookup failed ({type(error).__name__})",
+        )
+    return ValidationResult(
+        "PRODUCTION_E2E_PROJECT",
+        "PASS" if project is not None else "FAIL",
+        "existing Project found" if project is not None else "Project not found",
+    )
+
+
+async def _youtube_credential_result(database: Database, settings: Settings) -> ValidationResult:
+    """Verify an active encrypted YouTube credential can be resolved without contacting Google."""
+
+    try:
+        async with database.session_factory() as session:
+            resolver = YouTubeCredentialResolver(
+                PublishingConnectionRepository(session),
+                PublishingCredentialRepository(session),
+                CredentialCipher(settings.youtube_credential_encryption_key),
+                settings.youtube_client_id,
+                settings.youtube_client_secret,
+            )
+            credential = await resolver.resolve()
+    except CredentialResolutionError:
+        return ValidationResult(
+            "YOUTUBE_OAUTH_CREDENTIAL",
+            "FAIL",
+            "active credential exists but cannot be resolved",
+        )
+    except Exception as error:
+        return ValidationResult(
+            "YOUTUBE_OAUTH_CREDENTIAL",
+            "FAIL",
+            f"credential check failed ({type(error).__name__})",
+        )
+    if credential is None:
+        return ValidationResult(
+            "YOUTUBE_OAUTH_CREDENTIAL",
+            "FAIL",
+            "no active connected YouTube credential",
+        )
+    return ValidationResult(
+        "YOUTUBE_OAUTH_CREDENTIAL",
+        "PASS",
+        "active encrypted credential resolved locally",
+    )
+
+
+async def _worker_result(settings: Settings) -> list[ValidationResult]:
+    """Dispatch only the secret-free preflight task; never execute a Workflow or Publication."""
+
+    from apps.worker.celery_app import create_celery_app
+
+    app = create_celery_app(settings)
+    try:
+        result = app.send_task("apps.worker.preflight.capabilities").get(timeout=15)
+    except Exception as error:
+        return [
+            ValidationResult(
+                "WORKER_EXECUTION",
+                "FAIL",
+                f"preflight task failed ({type(error).__name__})",
+            ),
+            ValidationResult("FFMPEG", "FAIL", "Worker FFmpeg capability not verified"),
+        ]
+    worker_ok = isinstance(result, dict) and result.get("worker") == "ok"
+    ffmpeg_ok = isinstance(result, dict) and result.get("ffmpeg") == "ok"
+    return [
+        ValidationResult(
+            "WORKER_EXECUTION",
+            "PASS" if worker_ok else "FAIL",
+            "secret-free Celery task completed" if worker_ok else "unexpected Worker response",
+        ),
+        ValidationResult(
+            "FFMPEG",
+            "PASS" if ffmpeg_ok else "FAIL",
+            "ffmpeg executable verified on Worker" if ffmpeg_ok else "ffmpeg unavailable on Worker",
+        ),
+    ]
+
+
 async def live_checks(
     settings: Settings,
     *,
     api_base_url: str | None,
     storage_probe: bool,
     check_presigned_access: bool,
+    environment: dict[str, str],
 ) -> list[ValidationResult]:
     """Perform opt-in infrastructure checks only; no AI, OAuth, workflow, or publishing calls."""
 
@@ -272,6 +386,10 @@ async def live_checks(
         )
         results.append(await _migration_result(database))
         results.append(
+            await _project_result(database, environment.get("AI_VIDEO_OS_PRODUCTION_E2E_PROJECT_ID"))
+        )
+        results.append(await _youtube_credential_result(database, settings))
+        results.append(
             ValidationResult(
                 "REDIS_CONNECTIVITY",
                 "PASS" if await redis.check_connection() else "FAIL",
@@ -284,6 +402,21 @@ async def live_checks(
                 "PASS" if await storage.check_connection() else "FAIL",
                 "Bucket head request",
             )
+        )
+        results.extend(await _worker_result(settings))
+        results.extend(
+            [
+                ValidationResult(
+                    "OPENAI_GENERATION_ACCESS",
+                    "NOT_CHECKABLE",
+                    "requires the separately approved Controlled Production E2E",
+                ),
+                ValidationResult(
+                    "YOUTUBE_UPLOAD_ACCESS",
+                    "NOT_CHECKABLE",
+                    "requires the separately approved private-only Controlled Production E2E",
+                ),
+            ]
         )
         if storage_probe:
             results.extend(await _storage_probe(storage, check_presigned_access))
@@ -374,6 +507,7 @@ async def _run() -> int:
                 api_base_url=args.api_base_url,
                 storage_probe=args.storage_probe,
                 check_presigned_access=args.check_presigned_access,
+                environment=dict(os.environ),
             )
         )
     _emit(results, args.json)
