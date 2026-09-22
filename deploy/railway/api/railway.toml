@@ -6,6 +6,7 @@ watchPatterns = [
   "migrations/**",
   "pyproject.toml",
   "alembic.ini",
+  "scripts/validate_production_infrastructure.py",
   "deploy/railway/api/**",
 ]
 
