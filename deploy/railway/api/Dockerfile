@@ -23,6 +23,7 @@ COPY apps/api apps/api
 COPY apps/worker apps/worker
 COPY alembic.ini alembic.ini
 COPY migrations migrations
+COPY scripts/validate_production_infrastructure.py scripts/validate_production_infrastructure.py
 
 RUN pip install --no-cache-dir .
 
