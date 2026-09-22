@@ -11,10 +11,9 @@ import asyncio
 import json
 import os
 import sys
-from uuid import UUID
 from dataclasses import asdict, dataclass
 from typing import Literal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 from alembic.config import Config
@@ -49,6 +48,7 @@ CheckStatus = Literal[
 
 _FALSE_VALUES = {"", "0", "false", "no", "off"}
 _PLACEHOLDER_VALUES = {"sk-dummy", "change-me-local-only"}
+_YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 _SECRET_SETTINGS = (
     "openai_api_key",
     "youtube_client_id",
@@ -101,6 +101,13 @@ def _secret_presence(settings: Settings) -> list[ValidationResult]:
 def dry_run(settings: Settings, environment: dict[str, str]) -> list[ValidationResult]:
     """Validate settings and safety requirements without network access or writes."""
 
+    project_id_raw = environment.get("AI_VIDEO_OS_PRODUCTION_E2E_PROJECT_ID", "")
+    try:
+        UUID(project_id_raw)
+        project_id_status: CheckStatus = "PASS"
+    except ValueError:
+        project_id_status = "FAIL"
+
     results = _secret_presence(settings)
     results.extend(
         [
@@ -115,9 +122,23 @@ def dry_run(settings: Settings, environment: dict[str, str]) -> list[ValidationR
                 detail="private required",
             ),
             ValidationResult(
+                check="YOUTUBE_OAUTH_REDIRECT_URI",
+                status=(
+                    "PASS" if settings.youtube_oauth_redirect_uri.startswith("https://") else "FAIL"
+                ),
+                detail="production HTTPS callback required",
+            ),
+            ValidationResult(
                 check="STORAGE_ADDRESSING_STYLE",
                 status="PASS" if settings.storage_addressing_style == "virtual" else "FAIL",
                 detail="virtual required for Railway Storage Bucket",
+            ),
+            ValidationResult(
+                check="PRODUCTION_E2E_PROJECT_ID",
+                status=project_id_status,
+                detail=(
+                    "valid UUID configured" if project_id_status == "PASS" else "missing or invalid"
+                ),
             ),
             ValidationResult(
                 check="AI_VIDEO_OS_RUN_PRODUCTION_E2E",
@@ -290,42 +311,77 @@ async def _project_result(database: Database, project_id_raw: str | None) -> Val
     )
 
 
-async def _youtube_credential_result(database: Database, settings: Settings) -> ValidationResult:
-    """Verify an active encrypted YouTube credential can be resolved without contacting Google."""
+async def _youtube_credential_results(
+    database: Database, settings: Settings
+) -> list[ValidationResult]:
+    """Verify connection, scope, and local decryption without contacting Google."""
 
     try:
         async with database.session_factory() as session:
+            connection_repository = PublishingConnectionRepository(session)
+            credential_repository = PublishingCredentialRepository(session)
+            connection = await connection_repository.get_active("youtube")
+            if connection is None:
+                return [
+                    ValidationResult(
+                        "YOUTUBE_CONNECTION",
+                        "FAIL",
+                        "no active connected YouTube connection",
+                    ),
+                    ValidationResult(
+                        "YOUTUBE_UPLOAD_SCOPE",
+                        "FAIL",
+                        "scope cannot be verified without an active connection",
+                    ),
+                    ValidationResult(
+                        "YOUTUBE_OAUTH_CREDENTIAL",
+                        "FAIL",
+                        "no active connected YouTube credential",
+                    ),
+                ]
             resolver = YouTubeCredentialResolver(
-                PublishingConnectionRepository(session),
-                PublishingCredentialRepository(session),
+                connection_repository,
+                credential_repository,
                 CredentialCipher(settings.youtube_credential_encryption_key),
                 settings.youtube_client_id,
                 settings.youtube_client_secret,
             )
             credential = await resolver.resolve()
     except CredentialResolutionError:
-        return ValidationResult(
-            "YOUTUBE_OAUTH_CREDENTIAL",
-            "FAIL",
-            "active credential exists but cannot be resolved",
-        )
+        credential = None
     except Exception as error:
-        return ValidationResult(
+        return [
+            ValidationResult(
+                "YOUTUBE_CONNECTION",
+                "FAIL",
+                f"connection check failed ({type(error).__name__})",
+            ),
+            ValidationResult("YOUTUBE_UPLOAD_SCOPE", "FAIL", "scope check failed"),
+            ValidationResult(
+                "YOUTUBE_OAUTH_CREDENTIAL",
+                "FAIL",
+                f"credential check failed ({type(error).__name__})",
+            ),
+        ]
+
+    scope_ok = _YOUTUBE_UPLOAD_SCOPE in connection.scopes
+    return [
+        ValidationResult("YOUTUBE_CONNECTION", "PASS", "active connected connection found"),
+        ValidationResult(
+            "YOUTUBE_UPLOAD_SCOPE",
+            "PASS" if scope_ok else "FAIL",
+            "required upload scope present" if scope_ok else "required upload scope missing",
+        ),
+        ValidationResult(
             "YOUTUBE_OAUTH_CREDENTIAL",
-            "FAIL",
-            f"credential check failed ({type(error).__name__})",
-        )
-    if credential is None:
-        return ValidationResult(
-            "YOUTUBE_OAUTH_CREDENTIAL",
-            "FAIL",
-            "no active connected YouTube credential",
-        )
-    return ValidationResult(
-        "YOUTUBE_OAUTH_CREDENTIAL",
-        "PASS",
-        "active encrypted credential resolved locally",
-    )
+            "PASS" if credential is not None else "FAIL",
+            (
+                "active encrypted credential resolved locally"
+                if credential is not None
+                else "active credential exists but cannot be resolved"
+            ),
+        ),
+    ]
 
 
 async def _worker_result(settings: Settings) -> list[ValidationResult]:
@@ -335,7 +391,8 @@ async def _worker_result(settings: Settings) -> list[ValidationResult]:
 
     app = create_celery_app(settings)
     try:
-        result = app.send_task("apps.worker.preflight.capabilities").get(timeout=15)
+        task = app.send_task("apps.worker.preflight.capabilities", queue="ai-video-os")
+        result = await asyncio.to_thread(task.get, timeout=15)
     except Exception as error:
         return [
             ValidationResult(
@@ -357,6 +414,38 @@ async def _worker_result(settings: Settings) -> list[ValidationResult]:
             "FFMPEG",
             "PASS" if ffmpeg_ok else "FAIL",
             "ffmpeg executable verified on Worker" if ffmpeg_ok else "ffmpeg unavailable on Worker",
+        ),
+    ]
+
+
+def _not_checkable_results() -> list[ValidationResult]:
+    """Classify checks that would require prohibited external provider calls."""
+
+    return [
+        ValidationResult(
+            "OPENAI_TEXT_GENERATION_ACCESS",
+            "NOT_CHECKABLE",
+            "requires the separately approved Controlled Production E2E",
+        ),
+        ValidationResult(
+            "GPT_IMAGE_GENERATION_ACCESS",
+            "NOT_CHECKABLE",
+            "requires the separately approved Controlled Production E2E",
+        ),
+        ValidationResult(
+            "OPENAI_QUOTA_AND_BILLING",
+            "NOT_CHECKABLE",
+            "requires a real OpenAI request",
+        ),
+        ValidationResult(
+            "YOUTUBE_TOKEN_REMOTE_VALIDITY",
+            "NOT_CHECKABLE",
+            "requires communication with Google",
+        ),
+        ValidationResult(
+            "YOUTUBE_UPLOAD_ACCESS",
+            "NOT_CHECKABLE",
+            "requires the separately approved private-only Controlled Production E2E",
         ),
     ]
 
@@ -386,9 +475,12 @@ async def live_checks(
         )
         results.append(await _migration_result(database))
         results.append(
-            await _project_result(database, environment.get("AI_VIDEO_OS_PRODUCTION_E2E_PROJECT_ID"))
+            await _project_result(
+                database,
+                environment.get("AI_VIDEO_OS_PRODUCTION_E2E_PROJECT_ID"),
+            )
         )
-        results.append(await _youtube_credential_result(database, settings))
+        results.extend(await _youtube_credential_results(database, settings))
         results.append(
             ValidationResult(
                 "REDIS_CONNECTIVITY",
@@ -404,20 +496,7 @@ async def live_checks(
             )
         )
         results.extend(await _worker_result(settings))
-        results.extend(
-            [
-                ValidationResult(
-                    "OPENAI_GENERATION_ACCESS",
-                    "NOT_CHECKABLE",
-                    "requires the separately approved Controlled Production E2E",
-                ),
-                ValidationResult(
-                    "YOUTUBE_UPLOAD_ACCESS",
-                    "NOT_CHECKABLE",
-                    "requires the separately approved private-only Controlled Production E2E",
-                ),
-            ]
-        )
+        results.extend(_not_checkable_results())
         if storage_probe:
             results.extend(await _storage_probe(storage, check_presigned_access))
         else:

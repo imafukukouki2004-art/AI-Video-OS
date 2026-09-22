@@ -26,6 +26,7 @@ The default validator performs no network access and verifies secret presence wi
 - Storage bucket connectivity
 - optional temporary-key storage upload/read/presigned/delete probe
 - active encrypted YouTube OAuth credential can be decrypted locally
+- active YouTube connection contains the required `youtube.upload` scope
 
 The report never prints database URLs, Redis URLs, API keys, OAuth tokens, encryption keys, presigned URLs, or raw provider exceptions.
 
@@ -39,6 +40,10 @@ Preflight must report these as `NOT_CHECKABLE`, not as false READY claims:
 - YouTube private upload result
 
 Those are verified only by the Controlled Production E2E.
+
+The safe live default uses a read-only storage bucket head request. The optional
+`--storage-probe` performs a temporary object write/read/delete cycle and must not be used unless
+that separate Storage mutation is explicitly approved.
 
 ## Preflight READY gate
 
