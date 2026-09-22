@@ -80,3 +80,14 @@ def test_api_dockerfile_keeps_fixed_local_fallback() -> None:
     dockerfile = (_ROOT / "deploy" / "railway" / "api" / "Dockerfile").read_text()
 
     assert '"--port", "8000"' in dockerfile
+
+
+def test_api_image_includes_production_preflight_validator() -> None:
+    dockerfile = (_ROOT / "deploy" / "railway" / "api" / "Dockerfile").read_text()
+    config = tomllib.loads((_ROOT / "deploy" / "railway" / "api" / "railway.toml").read_text())
+
+    assert (
+        "COPY scripts/validate_production_infrastructure.py "
+        "scripts/validate_production_infrastructure.py"
+    ) in dockerfile
+    assert "scripts/validate_production_infrastructure.py" in config["build"]["watchPatterns"]
